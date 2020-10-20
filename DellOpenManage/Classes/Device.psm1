@@ -1,0 +1,19 @@
+Class Device {
+    [Int]$Id
+    [String]$Identifier
+    [String]$DeviceServiceTag
+    [String]$ChassisServiceTag
+    [String]$Model
+    [Int]$Type
+    [Int]$PowerState
+    [Int]$ManagedState
+    [Int]$Status
+    [Boolean]$ConnectionState
+    [String]$AssetTag
+    [String]$DeviceName
+    [nullable[DateTime]]$LastInventoryTime
+    [nullable[DateTime]]$LastStatusTime
+    [String]$NetworkAddress
+    [String]$MacAddress
+    [String]$DnsName
+}

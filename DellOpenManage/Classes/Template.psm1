@@ -1,0 +1,22 @@
+Class Template {
+    [Int]$Id
+    [String]$Name
+    [String]$Description
+    [String]$Content
+    [Int]$SourceDeviceId
+    [Int]$TypeId
+    [Int]$ViewTypeId
+    [Int]$TaskId
+    [Boolean]$HasIdentityAttributes
+    [Int]$Status
+    [Int]$IdentityPoolId
+    [Boolean]$IsPersistencePolicyValid
+    [Boolean]$IsStatelessAvailable
+    [Boolean]$IsBuiltIn
+    [String]$CreatedBy
+    [String]$CreationTime
+    [String]$LastUpdatedBy
+    [nullable[DateTime]]$LastUpdatedTime
+    [String]$Views
+    #[TemplateAttribute]$AttributeDetails
+}

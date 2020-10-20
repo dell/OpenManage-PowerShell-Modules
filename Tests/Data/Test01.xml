@@ -1,0 +1,5 @@
+<SystemConfiguration>
+    <Component FQDD="iDRAC.Embedded.1">
+        <Attribute Name="Users.12#UserName">testuser</Attribute>
+    </Component>
+</SystemConfiguration>

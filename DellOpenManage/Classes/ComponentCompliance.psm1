@@ -1,0 +1,22 @@
+Class ComponentCompliance {
+    [Int]$Id
+    [Int]$DeviceId
+    [String]$ServiceTag
+    [String]$DeviceModel
+    [String]$DeviceName
+    [String]$CurrentVersion
+    [String]$Version
+    [String]$Name
+    [String]$Criticality
+    [String]$ComplianceStatus
+    [String]$UpdateAction
+    [String]$Path
+    [String]$UniqueIdentifier
+    [String]$TargetIdentifier
+    [String]$SourceName
+    [String]$PrerequisiteInfo
+    [String]$ImpactAssessment
+    [String]$Uri
+    [Boolean]$RebootRequired
+    [String]$ComponentType
+}

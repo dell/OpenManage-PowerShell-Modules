@@ -1,0 +1,23 @@
+class NetworkPartition {
+    [String]$NicId
+    [String]$VendorName
+    [String]$PortId
+    [String]$Model
+    [String]$LinkStatus
+    [Int]$LinkSpeed
+    [String]$Fqdd
+    [String]$CurrentMacAddress
+    [String]$PermanentMacAddress
+    [String]$PermanentFcoeMacAddress
+    [String]$VirtualMacAddress
+    [String]$VirtualIscsiMacAddress
+    [String]$VirtualFipMacAddress
+    [String]$NicMode
+    [String]$FcoeMode
+    [String]$IscsiMode
+    [Int]$MinBandwidth
+    [Int]$MaxBandwidth
+    [String]$DeviceId
+    [String]$DeviceName
+    [String]$DeviceServiceTag
+}
