@@ -1,8 +1,5 @@
 # DellOpenManage Powershell Module
 
-# Module Function and Type Definitions
-See [Command Reference](Documentation/CommandReference.md)
-
 # Install Module
 
 ## Requirements
@@ -22,6 +19,9 @@ See [Command Reference](Documentation/CommandReference.md)
 3. Import module `Import-Module DellOpenManage`
 
 # Examples
+
+## Module Function and Type Definitions
+See [Command Reference](Documentation/CommandReference.md)
 
 ## Quick Start
 ```
@@ -229,3 +229,7 @@ Redirect ALL output to file
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "StageForNextReboot" *> firmware.txt
 ```
+
+## License
+
+Copyright Dell EMC
