@@ -52,10 +52,24 @@ Disconnect
 Disconnect-OMEServer
 ```
 
+## Discovery
+Discover servers by hostname
+```
+New-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait
+```
+Discover servers by IP Address
+```
+New-OMEDiscovery -Hosts @('10.35.0.0', '10.35.0.1') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait
+```
+Discover servers by Subnet
+```    
+New-OMEDiscovery -Hosts @('10.37.0.0/24') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait
+```
+
 ## Devices
 Get device by id
 ```
-10097, 10100 | Get-OMEDevice | Format-Table
+10097, 10100 | Get-OMEDevice -FilterBy "Id" | Format-Table
 ```
 Get device by service tag
 ```
@@ -192,6 +206,14 @@ Deploy template to device
 ```
 "TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -Wait
 ```
+Deploy template and boot to network ISO over NFS
+```
+"TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "NFS" -NetworkBootShareIpAddress "192.168.1.100" -NetworkBootIsoPath "/mnt/data/iso/CentOS7-Unattended.iso" -Wait
+``` 
+Deploy template and boot to network ISO over CIFS
+```
+"TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "CIFS" -NetworkBootShareIpAddress "192.168.1.101" -NetworkBootIsoPath "/Share/ISO/CentOS7-Unattended.iso" -NetworkBootShareUser "Administrator" -NetworkBootSharePassword "Password" -NetworkBootShareName "Share" -Wait
+``` 
 
 ## Jobs
 List all jobs

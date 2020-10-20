@@ -197,7 +197,7 @@ Process {
             $DiscoveryPasswordText = (New-Object PSCredential "user", $DiscoveryPassword).GetNetworkCredential().Password
             $Payload = Get-DiscoverDevicePayload -HostList $Hosts -DeviceType $DeviceType -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPasswordText -Email $Email -SetTrapDestination $SetTrapDestination.IsPresent
             $Payload = $Payload | ConvertTo-Json -Depth 6
-            Write-Verbose $Payload
+            #Write-Verbose $Payload
             $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Post  -Body $Payload -Headers $Headers -ContentType $Type
             if ($DiscoverResponse.StatusCode -eq 201) {
                 Write-Verbose "Discovering devices...."

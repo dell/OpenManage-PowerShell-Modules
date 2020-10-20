@@ -209,7 +209,7 @@ Process {
         }
         $TemplateDeployPayload.TargetIds = $DeviceIds
         $TemplateDeployPayload = $TemplateDeployPayload |ConvertTo-Json -Depth 6
-        Write-Verbose $TemplateDeployPayload
+        #Write-Verbose $TemplateDeployPayload
         # Associate Identity Pool to Template
         #$AssignIdentityResponse = Set-IdentitiesToTarget $IpAddress $Type $Headers $IdentityPoolId $TemplateId 
 
