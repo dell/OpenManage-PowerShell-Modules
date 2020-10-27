@@ -19,7 +19,14 @@ if ($MajorVersion -lt 5) {
     } else {
         $Source = "DellOpenManage"
     }
-    $Destination = "$home\Documents\WindowsPowerShell\Modules"
+    if ($MajorVersion -ge 7) {
+        $Destination = "$home\Documents\WindowsPowerShell\Modules"
+    } else {
+        $Destination = "$home\Documents\PowerShell\Modules"
+    }
+    if (Test-Path -Path $Destination) {
+        New-Item -ItemType Directory -Path $Destination -Force
+    }
     if ((Test-Path -Path $Destination) -and (Test-Path -Path $Source)) {
         Try {
             Copy-Item -Path $Source -Destination $Destination -Recurse -Force -ErrorAction Stop
