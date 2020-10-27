@@ -1,18 +1,29 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [String]$Path
+)
 function Get-PowerShellVersion {
     $get_host_info = Get-Host
     [int]$major_number = $get_host_info.Version.Major
     return $major_number
 }
+
 $MajorVersion = Get-PowerShellVersion
 if ($MajorVersion -lt 5) {
     Write-Error "PowerShell Version 5 or later required"
     exit
 } else {
-    $Source = "DellOpenManage"
+    if ($Path) {
+        $Source = $Path
+    } else {
+        $Source = "DellOpenManage"
+    }
     $Destination = "$home\Documents\WindowsPowerShell\Modules"
-    if (Test-Path -Path $Destination) {
+    if ((Test-Path -Path $Destination) -and (Test-Path -Path $Source)) {
         Try {
             Copy-Item -Path $Source -Destination $Destination -Recurse -Force -ErrorAction Stop
+            Get-ChildItem $Destination -Recurse | Unblock-File
             Write-Output "Sucessfully installed OpenManage Module to $Destination"
         }
         Catch {
