@@ -144,13 +144,7 @@ Process {
         $BaselineURL = $BaseUri + "/api/UpdateService/Baselines"
         $BaselinePayload = $BaselinePayload | ConvertTo-Json -Depth 6
         Write-Verbose $BaselinePayload
-        Try {
-            $BaselineResponse = Invoke-WebRequest -Uri $BaselineURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $BaselinePayload
-        } Catch [System.Net.WebException] {
-            $statusCode = [int]$_.Exception.Response.StatusCode
-            $msg = $_.Exception.Response.StatusDescription
-            Write-Warning "Error ($($statusCode)) $($msg). Unable to create baseline."
-        }
+        $BaselineResponse = Invoke-WebRequest -Uri $BaselineURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $BaselinePayload
         if ($BaselineResponse.StatusCode -eq 201) {
             #$BaselineData = $BaselineResponse.Content | ConvertFrom-Json
             if ($Wait) {
@@ -172,6 +166,7 @@ Process {
         }
     } 
     Catch {
+        Write-Error ($_.ErrorDetails)
         Write-Error ($_.Exception | Format-List -Force | Out-String) 
         Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
     }

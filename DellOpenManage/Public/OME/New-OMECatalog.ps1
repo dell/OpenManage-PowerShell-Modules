@@ -144,13 +144,7 @@ Process {
         # Do not output the payload with the plain text password
         # Write-Verbose $CatalogPayload
 
-        Try {
-            $CatalogResponse = Invoke-WebRequest -Uri $CatalogURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $CatalogPayload
-        } Catch [System.Net.WebException] {
-            $statusCode = [int]$_.Exception.Response.StatusCode
-            $msg = $_.Exception.Response.StatusDescription
-            Write-Warning "Error ($($statusCode)) $($msg). Unable to create catalog."
-        }
+        $CatalogResponse = Invoke-WebRequest -Uri $CatalogURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $CatalogPayload
         Write-Verbose "Creating Catalog..."
         if ($CatalogResponse.StatusCode -eq 201) {
             #$CatalogData = $CatalogResponse.Content | ConvertFrom-Json
@@ -172,6 +166,7 @@ Process {
         }
     } 
     Catch {
+        Write-Error ($_.ErrorDetails)
         Write-Error ($_.Exception | Format-List -Force | Out-String) 
         Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
     }

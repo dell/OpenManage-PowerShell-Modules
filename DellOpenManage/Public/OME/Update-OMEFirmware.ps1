@@ -233,6 +233,7 @@ Process {
         }
     } 
     Catch {
+        Write-Error ($_.ErrorDetails)
         Write-Error ($_.Exception | Format-List -Force | Out-String) 
         Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
     }
