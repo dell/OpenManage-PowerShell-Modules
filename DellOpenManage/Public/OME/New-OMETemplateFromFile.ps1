@@ -39,7 +39,7 @@ limitations under the License.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [String]$Name = "Template_$((Get-Date).ToString('yyyyMMddHHmmss'))",
+    [String]$Name = "Template $((Get-Date).ToString('yyyyMMddHHmmss'))",
     
     [Parameter(Mandatory, ValueFromPipeline)]
     [String]$Content,

@@ -112,8 +112,10 @@ limitations under the License.
     Create new device discovery job in OpenManage Enterprise
 .DESCRIPTION
     This is used to onboard devices into OpenManage Enterprise. Specify a list of IP Addresses or hostnames. You can also specify a subnet. Wildcards are supported as well.
+.PARAMETER Name
+    Name of the discovery job
 .PARAMETER DeviceType
-    It can be server,network switch chassis, dell storage
+    Type of device ("server", "chassis", "storage", "network")
 .PARAMETER Hosts
     Array of IP Addresses, Subnets or Hosts
     Valid Format:
@@ -129,6 +131,14 @@ limitations under the License.
     10.35.0.*
     10.36.0.0-255
     10.35.0.0/255.255.255.0
+.PARAMETER DiscoveryUserName
+    Discovery user name. The iDRAC user for server discovery.
+.PARAMETER DiscoveryPassword
+    Discovery password. The iDRAC user's password for server discovery.
+.PARAMETER Email
+    Email upon completion
+.PARAMETER SetTrapDestination
+    Set trap destination of iDRAC to OpenManage Enterprise upon discovery
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -149,7 +159,7 @@ limitations under the License.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [String]$Name = "Server Discovery",
+    [String]$Name = "Server Discovery $((Get-Date).ToString('yyyyMMddHHmmss'))",
 
     [Parameter(Mandatory=$false)]
 	[ValidateSet("server", "chassis", "storage", "network")]

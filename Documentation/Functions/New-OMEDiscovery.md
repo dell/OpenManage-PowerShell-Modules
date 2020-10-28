@@ -64,7 +64,7 @@ Aliases:
 
 Required: False
 Position: 1
-Default value: Server Discovery
+Default value: "Server Discovery $((Get-Date).ToString('yyyyMMddHHmmss'))"
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

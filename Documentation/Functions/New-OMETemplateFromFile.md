@@ -49,7 +49,7 @@ Aliases:
 
 Required: False
 Position: 1
-Default value: "Template_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+Default value: "Template $((Get-Date).ToString('yyyyMMddHHmmss'))"
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

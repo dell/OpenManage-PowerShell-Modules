@@ -14,7 +14,7 @@ function Get-TargetPayload($ComplianceReportList) {
     return $ComplianceReportTargetList
 }
 
-function Get-FirmwareApplicablePayload($CatalogId, $RepositoryId, $BaselineId, $TargetPayload, $UpdateSchedule, $UpdateScheduleCron, $ResetiDRAC, $ClearJobQueue) {
+function Get-FirmwareApplicablePayload($Name, $CatalogId, $RepositoryId, $BaselineId, $TargetPayload, $UpdateSchedule, $UpdateScheduleCron, $ResetiDRAC, $ClearJobQueue) {
     $Payload = '{
         "JobName": "Update Firmware-Test",
         "JobDescription": "Firmware Update Job",
@@ -89,6 +89,7 @@ function Get-FirmwareApplicablePayload($CatalogId, $RepositoryId, $BaselineId, $
         }
     }
     $Payload.Targets += $TargetPayload
+    $Payload.JobName = $Name
     $Payload.Schedule = $Schedule
     return $payload
 }
@@ -115,6 +116,8 @@ limitations under the License.
     Update firmware on devices in OpenManage Enterprise
 .DESCRIPTION
     This will use an existing firmware baseline to submit a Job that updates firmware on a set of devices. 
+.PARAMETER Name
+    Name of the firmware update job
 .PARAMETER Baseline
     Array of type Baseline returned from Get-Baseline function
 .PARAMETER DeviceFilter
@@ -159,6 +162,9 @@ limitations under the License.
 
 [CmdletBinding()]
 param(
+    [Parameter(Mandatory=$false)]
+    [String]$Name = "Update Firmware $((Get-Date).ToString('yyyyMMddHHmmss'))",
+
     [Parameter(Mandatory=$false)]
     [Device[]]$DeviceFilter,
 
@@ -218,7 +224,7 @@ Process {
             if ($ComplianceReportList.Length -gt 0) {
                 $TargetPayload = Get-TargetPayload $ComplianceReportList
                 if ($TargetPayload.Length -gt 0) {
-                    $UpdatePayload = Get-FirmwareApplicablePayload -CatalogId $CatalogId -RepositoryId $RepositoryId -BaselineId $BaselineId -TargetPayload $TargetPayload -UpdateSchedule $UpdateSchedule -UpdateScheduleCron $UpdateScheduleCron -ResetiDRAC $ResetiDRAC.IsPresent -ClearJobQueue $ClearJobQueue.IsPresent
+                    $UpdatePayload = Get-FirmwareApplicablePayload -Name $Name -CatalogId $CatalogId -RepositoryId $RepositoryId -BaselineId $BaselineId -TargetPayload $TargetPayload -UpdateSchedule $UpdateSchedule -UpdateScheduleCron $UpdateScheduleCron -ResetiDRAC $ResetiDRAC.IsPresent -ClearJobQueue $ClearJobQueue.IsPresent
                     # Update firmware
                     $UpdateJobURL = $BaseUri + "/api/JobService/Jobs"
                     $UpdatePayload = $UpdatePayload | ConvertTo-Json -Depth 6

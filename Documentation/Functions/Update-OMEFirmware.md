@@ -18,9 +18,9 @@ Update firmware on devices in OpenManage Enterprise
 ## SYNTAX
 
 ```
-Update-OMEFirmware [[-DeviceFilter] <Device[]>] [[-ComponentFilter] <String>] [-Baseline] <Baseline>
- [[-UpdateSchedule] <String>] [[-UpdateAction] <String[]>] [-ResetiDRAC] [-ClearJobQueue] [-Wait]
- [[-WaitTime] <Int32>] [<CommonParameters>]
+Update-OMEFirmware [[-Name] <String>] [[-DeviceFilter] <Device[]>] [[-ComponentFilter] <String>]
+ [-Baseline] <Baseline> [[-UpdateSchedule] <String>] [[-UpdateScheduleCron] <String>]
+ [[-UpdateAction] <String[]>] [-ResetiDRAC] [-ClearJobQueue] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -52,12 +52,19 @@ Update firmware on all devices in baseline on next reboot
 
 ### EXAMPLE 4
 ```
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "ScheduleLater" -UpdateScheduleCron "0 0 0 1 11 ?"
+```
+
+Update firmware on 11/1/2020 12:00AM UTC
+
+### EXAMPLE 5
+```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow"
 ```
 
 Update firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
 
-### EXAMPLE 5
+### EXAMPLE 6
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue
 ```
@@ -65,6 +72,21 @@ Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -Component
 Update firmware on specific components in baseline on next reboot and clear job queue before update
 
 ## PARAMETERS
+
+### -Name
+Name of the firmware update job
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: "Update Firmware $((Get-Date).ToString('yyyyMMddHHmmss'))"
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -DeviceFilter
 Array of type Device returned from Get-OMEDevice function.
@@ -76,7 +98,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -93,7 +115,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -108,7 +130,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -116,7 +138,7 @@ Accept wildcard characters: False
 
 ### -UpdateSchedule
 Determines when the updates will be performed.
-(Default="Preview", "RebootNow", "StageForNextReboot")
+(Default="Preview", "RebootNow", "ScheduleLater", "StageForNextReboot")
 
 ```yaml
 Type: String
@@ -124,8 +146,25 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: Preview
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UpdateScheduleCron
+Cron string to schedule updates at a later time.
+Uses UTC time.
+Used with -UpdateSchedule "ScheduleLater"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -140,7 +179,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 7
 Default value: Upgrade
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -202,7 +241,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 8
 Default value: 3600
 Accept pipeline input: False
 Accept wildcard characters: False
