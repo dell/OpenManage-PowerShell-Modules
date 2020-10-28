@@ -8,14 +8,15 @@
 
 ## Scripted Installation
 1. Open PowerShell Command Window
-2. Change your PowerShell Execution Policy to Unrestricted `Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser`
+2. Change your PowerShell Execution Policy to Unrestricted `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 3. CD to the directory where you cloned the Github repo
 4. .\Install-Module.ps1
     * This will install the module in C:\Users\username\Documents\WindowsPowerShell\Modules
 
 ## Manual Installation
 1. Determine module path `$Env:PSModulePath` 
-    * Example: C:\Users\username\Documents\WindowsPowerShell\Modules
+    * PowerShell 5: C:\Users\username\Documents\WindowsPowerShell\Modules
+    * PowerShell 6+: C:\Users\username\Documents\PowerShell\Modules
 2. Copy the DellOpenManage folder to a directory in your module path 
     * Example: C:\Users\username\Documents\WindowsPowerShell\Modules\DellOpenManage
 3. Import module `Import-Module DellOpenManage`
