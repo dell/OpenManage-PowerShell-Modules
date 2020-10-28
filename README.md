@@ -11,7 +11,6 @@
 2. Change your PowerShell Execution Policy `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 3. CD to the directory where you cloned the Github repo
 4. .\Install-Module.ps1
-    * This will install the module in C:\Users\username\Documents\WindowsPowerShell\Modules
 
 ## Manual Installation
 1. Determine module path `$Env:PSModulePath` 
@@ -107,11 +106,14 @@ Get all inventory
 ```
 10097, 10100 | Get-OMEDevice -FilterBy "Id" | Get-OMEDeviceDetail 
 ```
-Get inventory section
+Get network cards and mac addresses
 ```
-"C39P9ZZ", "C39N9ZZ" | Get-OMEDevice | Get-OMEDeviceDetail -InventoryType "network" 
+"C39P9ZZ", "C39N9ZZ" | Get-OMEDevice | Get-OMEDeviceDetail -InventoryType "network" | Format-Table
 ```
-
+Get firmware inventory
+```
+"C39P9ZZ", "C39N9ZZ" | Get-OMEDevice | Get-OMEDeviceDetail -InventoryType "software" | Format-Table
+```
 ## Groups
 Get all groups
 ```
@@ -176,7 +178,7 @@ Update firmware on all devices in baseline immediately ***Warning: This will for
 ```
 $devices = $("CY85DZZ" | Get-OMEDevice -FilterBy "ServiceTag")
 $baseline = $("AllLatest" | Get-OMEFirmwareBaseline)
-Update-OMEFirmware -Baseline $baseline -UpdateSchedule "RebootNow" | Format-Table
+Update-OMEFirmware -Baseline $baseline -UpdateSchedule "RebootNow" -Wait
 ```
 Update firmware on all devices in baseline on next reboot
 ```
@@ -184,19 +186,27 @@ Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSch
 ```
 Update firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
 ```
-Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow"
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow" -Wait
 ```
 Downgrade firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
 ```
-Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow" -UpdateAction 
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow" -UpdateAction "Downgrade" -Wait
 ```
 Update firmware on specific components in baseline on next reboot and clear job queue
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue 
 ```
+Update firmware later scheduled at 11/1/2020 12:00AM UTC
+```
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "ScheduleLater" -UpdateScheduleCron "0 0 0 1 11 ?"
+```
 
 ## Templates
 Create new template from source device
+```
+New-OMETemplateFromDevice -Name "TestTemplate" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
+```
+Create new template from source device and capture specific components
 ```
 New-OMETemplateFromDevice -Name "TestTemplate" -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
 ```

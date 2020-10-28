@@ -14,7 +14,7 @@ function Get-TargetPayload($ComplianceReportList) {
     return $ComplianceReportTargetList
 }
 
-function Get-FirmwareApplicablePayload($CatalogId, $RepositoryId, $BaselineId, $TargetPayload, $StageUpdate, $ResetiDRAC, $ClearJobQueue) {
+function Get-FirmwareApplicablePayload($CatalogId, $RepositoryId, $BaselineId, $TargetPayload, $UpdateSchedule, $UpdateScheduleCron, $ResetiDRAC, $ClearJobQueue) {
     $Payload = '{
         "JobName": "Update Firmware-Test",
         "JobDescription": "Firmware Update Job",
@@ -63,6 +63,16 @@ function Get-FirmwareApplicablePayload($CatalogId, $RepositoryId, $BaselineId, $
         "Targets": []
     }' | ConvertFrom-Json
 
+    $StageUpdate = $true
+    $Schedule = "startNow"
+    if ($UpdateSchedule -eq "RebootNow") {
+        $StageUpdate = $false
+    } elseif ($UpdateSchedule -eq "ScheduleLater") {
+        $StageUpdate = $false
+        $Schedule = $UpdateScheduleCron
+    } elseif ($UpdateSchedule -eq "StageForNextReboot") {
+        $StageUpdate = $true
+    }
     $ParamsHashValMap = @{
         "complianceReportId" = [string]$BaselineId
         "repositoryId" = [string]$RepositoryId
@@ -78,7 +88,8 @@ function Get-FirmwareApplicablePayload($CatalogId, $RepositoryId, $BaselineId, $
             $Payload.'Params'[$i].'Value' = $ParamsHashValMap.$value
         }
     }
-    $Payload."Targets" += $TargetPayload
+    $Payload.Targets += $TargetPayload
+    $Payload.Schedule = $Schedule
     return $payload
 }
 
@@ -115,7 +126,9 @@ limitations under the License.
 .PARAMETER ClearJobQueue
     This option clears any active or pending jobs. Occurs immediately, regardless if StageForNextReboot is set
 .PARAMETER UpdateSchedule
-    Determines when the updates will be performed. (Default="Preview", "RebootNow", "StageForNextReboot")
+    Determines when the updates will be performed. (Default="Preview", "RebootNow", "ScheduleLater", "StageForNextReboot")
+.PARAMETER UpdateScheduleCron
+    Cron string to schedule updates at a later time. Uses UTC time. Used with -UpdateSchedule "ScheduleLater"
 .PARAMETER UpdateAction
     Determines what type of updates will be performed. (Default="Upgrade", "Downgrade", "All")
 .PARAMETER Wait
@@ -133,6 +146,9 @@ limitations under the License.
 .EXAMPLE
     Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "StageForNextReboot"
     Update firmware on all devices in baseline on next reboot
+.EXAMPLE
+    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "ScheduleLater" -UpdateScheduleCron "0 0 0 1 11 ?"
+    Update firmware on 11/1/2020 12:00AM UTC
 .EXAMPLE
     Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow" 
     Update firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
@@ -153,8 +169,11 @@ param(
     [Baseline]$Baseline,
 
     [Parameter(Mandatory=$false)]
-    [ValidateSet("Preview", "RebootNow", "StageForNextReboot")]
+    [ValidateSet("Preview", "RebootNow", "ScheduleLater", "StageForNextReboot")]
     [String]$UpdateSchedule = "Preview",
+
+    [Parameter(Mandatory=$false)]
+    [String]$UpdateScheduleCron,
 
     [Parameter(Mandatory=$false)]
     [ValidateSet("Upgrade", "Downgrade", "All")]
@@ -188,23 +207,18 @@ Process {
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
-        $StageUpdate = $true
         $BaselineId = $Baseline.Id
         $CatalogId = $Baseline.CatalogId
         $RepositoryId = $Baseline.RepositoryId
         if ($UpdateSchedule -eq "Preview") { # Only show report, do not perform any updates
             return Get-OMEFirmwareCompliance -Baseline $Baseline -DeviceFilter $DeviceFilter -ComponentFilter $ComponentFilter -UpdateAction $UpdateAction -Output "Report"
         } else { # Apply updates
-            if ($UpdateSchedule -eq "RebootNow") {
-                $StageUpdate = $false
-            } elseif ($UpdateSchedule -eq "StageForNextReboot") {
-                $StageUpdate = $true
-            }
+            
             $ComplianceReportList = Get-OMEFirmwareCompliance -Baseline $Baseline -DeviceFilter $DeviceFilter -ComponentFilter $ComponentFilter -UpdateAction $UpdateAction -Output "Data"
             if ($ComplianceReportList.Length -gt 0) {
                 $TargetPayload = Get-TargetPayload $ComplianceReportList
                 if ($TargetPayload.Length -gt 0) {
-                    $UpdatePayload = Get-FirmwareApplicablePayload -CatalogId $CatalogId -RepositoryId $RepositoryId -BaselineId $BaselineId -TargetPayload $TargetPayload -StageUpdate $StageUpdate -ResetiDRAC $ResetiDRAC.IsPresent -ClearJobQueue $ClearJobQueue.IsPresent
+                    $UpdatePayload = Get-FirmwareApplicablePayload -CatalogId $CatalogId -RepositoryId $RepositoryId -BaselineId $BaselineId -TargetPayload $TargetPayload -UpdateSchedule $UpdateSchedule -UpdateScheduleCron $UpdateScheduleCron -ResetiDRAC $ResetiDRAC.IsPresent -ClearJobQueue $ClearJobQueue.IsPresent
                     # Update firmware
                     $UpdateJobURL = $BaseUri + "/api/JobService/Jobs"
                     $UpdatePayload = $UpdatePayload | ConvertTo-Json -Depth 6
