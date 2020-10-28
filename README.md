@@ -8,8 +8,9 @@
 
 ## Scripted Installation
 1. Open PowerShell Command Window
-2. CD to the directory where you cloned the Github repo
-3. .\Install-Module.ps1
+2. Change your PowerShell Execution Policy to Unrestricted `Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser`
+3. CD to the directory where you cloned the Github repo
+4. .\Install-Module.ps1
     * This will install the module in C:\Users\username\Documents\WindowsPowerShell\Modules
 
 ## Manual Installation
@@ -27,8 +28,11 @@ See [Command Reference](Documentation/CommandReference.md)
 ## Quick Start
 ```
 Import-Module DellOpenManage
+
 Connect-OMEServer -Name "ome.example.com" -Credentials $(Get-Credential) -IgnoreCertificateWarning
+
 "PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Format-Table
+
 Disconnect-OMEServer
 ```
 
@@ -41,12 +45,18 @@ Import-Module DellOpenManage
 Connect
 ```
 $credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "admin", $(ConvertTo-SecureString -Force -AsPlainText "password")
-Connect-OMEServer -Name "ome.example.com" -Credentials $credentials 
+Connect-OMEServer -Name "ome.example.com" -Credentials $credentials -IgnoreCertificateWarning
+```
+Connect: Variables
+```
+. "C:\Path\To\Credentials.ps1"
+$credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $OMEUsername, $(ConvertTo-SecureString -Force -AsPlainText $OMEPassword)
+Connect-OMEServer -Name $OMEServer -Credentials $credentials -IgnoreCertificateWarning
 ```
 Connect: Prompt for Credentials
 ```
 $credentials = Get-Credential
-Connect-OMEServer -Name "ome.example.com" -Credentials $credentials 
+Connect-OMEServer -Name "ome.example.com" -Credentials $credentials -IgnoreCertificateWarning
 ```
 Disconnect
 ```

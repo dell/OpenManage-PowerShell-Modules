@@ -213,7 +213,7 @@ Process {
         # Associate Identity Pool to Template
         #$AssignIdentityResponse = Set-IdentitiesToTarget $IpAddress $Type $Headers $IdentityPoolId $TemplateId 
 
-        $DeployTemplateResponse = Invoke-WebRequest -Uri $TemplateDeployUrl -Method Post -Body $TemplateDeployPayload -ContentType $Type -Headers $Headers -ErrorVariable ResponseError
+        $DeployTemplateResponse = Invoke-WebRequest -Uri $TemplateDeployUrl -Method Post -Body $TemplateDeployPayload -ContentType $Type -Headers $Headers
         if ($DeployTemplateResponse.StatusCode -eq 200) {
             $DeployTemplateContent = $DeployTemplateResponse.Content | ConvertFrom-Json
             $JobId = $DeployTemplateContent

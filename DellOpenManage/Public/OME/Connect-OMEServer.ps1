@@ -54,6 +54,7 @@ param(
 )
 
     Try {
+        if ($IgnoreCertificateWarning) { Set-CertPolicy }
         $Type = "application/json"
         # Allow for use of Environment Variables 
         if ($Name) {
@@ -77,7 +78,6 @@ param(
         $SessionUrl  = "https://$($OMEHost)/api/SessionService/Sessions"
         $UserDetails = @{"UserName"=$OMEUserName;"Password"=$OMEPassword;"SessionType"="API"} | ConvertTo-Json
 
-        if ($IgnoreCertificateWarning) { Set-CertPolicy }
         $SessResponse = Invoke-WebRequest -Uri $SessionUrl -Method Post -Body $UserDetails -ContentType $Type
         if ($SessResponse.StatusCode -eq 200 -or $SessResponse.StatusCode -eq 201) {
             $SessResponseData = $SessResponse.Content | ConvertFrom-Json
