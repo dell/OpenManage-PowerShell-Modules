@@ -18,10 +18,9 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Disconnect from OpenManage Enterprise Server using REST API
+   Disconnect from OpenManage Enterprise Server removing the current session
 
  .DESCRIPTION
-
    Deletes the current authentication session
 
  .EXAMPLE

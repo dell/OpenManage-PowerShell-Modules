@@ -26,7 +26,22 @@ See [Command Reference](Documentation/CommandReference.md)
 
 # Examples
 
-## Quick Start
+## Getting Started
+See if Module is available
+```
+Get-Module -ListAvailable -Name "DellOpenManage"
+```
+List available commandlets in Module
+```
+Get-Command -Module "DellOpenManage"
+```
+Show help for commandlet
+```
+Get-Help Connect-OMEServer -Detailed
+```
+## Basic Example
+* Copy and paste these commands into a Test.ps1 script or PowerShell ISE and execute the script.
+* This will Import the Module, connect to server prompting for credentials, list servers by model, then disconnect the current session. 
 ```
 Import-Module DellOpenManage
 
@@ -35,11 +50,6 @@ Connect-OMEServer -Name "ome.example.com" -Credentials $(Get-Credential) -Ignore
 "PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Format-Table
 
 Disconnect-OMEServer
-```
-
-## Import Module
-```
-Import-Module DellOpenManage
 ```
 
 ## Connect
@@ -58,10 +68,6 @@ Connect: Prompt for Credentials
 ```
 $credentials = Get-Credential
 Connect-OMEServer -Name "ome.example.com" -Credentials $credentials -IgnoreCertificateWarning
-```
-Disconnect
-```
-Disconnect-OMEServer
 ```
 
 ## Discovery
