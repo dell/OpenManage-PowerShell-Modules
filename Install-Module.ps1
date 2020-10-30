@@ -11,7 +11,7 @@ if ($MajorVersion -lt 5) {
 } else {
     $ModuleDir = "\DellOpenManage"
     $Source = $PSScriptRoot + $ModuleDir
-    if ($MajorVersion -ge 6) {
+    if ($PSVersionTable.PSEdition -eq 'Core') {
         $Destination = "$home\Documents\PowerShell\Modules"
     } else {
         $Destination = "$home\Documents\WindowsPowerShell\Modules"
