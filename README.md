@@ -18,7 +18,7 @@
     * PowerShell 6+: C:\Users\username\Documents\PowerShell\Modules
 2. Copy the DellOpenManage folder to a directory in your module path 
     * Example: C:\Users\username\Documents\WindowsPowerShell\Modules\DellOpenManage
-3. List available Modules `Get-Module -ListAvailable -Name "DellOpenManage"`
+3. List available Modules `Get-Module Dell* -ListAvailable`
 4. Import module `Import-Module DellOpenManage`
 
 # Command Reference
@@ -29,7 +29,7 @@ See [Command Reference](Documentation/CommandReference.md)
 ## Getting Started
 See if Module is available
 ```
-Get-Module -ListAvailable -Name "DellOpenManage"
+Get-Module Dell* -ListAvailable
 ```
 List available commandlets in Module
 ```
@@ -162,7 +162,14 @@ Get-OMEFirmwareBaseline | Format-Table
 Get device firmware compliance report
 ```
 $devices = $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag")
-"AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -DeviceFilter $devices | Select-Object -Property ServiceTag,DeviceModel,DeviceName,CurrentVersion,Version,UpdateAction,ComplianceStatus,Name | Format-Table
+"AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -DeviceFilter $devices | 
+    Select-Object -Property ServiceTag,DeviceModel,DeviceName,CurrentVersion,Version,UpdateAction,ComplianceStatus,Name | Format-Table
+```
+Get device firmware compliance report. BIOS only.
+```
+"AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -ComponentFilter "BIOS" | 
+    Select-Object -Property ServiceTag,DeviceModel,DeviceName,CurrentVersion,Version,UpdateAction,ComplianceStatus,Name | 
+    Sort-Object CurrentVersion | Format-Table
 ```
 Create new firmware baseline
 ```

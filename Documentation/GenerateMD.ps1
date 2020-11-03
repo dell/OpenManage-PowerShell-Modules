@@ -9,6 +9,7 @@ using module ..\DellOpenManage\Classes\SessionAuth.psm1
 using module ..\DellOpenManage\Classes\Template.psm1
 using module ..\DellOpenManage\Classes\TemplateAttribute.psm1
 using module ..\DellOpenManage\Classes\NetworkPartition.psm1
+using module ..\DellOpenManage\Classes\InventoryDetail.psm1
 using module ..\DellOpenManage\Classes\Job.psm1
 using module ..\DellOpenManage\Classes\JobDetail.psm1
 
@@ -27,7 +28,7 @@ foreach ($cmdlet in (Get-Command -Module DellOpenManage)) {
         'tags' = 'OnlineHelp PowerShell';
     }
     $FunctionList += $cmdlet.Name
-    New-MarkdownHelp -Command $cmdlet -OutputFolder .\Documentation\Functions -Metadata $meta -Force 
+    New-MarkdownHelp -Command $cmdlet -OutputFolder .\Documentation\Functions -Force 
 }
 
 $IndexFile = "./Documentation/CommandReference.md"

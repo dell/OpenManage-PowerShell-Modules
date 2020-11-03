@@ -5,6 +5,7 @@
 - [Get-OMECatalog](Functions/Get-OMECatalog.md)
 - [Get-OMEDevice](Functions/Get-OMEDevice.md)
 - [Get-OMEDeviceDetail](Functions/Get-OMEDeviceDetail.md)
+- [Get-OMEDeviceNetworkDetail](Functions/Get-OMEDeviceNetworkDetail.md)
 - [Get-OMEFirmwareBaseline](Functions/Get-OMEFirmwareBaseline.md)
 - [Get-OMEFirmwareCompliance](Functions/Get-OMEFirmwareCompliance.md)
 - [Get-OMEGroup](Functions/Get-OMEGroup.md)
@@ -96,6 +97,12 @@
 - UpdatedBy (string UpdatedBy {get;set;})
 - UpdatedTime (System.Nullable[datetime] UpdatedTime {get;set;})
 - Visible (bool Visible {get;set;})
+## InventoryDetail
+- DeviceId (string DeviceId {get;set;})
+- DeviceName (string DeviceName {get;set;})
+- DeviceServiceTag (string DeviceServiceTag {get;set;})
+- InventoryInfo (psobject InventoryInfo {get;set;})
+- InventoryType (string InventoryType {get;set;})
 ## Job
 - Builtin (bool Builtin {get;set;})
 - CreatedBy (string CreatedBy {get;set;})
@@ -132,6 +139,7 @@
 - DeviceServiceTag (string DeviceServiceTag {get;set;})
 - FcoeMode (string FcoeMode {get;set;})
 - Fqdd (string Fqdd {get;set;})
+- iDRACMacAddress (string iDRACMacAddress {get;set;})
 - IscsiMode (string IscsiMode {get;set;})
 - LinkSpeed (int LinkSpeed {get;set;})
 - LinkStatus (string LinkStatus {get;set;})

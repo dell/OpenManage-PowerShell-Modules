@@ -1,13 +1,8 @@
 ---
-author: Trevor Squillario
-category: DELLOPENMANAGE
 external help file: DellOpenManage-help.xml
-layout: post
 Module Name: DellOpenManage
 online version:
 schema: 2.0.0
-tags: OnlineHelp PowerShell
-title: Set-OMEPowerState
 ---
 
 # Set-OMEPowerState
@@ -34,7 +29,8 @@ Set-OMEPowerState -State "On" -Devices $("37KP0ZZ" | Get-OMEDevice -FilterBy "Se
 ## PARAMETERS
 
 ### -Devices
-{{ Fill Devices Description }}
+Array of type Device returned from Get-OMEDevice function.
+Used to limit the devices updated within the baseline.
 
 ```yaml
 Type: Device[]

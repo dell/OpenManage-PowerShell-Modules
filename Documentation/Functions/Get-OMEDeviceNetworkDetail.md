@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-OMEDeviceDetail
+# Get-OMEDeviceNetworkDetail
 
 ## SYNOPSIS
 Get device inventory from OpenManage Enterprise
@@ -13,7 +13,7 @@ Get device inventory from OpenManage Enterprise
 ## SYNTAX
 
 ```
-Get-OMEDeviceDetail [-Devices] <Device[]> [[-InventoryType] <String>] [<CommonParameters>]
+Get-OMEDeviceNetworkDetail [-Devices] <Device[]> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -25,22 +25,15 @@ Requires a Device object to be passed in from Get-OMEDevice
 
 ### EXAMPLE 1
 ```
-"C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail
+"C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceNetworkDetail
 ```
 
-Get all inventory for devices
-
-### EXAMPLE 2
-```
-"C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail -InventoryType "software"
-```
-
-Get software inventory for devices
+Get network device detail
 
 ## PARAMETERS
 
 ### -Devices
-Array of type Device returned from Get-OMEDevice function.
+{{ Fill Devices Description }}
 
 ```yaml
 Type: Device[]
@@ -51,21 +44,6 @@ Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
-```
-
-### -InventoryType
-String to specify the inventory section to return ("capabilities","cards","controllers","cpus","disks","fc","flash","fru","license","location","management","memory","network","os","powerstates","psu","software","storage","subsystem")
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

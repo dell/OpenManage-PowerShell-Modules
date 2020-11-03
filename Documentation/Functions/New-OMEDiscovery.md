@@ -1,13 +1,8 @@
 ---
-author: Trevor Squillario
-category: DELLOPENMANAGE
 external help file: DellOpenManage-help.xml
-layout: post
 Module Name: DellOpenManage
 online version:
 schema: 2.0.0
-tags: OnlineHelp PowerShell
-title: New-OMEDiscovery
 ---
 
 # New-OMEDiscovery
@@ -55,7 +50,7 @@ Discover servers by Subnet
 ## PARAMETERS
 
 ### -Name
-{{ Fill Name Description }}
+Name of the discovery job
 
 ```yaml
 Type: String
@@ -70,7 +65,7 @@ Accept wildcard characters: False
 ```
 
 ### -DeviceType
-It can be server,network switch chassis, dell storage
+Type of device ("server", "chassis", "storage", "network")
 
 ```yaml
 Type: String
@@ -113,7 +108,8 @@ Accept wildcard characters: False
 ```
 
 ### -DiscoveryUserName
-{{ Fill DiscoveryUserName Description }}
+Discovery user name.
+The iDRAC user for server discovery.
 
 ```yaml
 Type: String
@@ -128,7 +124,8 @@ Accept wildcard characters: False
 ```
 
 ### -DiscoveryPassword
-{{ Fill DiscoveryPassword Description }}
+Discovery password.
+The iDRAC user's password for server discovery.
 
 ```yaml
 Type: SecureString
@@ -143,7 +140,7 @@ Accept wildcard characters: False
 ```
 
 ### -Email
-{{ Fill Email Description }}
+Email upon completion
 
 ```yaml
 Type: String
@@ -158,7 +155,7 @@ Accept wildcard characters: False
 ```
 
 ### -SetTrapDestination
-{{ Fill SetTrapDestination Description }}
+Set trap destination of iDRAC to OpenManage Enterprise upon discovery
 
 ```yaml
 Type: SwitchParameter

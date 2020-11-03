@@ -1,13 +1,8 @@
 ---
-author: Trevor Squillario
-category: DELLOPENMANAGE
 external help file: DellOpenManage-help.xml
-layout: post
 Module Name: DellOpenManage
 online version:
 schema: 2.0.0
-tags: OnlineHelp PowerShell
-title: New-OMEFirmwareBaseline
 ---
 
 # New-OMEFirmwareBaseline
