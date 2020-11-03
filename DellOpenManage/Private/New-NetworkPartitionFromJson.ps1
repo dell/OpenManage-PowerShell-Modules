@@ -3,12 +3,17 @@ function New-NetworkPartitionFromJson {
     Param(
         [PSCustomObject]$NetworkPartition
     )
-    $Model = $NetworkPartition.ProductName.Substring(0,$NetworkPartition.ProductName.IndexOf("-"))
+    if ($NetworkPartition.ProductName.IndexOf("-") -ge 0) {
+        $Model = $NetworkPartition.ProductName.Substring(0,$NetworkPartition.ProductName.IndexOf("-"))
+    } else {
+        $Model = $NetworkPartition.ProductName
+    }
     $Model = $Model.Trim()
     return [NetworkPartition]@{
         DeviceId = $NetworkPartition.DeviceId
         DeviceName = $NetworkPartition.DeviceName
         DeviceServiceTag = $NetworkPartition.DeviceServiceTag
+        iDRACMacAddress = $NetworkPartition.iDRACMacAddress
         NicId = $NetworkPartition.NicId
         VendorName = $NetworkPartition.VendorName
         PortId = $NetworkPartition.PortId

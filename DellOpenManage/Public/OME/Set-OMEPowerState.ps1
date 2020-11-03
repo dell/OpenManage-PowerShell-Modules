@@ -94,7 +94,7 @@ limitations under the License.
 .SYNOPSIS
     Set power state of server
 .DESCRIPTION
-.PARAMETER Device
+.PARAMETER Devices
     Array of type Device returned from Get-OMEDevice function. Used to limit the devices updated within the baseline.
 .PARAMETER State
     String to represent the desired power state of device. ("On", "Off", "ColdBoot", "WarmBoot", "ShutDown")

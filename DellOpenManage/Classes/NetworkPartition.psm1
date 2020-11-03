@@ -1,4 +1,8 @@
 class NetworkPartition {
+    [String]$DeviceId
+    [String]$DeviceName
+    [String]$DeviceServiceTag
+    [String]$iDRACMacAddress
     [String]$NicId
     [String]$VendorName
     [String]$PortId
@@ -17,7 +21,4 @@ class NetworkPartition {
     [String]$IscsiMode
     [Int]$MinBandwidth
     [Int]$MaxBandwidth
-    [String]$DeviceId
-    [String]$DeviceName
-    [String]$DeviceServiceTag
 }
