@@ -52,6 +52,17 @@ Process {
         $InventoryDetails = $Devices | Get-OMEDeviceDetail
         $DeviceManagment = $InventoryDetails | Where-Object InventoryType -EQ "deviceManagement"
         $NetworkInterfaces = $InventoryDetails | Where-Object InventoryType -EQ "serverNetworkInterfaces"
+        if (-not $NetworkInterfaces) {
+            $NetworkPortInfo = @{
+                DeviceId = $Devices.Id
+                DeviceName = $Devices.DeviceName
+                DeviceServiceTag = $Devices.DeviceServiceTag
+                ManagementIpAddress = $DeviceManagment.InventoryInfo[0].IpAddress
+                ManagementMacAddress = $DeviceManagment.InventoryInfo[0].MacAddress
+            }
+            $ExportDeviceData += New-NetworkPartitionFromJson $NetworkPortInfo
+            return $ExportDeviceData
+        }
         foreach ($NetworkCard in $NetworkInterfaces.InventoryInfo) {
             foreach ($NetworkPort in $NetworkCard.Ports) {
                 foreach ($NetworkPartition in $NetworkPort.Partitions) {
@@ -59,7 +70,8 @@ Process {
                         DeviceId = $Devices.Id
                         DeviceName = $Devices.DeviceName
                         DeviceServiceTag = $Devices.DeviceServiceTag
-                        iDRACMacAddress = $DeviceManagment.InventoryInfo[0].MacAddress
+                        ManagementIpAddress = $DeviceManagment.InventoryInfo[0].IpAddress
+                        ManagementMacAddress = $DeviceManagment.InventoryInfo[0].MacAddress
                         NicId = $NetworkCard.NicId
                         VendorName = $NetworkCard.VendorName
                         PortId = $NetworkPort.PortId

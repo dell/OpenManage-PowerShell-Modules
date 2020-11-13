@@ -25,26 +25,24 @@ limitations under the License.
 .PARAMETER Devices
     Array of type Device returned from Get-OMEDevice function. 
 .PARAMETER InventoryType
-    String to specify the inventory section to return ("capabilities","cards","controllers","cpus","disks","fc","flash","fru","license","location","management","memory","network","os","powerstates","psu","software","storage","subsystem")
+    String to specify the inventory section to return (deviceCapabilities,serverDeviceCards,chassisControllerList,chassisFansList,chassisPciDeviceList,chassisPowerSupplies,chassisSlotsList,chassisStorageComputeAssociations,chassisTemperatureList,serverRaidControllers,serverProcessors,serverArrayDisks,serverFcCards,serverVirtualFlashes,deviceFru,deviceLicense,deviceLocation,deviceManagement,serverMemoryDevices,serverNetworkInterfaces,serverOperatingSystems,serverSupportedPowerStates,serverPowerSupplies,deviceSoftware,serverStorageEnclosures,subsystemRollupStatus)
+    These are device specific. A full list can be found by querying the OME API at /api/DeviceService/Devices(DeviceId)/InventoryTypes
 .INPUTS
     Device[]
 .EXAMPLE
     "C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail
     Get all inventory for devices
 .EXAMPLE
-    "C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail -InventoryType "software"
+    "C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail -InventoryType "deviceSoftware"
     Get software inventory for devices
 #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, ValueFromPipeline)]
-        [Device[]]$Devices,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet("capabilities","cards","controllers","cpus","disks","fc","flash","fru","license","location","management","memory","network","os","powerstates","psu","software","storage","subsystem")]
-        [String]$InventoryType = ""
-    )
-
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory, ValueFromPipeline)]
+    [Device[]]$Devices,
+    [Parameter(Mandatory=$false)]
+    [String]$InventoryType = ""
+)
 Begin {
     if(!$SessionAuth.Token){
         Write-Error "Please use Connect-OMEServer first"
@@ -53,32 +51,10 @@ Begin {
     }
 
 }
-
 Process {
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
         $BaseUri = "https://$($SessionAuth.Host)"
-        $InventoryTypeMap = @{
-            "cards"="serverDeviceCards"
-            "cpus"="serverProcessors"
-            "network"="serverNetworkInterfaces"
-            "fc"="serverFcCards"
-            "os"="serverOperatingSystems"
-            "flash"="serverVirtualFlashes"
-            "psu"="serverPowerSupplies"
-            "disks"="serverArrayDisks"
-            "controllers"="serverRaidControllers"
-            "memory"="serverMemoryDevices"
-            "storage"="serverStorageEnclosures"
-            "powerstates"="serverSupportedPowerStates"
-            "license"="deviceLicense"
-            "capabilities"="deviceCapabilities"
-            "fru"="deviceFru"
-            "management"="deviceManagement"
-            "software"="deviceSoftware"
-            "location"="deviceLocation"
-            "subsystem"="subsystemRollupStatus"
-        }
         $Type        = "application/json"
         $Headers     = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
@@ -89,7 +65,7 @@ Process {
         }
         $InventoryUrl = $BaseUri + "/api/DeviceService/Devices($($Devices.Id))/InventoryDetails"
         if($InventoryType -ne ""){
-            $InventoryUrl =  $BaseUri + "/api/DeviceService/Devices($($Devices.Id))/InventoryDetails('$($InventoryTypeMap[$InventoryType])')"
+            $InventoryUrl =  $BaseUri + "/api/DeviceService/Devices($($Devices.Id))/InventoryDetails('$($InventoryType)')"
         }
         $InventoryResp = Invoke-WebRequest -Uri $InventoryUrl -UseBasicParsing -Headers $Headers -Method Get -ContentType $Type
         if ($InventoryResp.StatusCode -eq 200) {
