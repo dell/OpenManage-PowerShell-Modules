@@ -26,24 +26,21 @@ This is the source of the updates to compare your devices against.
 
 ### EXAMPLE 1
 ```
-New-OMECatalog -Name "DellOnline"
-```
-
+New-OMECatalog -Name "DellOnline" 
 Create new catalog from a repository on downloads.dell.com
+```
 
 ### EXAMPLE 2
 ```
 New-OMECatalog -Name "NFSTest" -RepositoryType "NFS" -Source "nfs01.example.com" -SourcePath "/mnt/data/drm/AllDevices" -CatalogFile "AllDevices_1.01_Catalog.xml"
-```
-
 Create new catalog from a NFS repository
+```
 
 ### EXAMPLE 3
 ```
 New-OMECatalog -Name "CIFSTest" -RepositoryType "CIFS" -Source "windows01.example.com" -SourcePath "/Share01/DRM/AllDevices" -CatalogFile "AllDevices_1.01_Catalog.xml" -DomainName "example.com" -Username "Administrator" -Password $("P@ssword1" | ConvertTo-SecureString -AsPlainText -Force)
-```
-
 Create new catalog from a CIFS repository
+```
 
 ## PARAMETERS
 

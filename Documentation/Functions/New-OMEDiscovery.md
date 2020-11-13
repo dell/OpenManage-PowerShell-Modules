@@ -29,23 +29,20 @@ Wildcards are supported as well.
 ### EXAMPLE 1
 ```
 New-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-```
-
 Discover servers by hostname
+```
 
 ### EXAMPLE 2
 ```
 New-OMEDiscovery -Hosts @('10.35.0.0', '10.35.0.1') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-```
-
 Discover servers by IP Address
+```
 
 ### EXAMPLE 3
 ```
 New-OMEDiscovery -Hosts @('10.37.0.0/24') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-```
-
 Discover servers by Subnet
+```
 
 ## PARAMETERS
 

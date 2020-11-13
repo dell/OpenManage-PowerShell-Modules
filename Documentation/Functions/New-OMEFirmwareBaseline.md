@@ -25,9 +25,8 @@ A baseline is used to compare updates in a catalog against a set of devices.
 ### EXAMPLE 1
 ```
 New-OMEFirmwareBaseline -Name "TSTestBaseline01" -Catalog $("Auto-Update-Online" | Get-OMECatalog) -Devices $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") | Format-Table
-```
-
 Create new firmware baseline using existing catalog
+```
 
 ## PARAMETERS
 

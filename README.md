@@ -114,11 +114,42 @@ Get all inventory
 ```
 Get network cards and mac addresses
 ```
-"C39P9ZZ", "C39N9ZZ" | Get-OMEDevice | Get-OMEDeviceDetail -InventoryType "network" | Format-Table
+"C39P9ZZ", "C39N9ZZ" | Get-OMEDevice | Get-OMEDeviceDetail -InventoryType "serverNetworkInterfaces" | Format-Table
 ```
 Get firmware inventory
 ```
-"C39P9ZZ", "C39N9ZZ" | Get-OMEDevice | Get-OMEDeviceDetail -InventoryType "software" | Format-Table
+"C39P9ZZ", "C39N9ZZ" | Get-OMEDevice | Get-OMEDeviceDetail -InventoryType "deviceSoftware" | Format-Table
+```
+Inventory Types
+
+These are device specific. A full list can be found by querying the OME API at /api/DeviceService/Devices(DeviceId)/InventoryTypes
+```
+deviceCapabilities
+serverDeviceCards
+chassisControllerList
+chassisFansList
+chassisPciDeviceList
+chassisPowerSupplies
+chassisSlotsList
+chassisStorageComputeAssociations
+chassisTemperatureList
+serverRaidControllers
+serverProcessors
+serverArrayDisks
+serverFcCards
+serverVirtualFlashes
+deviceFru
+deviceLicense
+deviceLocation
+deviceManagement
+serverMemoryDevices
+serverNetworkInterfaces
+serverOperatingSystems
+serverSupportedPowerStates
+serverPowerSupplies
+deviceSoftware
+serverStorageEnclosures
+subsystemRollupStatus
 ```
 ## Groups
 Get all groups
@@ -287,6 +318,11 @@ Redirect ALL output to file
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "StageForNextReboot" *> firmware.txt
 ```
+
+## Support
+This code is provided as-is and currently not officially supported by Dell EMC.
+
+To report problems or provide feedback https://github.com/dell/OpenManage-PowerShell-Modules/issues 
 
 ## License
 

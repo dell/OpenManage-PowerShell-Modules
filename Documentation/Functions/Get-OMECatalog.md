@@ -24,16 +24,14 @@ Returns all catalogs if no input received
 ### EXAMPLE 1
 ```
 Get-OMECatalog | Format-Table
-```
-
 Get all catalogs
+```
 
 ### EXAMPLE 2
 ```
 "DRM" | Get-OMECatalog | Format-Table
-```
-
 Get catalog by name
+```
 
 ## PARAMETERS
 

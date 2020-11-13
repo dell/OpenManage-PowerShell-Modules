@@ -24,37 +24,32 @@ Get-OMEJob [[-Value] <String[]>] [-Detail] [[-FilterBy] <String>] [<CommonParame
 ### EXAMPLE 1
 ```
 Get-OMEJOb | Format-Table
-```
-
 List all jobs
+```
 
 ### EXAMPLE 2
 ```
 13852 | Get-OMEJob -Detail -Verbose
-```
-
 Get job by Id
+```
 
 ### EXAMPLE 3
 ```
 5 | Get-OMEJob -FilterBy "Type" | Format-Table
-```
-
 Get job by job type
+```
 
 ### EXAMPLE 4
 ```
 2060 | Get-OMEJob -FilterBy "LastRunStatus" | Format-Table
-```
-
 Get job by last run status
+```
 
 ### EXAMPLE 5
 ```
 "Enabled" | Get-OMEJob -FilterBy "State" | Format-Table
-```
-
 Get job by state
+```
 
 ## PARAMETERS
 

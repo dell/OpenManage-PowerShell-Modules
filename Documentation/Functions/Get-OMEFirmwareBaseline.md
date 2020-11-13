@@ -24,16 +24,14 @@ Returns all baselines if no input received
 ### EXAMPLE 1
 ```
 Get-OMEFirmwareBaseline | Format-Table
-```
-
 Get all baselines
+```
 
 ### EXAMPLE 2
 ```
 "AllLatest" | Get-OMEFirmwareBaseline | Format-Table
-```
-
 Get baseline by name
+```
 
 ## PARAMETERS
 

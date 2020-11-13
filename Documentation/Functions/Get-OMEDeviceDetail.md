@@ -26,16 +26,14 @@ Requires a Device object to be passed in from Get-OMEDevice
 ### EXAMPLE 1
 ```
 "C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail
-```
-
 Get all inventory for devices
+```
 
 ### EXAMPLE 2
 ```
 "C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail -InventoryType "software"
-```
-
 Get software inventory for devices
+```
 
 ## PARAMETERS
 

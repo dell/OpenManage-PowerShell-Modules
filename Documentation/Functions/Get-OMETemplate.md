@@ -24,16 +24,14 @@ Returns all templates if no input received
 ### EXAMPLE 1
 ```
 Get-OMETemplate | Format-Table
-```
-
 Get all templates
+```
 
 ### EXAMPLE 2
 ```
 "DRM" | Get-OMETemplate | Format-Table
-```
-
 Get template by name
+```
 
 ## PARAMETERS
 

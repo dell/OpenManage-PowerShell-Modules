@@ -139,7 +139,7 @@
 - DeviceServiceTag (string DeviceServiceTag {get;set;})
 - FcoeMode (string FcoeMode {get;set;})
 - Fqdd (string Fqdd {get;set;})
-- iDRACMacAddress (string iDRACMacAddress {get;set;})
+- ManagementMacAddress (string ManagementMacAddress {get;set;})
 - IscsiMode (string IscsiMode {get;set;})
 - LinkSpeed (int LinkSpeed {get;set;})
 - LinkStatus (string LinkStatus {get;set;})
