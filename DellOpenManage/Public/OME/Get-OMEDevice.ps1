@@ -127,18 +127,14 @@ Process {
                                 $DeviceData += New-DeviceFromJson -Device $Device
                             }
                         }
-                        else {
-                            Write-Error "Unable to get full set of devices ... "
-                        }
                     }
-
                 }
                 else {
-                    Write-Warning "No devices found in group ($($GroupInfo))"
+                    Write-Verbose "No devices found in group ($($Group.Name))"
                 }
             }
             else {
-                Write-Warning "Unable to retrieve devices for group ($($GroupInfo)) from $($IpAddress)"
+                Write-Warning "Unable to retrieve devices for group ($($Group.Name))"
             }
         }
         else { # Filter Devices directly
