@@ -104,6 +104,29 @@ Process {
         if ($Response.StatusCode -eq 200) {
             $ComplData = $Response | ConvertFrom-Json
             $ComplianceDeviceList = $ComplData.'value'
+
+            if($ComplData.'@odata.nextLink') {
+                $NextLinkUrl = $BaseUri + $ComplData.'@odata.nextLink'
+            }
+            while($NextLinkUrl)
+            {
+                $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method GET -Headers $Headers -ContentType $Type
+                if($NextLinkResponse.StatusCode -eq 200) {
+                    $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
+                    $ComplianceDeviceList = $ComplianceDeviceList + $NextLinkData.'value'
+                    if($NextLinkData.'@odata.nextLink')
+                    {
+                        $NextLinkUrl = $BaseUri + $NextLinkData.'@odata.nextLink'
+                    }
+                    else
+                    {
+                        $NextLinkUrl = $null
+                    }
+                } else {
+                    Write-Warning "Unable to get nextlink response for $($NextLinkUrl)"
+                    $NextLinkUrl = $null
+                }
+            }
             
             if ($ComplianceDeviceList.Length -gt 0) {
                 # Loop through devices 
