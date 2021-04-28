@@ -1,5 +1,6 @@
-﻿
-function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUserName, $DiscoveryPassword, $Email, $SetTrapDestination, $Schedule, $ScheduleCron) {
+﻿using module ..\..\Classes\Discovery.psm1
+
+function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $DiscoveryUserName, $DiscoveryPassword, $Email, $Schedule, $ScheduleCron) {
     $DiscoveryConfigPayload = '{
             "DiscoveryConfigGroupName":"Server Discovery",
             "DiscoveryStatusEmailRecipient":"",
@@ -11,7 +12,7 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
                           "AddressType":  30
                      }
                  ],
-                "ConnectionProfile":"{
+                 "ConnectionProfile":"{
                     \"profileName\":\"\",
                     \"profileDescription\":\"\",
                     \"type\":\"DISCOVERY\",
@@ -45,7 +46,7 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
                     }]
                 }",
                 "DeviceType":[1000]
-                }],
+            }],
             "Schedule":{
                 "RunNow":true,
                 "Cron":"startnow"
@@ -56,41 +57,54 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
             "UseAllProfiles": false
     }' | ConvertFrom-Json
 
-    $DeviceMap = @{
-        'server' = 1000
-        'chassis' = 2000
-        'storage' = 5000
-        'network' = 6000
-    }
-    $DiscoveryConfigPayload.DiscoveryConfigGroupName = $Name
+    $DiscoveryConfigPayload.DiscoveryConfigGroupName = $DiscoveryJob.Name
     if ($Email) {
         $DiscoveryConfigPayload.DiscoveryStatusEmailRecipient = $Email
     } else {
-        $DiscoveryConfigPayload.DiscoveryStatusEmailRecipient.PSObject.Properties.Remove("DiscoveryConfigTargets")
+        $DiscoveryConfigPayload.DiscoveryStatusEmailRecipient = $DiscoveryJob.EmailRecipient
     }
-    $DiscoveryConfigPayload.TrapDestination = $SetTrapDestination
-    $DiscoveryConfigPayload.DiscoveryConfigModels[0].PSObject.Properties.Remove("DiscoveryConfigTargets")
-    $DiscoveryConfigPayload.DiscoveryConfigModels[0]| Add-Member -MemberType NoteProperty -Name 'DiscoveryConfigTargets' -Value @()
-    foreach ($DiscoveryHost in $HostList) {
-        $jsonContent = [PSCustomObject]@{
-            "AddressType" = 30
-            "NetworkAddressDetail" = $DiscoveryHost
+    $DiscoveryConfigPayload.DiscoveryConfigModels[0].DeviceType = $DiscoveryJob.DeviceType
+    $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile = $DiscoveryJob.ConnectionProfile
+    $DiscoveryConfigPayload.Schedule = $DiscoveryJob.Schedule
+    $DiscoveryConfigPayload.CreateGroup = $DiscoveryJob.CreateGroup
+    $DiscoveryConfigPayload.TrapDestination = $DiscoveryJob.TrapDestination
+    $DiscoveryConfigPayload.CommunityString = $DiscoveryJob.CommunityString
+    $DiscoveryConfigPayload.UseAllProfiles = $DiscoveryJob.UseAllProfiles
+
+    $NewHostList = @()
+    if ($Mode.ToLower() -eq "append") {
+        $NewHostList = $DiscoveryJob.Hosts
+        $CurrentHostList = $DiscoveryJob.Hosts | Select-Object -Property NetworkAddress
+        foreach ($DiscoveryHost in $HostList) {
+            if (!$CurrentHostList.Contains($DiscoveryHost)) {
+                $NewHostList += [PSCustomObject]@{
+                    "AddressType" = 30
+                    "NetworkAddressDetail" = $DiscoveryHost
+                }
+            }
         }
-        $DiscoveryConfigPayload.DiscoveryConfigModels[0].DiscoveryConfigTargets += $jsonContent
+    } elseif ($Mode.ToLower() -eq "replace") {
+        foreach ($DiscoveryHost in $HostList) {
+            $NewHostList += [PSCustomObject]@{
+                "AddressType" = 30
+                "NetworkAddressDetail" = $DiscoveryHost
+            }
+        }
+    } elseif ($Mode.ToLower() -eq "remove") {
+        $NewHostList = $DiscoveryJob.Hosts
+        foreach ($CurrentHost in $DiscoveryJob.Hosts) {
+            if ($HostList.Contains($CurrentHost.NetworkAddress)) {
+                $NewHostList.Remove($CurrentHost)
+            }
+        }
     }
-    if ($DeviceType.ToLower() -eq 'server' -or $DeviceType.ToLower() -eq 'chassis') {
-        $DiscoveryConfigPayload.DiscoveryConfigModels[0].DeviceType = @($DeviceMap[$DeviceType.ToLower()])
-        $ConnectionProfile = $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile | ConvertFrom-Json
-        $ConnectionProfile.credentials[0].credentials.'username' = $DiscoveryUserName
-        $ConnectionProfile.credentials[0].credentials.'password' = $DiscoveryPassword
-        $ConnectionProfile.credentials[1].credentials.'username' = $DiscoveryUserName
-        $ConnectionProfile.credentials[2].credentials.'password' = $DiscoveryPassword
-        $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile = $ConnectionProfile | ConvertTo-Json -Depth 6
-    }
+    $DiscoveryConfigPayload.DiscoveryConfigModels[0].DiscoveryConfigTargets = $NewHostList
+
     if ($Schedule.ToLower() -eq "runlater") {
         $DiscoveryConfigPayload.Schedule.RunNow = False
         $DiscoveryConfigPayload.Schedule.Cron = $ScheduleCron
     }
+
     return $DiscoveryConfigPayload
 }
 
@@ -114,7 +128,7 @@ function Get-JobId($BaseUri, $Headers, $DiscoverConfigGroupId) {
     return $JobId
 }
 
-function New-OMEDiscovery {
+function Edit-OMEDiscovery {
 <#
 Copyright (c) 2018 Dell EMC Corporation
 
@@ -133,14 +147,11 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Create new device discovery job in OpenManage Enterprise
+    Edit device discovery job in OpenManage Enterprise
 .DESCRIPTION
     This is used to onboard devices into OpenManage Enterprise. Specify a list of IP Addresses or hostnames. You can also specify a subnet. Wildcards are supported as well.
-    Only implemented protocols are WSMAN/REDFISH. Submit an Issue on Github to request additional features.
 .PARAMETER Name
     Name of the discovery job
-.PARAMETER DeviceType
-    Type of device ("Server", "Chassis", "Storage", "Network")
 .PARAMETER Hosts
     Array of IP Addresses, Subnets or Hosts
     Valid Format:
@@ -162,13 +173,13 @@ limitations under the License.
     Discovery password. The iDRAC user's password for server discovery.
 .PARAMETER Email
     Email upon completion
-.PARAMETER SetTrapDestination
-    Set trap destination of iDRAC to OpenManage Enterprise upon discovery
 .PARAMETER Schedule
     Determines when the discovery job will be executed. (Default="RunNow", "RunLater")
 .PARAMETER ScheduleCron
     Cron string to schedule discovery job at a later time. Uses UTC time. Used with -Schedule "RunLater"
     Example: Every Sunday at 12:00AM UTC: '0 0 0 ? * sun *'
+.PARAMETER Mode
+    Method by which hosts are added or removed from discovery job
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -176,24 +187,23 @@ limitations under the License.
 .INPUTS
     None
 .EXAMPLE
-    New-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+    Edit-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
     Discover servers by hostname
 .EXAMPLE
-    New-OMEDiscovery -Hosts @('10.35.0.0', '10.35.0.1') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+    Edit-OMEDiscovery -Hosts @('10.35.0.0', '10.35.0.1') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
     Discover servers by IP Address
 .EXAMPLE
-    New-OMEDiscovery -Hosts @('10.37.0.0/24') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+    Edit-OMEDiscovery -Hosts @('10.37.0.0/24') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
     Discover servers by Subnet
 #>
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$false)]
-    [String]$Name = "Server Discovery $((Get-Date).ToString('yyyyMMddHHmmss'))",
+    [parameter(Mandatory, ValueFromPipeline)]
+    [Discovery]$Discovery,
 
     [Parameter(Mandatory=$false)]
-	[ValidateSet("Server", "Chassis", "Storage", "Network")]
-    [String] $DeviceType = "Server",
+    [String]$Name = "Server Discovery $((Get-Date).ToString('yyyyMMddHHmmss'))",
 
     [parameter(Mandatory)]
     [String[]]$Hosts,
@@ -208,26 +218,15 @@ param(
     [String]$Email,
 
     [Parameter(Mandatory=$false)]
-    [Switch]$SetTrapDestination,
-
-    [Parameter(Mandatory=$false)]
     [ValidateSet("RunNow", "RunLater")]
     [String]$Schedule = "RunNow",
 
     [Parameter(Mandatory=$false)]
     [String]$ScheduleCron = "0 0 0 ? * sun *",
 
-    <#
     [Parameter(Mandatory=$false)]
-	[ValidateSet("vmware", "wsman", "snmp", "ipmi", "redfish", "ssh" )]
-    [String[]] $Protocol = @("wsman", "redfish"),
-    #>
-
-    [Parameter(Mandatory=$false)]
-    [Switch]$Wait,
-
-    [Parameter(Mandatory=$false)]
-    [int]$WaitTime = 3600
+	[ValidateSet("Append", "Replace", "Remove")]
+    [String] $Mode = "Replace"
 )
 
 Begin {
@@ -245,13 +244,14 @@ Process {
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
-        $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups"
         if ($Hosts.Count -gt 0) {
             $DiscoveryPasswordText = (New-Object PSCredential "user", $DiscoveryPassword).GetNetworkCredential().Password
-            $Payload = Get-DiscoverDevicePayload -Name $Name -HostList $Hosts -DeviceType $DeviceType -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPasswordText -Email $Email -SetTrapDestination $SetTrapDestination.IsPresent -Schedule $Schedule -ScheduleCron $ScheduleCron
+            $Payload = Update-DiscoverDevicePayload -Name $Name -HostList $Hosts -Mode $Mode -DiscoveryJob $Discovery -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPasswordText -Email $Email -Schedule $Schedule -ScheduleCron $ScheduleCron
             $Payload = $Payload | ConvertTo-Json -Depth 6
-            #Write-Verbose $Payload
-            $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Post  -Body $Payload -Headers $Headers -ContentType $Type
+            Write-Verbose $Payload
+            $DiscoveryId = $Discovery.DiscoveryConfigGroupId
+            $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups(" + $DiscoveryId + ")"
+            $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Put  -Body $Payload -Headers $Headers -ContentType $Type
             if ($DiscoverResponse.StatusCode -eq 201) {
                 Write-Verbose "Discovering devices...."
                 Start-Sleep -Seconds 10
