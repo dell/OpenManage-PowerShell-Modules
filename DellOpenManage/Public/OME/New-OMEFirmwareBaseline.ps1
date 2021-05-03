@@ -72,7 +72,7 @@ param(
     [Switch]$Wait,
 
     [Parameter(Mandatory=$false)]
-    [int]$WaitTime = 30
+    [int]$WaitTime = 3600
 )
 
 Begin {
@@ -121,7 +121,7 @@ Process {
                 }
                 $TargetArray += $TargetTempHash
             }
-        } 
+        }
         elseif ($Group) {
             $TargetTypeHash = @{
                 Id = 2000
@@ -146,8 +146,12 @@ Process {
         Write-Verbose $BaselinePayload
         $BaselineResponse = Invoke-WebRequest -Uri $BaselineURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $BaselinePayload
         if ($BaselineResponse.StatusCode -eq 201) {
-            #$BaselineData = $BaselineResponse.Content | ConvertFrom-Json
+            $BaselineData = $BaselineResponse.Content | ConvertFrom-Json
+            Write-Verbose $BaselineData
             if ($Wait) {
+                $JobStatus = $($Name | Wait-OnFirmwareBaseline -WaitTime $WaitTime)
+                return $JobStatus
+                <#
                 Start-Sleep -s $WaitTime
                 $NewBaselineResponse = Invoke-WebRequest -Uri $BaselineURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method GET
                 $NewBaselineInfo = $NewBaselineResponse | ConvertFrom-Json
@@ -158,16 +162,19 @@ Process {
                         return $Baseline
                     }
                 }
+                #>
+            } else {
+                return
             }
             Write-Verbose "Baseline creation successful..."
         }
         else {
             Write-Error "Baseline creation failed"
         }
-    } 
+    }
     Catch {
         Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
+        Write-Error ($_.Exception | Format-List -Force | Out-String)
         Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
     }
 }

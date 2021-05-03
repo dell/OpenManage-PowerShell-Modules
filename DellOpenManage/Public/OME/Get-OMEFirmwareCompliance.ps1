@@ -24,7 +24,7 @@ limitations under the License.
 .SYNOPSIS
     Get device firmware compliance report from OpenManage Enterprise
 .DESCRIPTION
-    To get the list of firmware updates for a device you need a Catalog and a Baseline first. 
+    To get the list of firmware updates for a device you need a Catalog and a Baseline first.
     Then you can see the firmware that needs updated.
 .PARAMETER Baseline
     Array of type Baseline returned from Get-Baseline function
@@ -97,6 +97,7 @@ Process {
         if ($UpdateAction -eq "All") {
             $UpdateActionSet += "Upgrade"
             $UpdateActionSet += "Downgrade"
+            $UpdateActionSet += "Equal"
         } else {
             $UpdateActionSet += $UpdateAction
         }
@@ -127,10 +128,10 @@ Process {
                     $NextLinkUrl = $null
                 }
             }
-            
+
             if ($ComplianceDeviceList.Length -gt 0) {
-                # Loop through devices 
-                foreach ($ComplianceDevice in $ComplianceDeviceList) { 
+                # Loop through devices
+                foreach ($ComplianceDevice in $ComplianceDeviceList) {
                     # Check if the device is in the provided Devices list. Only return results for devices in the list, if a list was provided
                     if (($DeviceFilter.Count -gt 0 -and $DeviceFilter.Id -contains $ComplianceDevice.DeviceId) -or $DeviceFilter.Count -eq 0) {
                         $sourcesString = $null
@@ -141,7 +142,7 @@ Process {
                                 if (($ComponentFilter -ne "" -and $Component -match $ComponentFilter) -or $ComponentFilter -eq "") {
                                     # Check for UpdateAction to allow for downgrade of firmware
                                     if ($UpdateActionSet.ToUpper().Contains($Component.UpdateAction)) {
-                                        # Create string to be used in payload 
+                                        # Create string to be used in payload
                                         $sourceName = $Component.'SourceName'
                                         if ($sourcesString.Length -eq 0) {
                                             $sourcesString += $sourceName
@@ -176,7 +177,7 @@ Process {
                                 }
                             }
                         }
-                        # Create object to be used in payload 
+                        # Create object to be used in payload
                         if ( $null -ne $sourcesString) {
                             $DeviceComplianceReportTargetList += @{
                                 Data = $sourcesString
@@ -199,10 +200,10 @@ Process {
         } else {
             return $DeviceComplianceReport
         }
-    } 
+    }
     Catch {
         Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
+        Write-Error ($_.Exception | Format-List -Force | Out-String)
         Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
     }
 }

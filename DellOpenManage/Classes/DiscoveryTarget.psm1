@@ -1,6 +1,5 @@
 Class DiscoveryTarget {
-    [Int]$Id
-    [String]$NetworkAddress
+    [String]$NetworkAddressDetail
     [String]$SubnetMask
     [Int]$AddressType
     [Boolean]$Disabled

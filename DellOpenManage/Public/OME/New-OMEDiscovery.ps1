@@ -52,8 +52,7 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
             },
             "CreateGroup":false,
             "TrapDestination":false,
-            "CommunityString": false,
-            "UseAllProfiles": false
+            "CommunityString": false
     }' | ConvertFrom-Json
 
     $DeviceMap = @{
@@ -84,11 +83,12 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
         $ConnectionProfile.credentials[0].credentials.'username' = $DiscoveryUserName
         $ConnectionProfile.credentials[0].credentials.'password' = $DiscoveryPassword
         $ConnectionProfile.credentials[1].credentials.'username' = $DiscoveryUserName
-        $ConnectionProfile.credentials[2].credentials.'password' = $DiscoveryPassword
+        $ConnectionProfile.credentials[1].credentials.'password' = $DiscoveryPassword
         $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile = $ConnectionProfile | ConvertTo-Json -Depth 6
     }
     if ($Schedule.ToLower() -eq "runlater") {
-        $DiscoveryConfigPayload.Schedule.RunNow = False
+        $DiscoveryConfigPayload.Schedule.RunNow = $false
+        $DiscoveryConfigPayload.Schedule.RunLater = $true
         $DiscoveryConfigPayload.Schedule.Cron = $ScheduleCron
     }
     return $DiscoveryConfigPayload

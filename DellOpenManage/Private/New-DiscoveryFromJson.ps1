@@ -9,8 +9,7 @@ function New-DiscoveryFromJson {
     $targets = @()
     foreach ($target in $Discovery.DiscoveryConfigModels[0].DiscoveryConfigTargets) {
         $targets += [DiscoveryTarget]@{
-            Id = $target.DiscoveryConfigTargetId
-            NetworkAddress = $target.NetworkAddressDetail
+            NetworkAddressDetail = $target.NetworkAddressDetail
             SubnetMask = $target.SubnetMask
             AddressType = $target.AddressType
             Disabled = $target.Disabled
@@ -19,6 +18,8 @@ function New-DiscoveryFromJson {
     }
 
     $schedule = [Schedule]@{
+        RunNow = $Discovery.Schedule.RunNow
+        RunLater = $Discovery.Schedule.RunLater
         StartTime = $Discovery.Schedule.StartTime
         EndTime = $Discovery.Schedule.EndTime
         Cron = $Discovery.Schedule.Cron
@@ -33,7 +34,6 @@ function New-DiscoveryFromJson {
         CreateGroup = $Discovery.CreateGroup
         TrapDestination = $Discovery.TrapDestination
         CommunityString = $Discovery.CommunityString
-        UseAllProfiles = $Discovery.UseAllProfiles
         Hosts = $targets
         Schedule = $schedule
     }

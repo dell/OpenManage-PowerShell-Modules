@@ -1,15 +1,25 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false, ValueFromPipeline)]
-    [String]$Test
+    [String]$Test,
+
+    [Parameter(Mandatory=$false)]
+    [String]$Server
 )
 
 . .\Credentials.ps1
 
+# Requires Pester 4.0+
+#Install-Module -Name Pester -Scope CurrentUser -Force
+Import-Module Pester
 Remove-Module DellOpenManage
 Import-Module DellOpenManage
 
-$Global:OMEServer = $OMEServer
+if ($Server) {
+    $Global:OMEServer = $Server
+} else {
+    $Global:OMEServer = $OMEServer
+}
 $Global:OMEUsername = $OMEUsername
 $Global:OMEPassword = $OMEPassword
 $Global:iDRACUsername = $iDRACUsername

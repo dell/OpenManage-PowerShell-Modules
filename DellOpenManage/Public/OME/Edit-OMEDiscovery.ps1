@@ -2,6 +2,7 @@
 
 function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $DiscoveryUserName, $DiscoveryPassword, $Email, $Schedule, $ScheduleCron) {
     $DiscoveryConfigPayload = '{
+            "DiscoveryConfigGroupId":11,
             "DiscoveryConfigGroupName":"Server Discovery",
             "DiscoveryStatusEmailRecipient":"",
             "DiscoveryConfigModels":[
@@ -53,10 +54,10 @@ function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $Discover
             },
             "CreateGroup":false,
             "TrapDestination":false,
-            "CommunityString": false,
-            "UseAllProfiles": false
+            "CommunityString": false
     }' | ConvertFrom-Json
 
+    $DiscoveryConfigPayload.DiscoveryConfigGroupId = $DiscoveryJob.Id
     $DiscoveryConfigPayload.DiscoveryConfigGroupName = $DiscoveryJob.Name
     if ($Email) {
         $DiscoveryConfigPayload.DiscoveryStatusEmailRecipient = $Email
@@ -64,45 +65,62 @@ function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $Discover
         $DiscoveryConfigPayload.DiscoveryStatusEmailRecipient = $DiscoveryJob.EmailRecipient
     }
     $DiscoveryConfigPayload.DiscoveryConfigModels[0].DeviceType = $DiscoveryJob.DeviceType
-    $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile = $DiscoveryJob.ConnectionProfile
     $DiscoveryConfigPayload.Schedule = $DiscoveryJob.Schedule
     $DiscoveryConfigPayload.CreateGroup = $DiscoveryJob.CreateGroup
     $DiscoveryConfigPayload.TrapDestination = $DiscoveryJob.TrapDestination
     $DiscoveryConfigPayload.CommunityString = $DiscoveryJob.CommunityString
-    $DiscoveryConfigPayload.UseAllProfiles = $DiscoveryJob.UseAllProfiles
 
-    $NewHostList = @()
-    if ($Mode.ToLower() -eq "append") {
-        $NewHostList = $DiscoveryJob.Hosts
-        $CurrentHostList = $DiscoveryJob.Hosts | Select-Object -Property NetworkAddress
-        foreach ($DiscoveryHost in $HostList) {
-            if (!$CurrentHostList.Contains($DiscoveryHost)) {
+    # Update credentials
+    $ConnectionProfile = $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile | ConvertFrom-Json
+    $ConnectionProfile.credentials[0].credentials.'username' = $DiscoveryUserName
+    $ConnectionProfile.credentials[0].credentials.'password' = $DiscoveryPassword
+    $ConnectionProfile.credentials[1].credentials.'username' = $DiscoveryUserName
+    $ConnectionProfile.credentials[1].credentials.'password' = $DiscoveryPassword
+    $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile = $ConnectionProfile | ConvertTo-Json -Depth 6
+
+    # Update target hosts
+    if ($Hosts.Count -gt 0) {
+        $NewHostList = @()
+        if ($Mode.ToLower() -eq "append") {
+            $NewHostList = $DiscoveryJob.Hosts
+            $CurrentHostList = $DiscoveryJob.Hosts | Select-Object -Property NetworkAddressDetail
+            foreach ($DiscoveryHost in $HostList) {
+                if ($CurrentHostList -notcontains $DiscoveryHost) {
+                    $NewHostList += [PSCustomObject]@{
+                        "AddressType" = 30
+                        "NetworkAddressDetail" = $DiscoveryHost
+                    }
+                }
+            }
+        } elseif ($Mode.ToLower() -eq "replace") {
+            foreach ($DiscoveryHost in $HostList) {
                 $NewHostList += [PSCustomObject]@{
                     "AddressType" = 30
                     "NetworkAddressDetail" = $DiscoveryHost
                 }
             }
-        }
-    } elseif ($Mode.ToLower() -eq "replace") {
-        foreach ($DiscoveryHost in $HostList) {
-            $NewHostList += [PSCustomObject]@{
-                "AddressType" = 30
-                "NetworkAddressDetail" = $DiscoveryHost
+        } elseif ($Mode.ToLower() -eq "remove") {
+            $NewHostList = [System.Collections.ArrayList]$DiscoveryJob.Hosts # Need to cast to ArrayList, standard array is fixed size
+            foreach ($CurrentHost in $DiscoveryJob.Hosts) {
+                if ($HostList -contains $CurrentHost.NetworkAddressDetail) {
+                    $NewHostList.Remove($CurrentHost)
+                }
             }
         }
-    } elseif ($Mode.ToLower() -eq "remove") {
-        $NewHostList = $DiscoveryJob.Hosts
-        foreach ($CurrentHost in $DiscoveryJob.Hosts) {
-            if ($HostList.Contains($CurrentHost.NetworkAddress)) {
-                $NewHostList.Remove($CurrentHost)
-            }
-        }
+        $DiscoveryConfigPayload.DiscoveryConfigModels[0].DiscoveryConfigTargets = $NewHostList
+    } else { # If -Hosts not provided set to existing list of hosts
+        $DiscoveryConfigPayload.DiscoveryConfigModels[0].DiscoveryConfigTargets = $DiscoveryJob.Hosts
     }
-    $DiscoveryConfigPayload.DiscoveryConfigModels[0].DiscoveryConfigTargets = $NewHostList
 
+    # Update schedule
     if ($Schedule.ToLower() -eq "runlater") {
-        $DiscoveryConfigPayload.Schedule.RunNow = False
+        $DiscoveryConfigPayload.Schedule.RunNow = $false
+        $DiscoveryConfigPayload.Schedule.RunLater = $true
         $DiscoveryConfigPayload.Schedule.Cron = $ScheduleCron
+    } else {
+        $DiscoveryConfigPayload.Schedule.RunNow = $true
+        $DiscoveryConfigPayload.Schedule.RunLater = $false
+        $DiscoveryConfigPayload.Schedule.Cron = "startnow"
     }
 
     return $DiscoveryConfigPayload
@@ -179,7 +197,7 @@ limitations under the License.
     Cron string to schedule discovery job at a later time. Uses UTC time. Used with -Schedule "RunLater"
     Example: Every Sunday at 12:00AM UTC: '0 0 0 ? * sun *'
 .PARAMETER Mode
-    Method by which hosts are added or removed from discovery job
+    Method by which hosts are added or removed from discovery job ("Append", Default="Replace", "Remove")
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -187,14 +205,20 @@ limitations under the License.
 .INPUTS
     None
 .EXAMPLE
-    Edit-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-    Discover servers by hostname
+    "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+    Replace host list and run now
 .EXAMPLE
-    Edit-OMEDiscovery -Hosts @('10.35.0.0', '10.35.0.1') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-    Discover servers by IP Address
+    "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server02-idrac.example.com') -Mode "Append" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+    Append host to host list and run now
 .EXAMPLE
-    Edit-OMEDiscovery -Hosts @('10.37.0.0/24') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-    Discover servers by Subnet
+    "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server02-idrac.example.com') -Mode "Remove" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+    Remove host from host list and run now
+.EXAMPLE
+    "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Schedule "RunNow" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+    Run discovery job now
+.EXAMPLE
+    "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Schedule "RunLater" -ScheduleCron "0 0 0 ? * sun *" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+    Run discovery job Every Sunday at 12:00AM UTC
 #>
 
 [CmdletBinding()]
@@ -205,7 +229,7 @@ param(
     [Parameter(Mandatory=$false)]
     [String]$Name = "Server Discovery $((Get-Date).ToString('yyyyMMddHHmmss'))",
 
-    [parameter(Mandatory)]
+    [parameter(Mandatory=$false)]
     [String[]]$Hosts,
 
     [Parameter(Mandatory)]
@@ -226,7 +250,13 @@ param(
 
     [Parameter(Mandatory=$false)]
 	[ValidateSet("Append", "Replace", "Remove")]
-    [String] $Mode = "Replace"
+    [String] $Mode = "Replace",
+
+    [Parameter(Mandatory=$false)]
+    [Switch]$Wait,
+
+    [Parameter(Mandatory=$false)]
+    [int]$WaitTime = 3600
 )
 
 Begin {
@@ -244,33 +274,30 @@ Process {
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
-        if ($Hosts.Count -gt 0) {
-            $DiscoveryPasswordText = (New-Object PSCredential "user", $DiscoveryPassword).GetNetworkCredential().Password
-            $Payload = Update-DiscoverDevicePayload -Name $Name -HostList $Hosts -Mode $Mode -DiscoveryJob $Discovery -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPasswordText -Email $Email -Schedule $Schedule -ScheduleCron $ScheduleCron
-            $Payload = $Payload | ConvertTo-Json -Depth 6
-            Write-Verbose $Payload
-            $DiscoveryId = $Discovery.DiscoveryConfigGroupId
-            $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups(" + $DiscoveryId + ")"
-            $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Put  -Body $Payload -Headers $Headers -ContentType $Type
-            if ($DiscoverResponse.StatusCode -eq 201) {
-                Write-Verbose "Discovering devices...."
-                Start-Sleep -Seconds 10
-                $DiscoverInfo = $DiscoverResponse.Content | ConvertFrom-Json
-                $DiscoverConfigGroupId = $DiscoverInfo.DiscoveryConfigGroupId
-                $JobId = Get-JobId -BaseUri $BaseUri -Headers $Headers -DiscoverConfigGroupId $DiscoverConfigGroupId
-                if ($Wait -and $Schedule.ToLower() -eq "runnow") {
-                    $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
-                    return $JobStatus
-                } else {
-                    return $JobId
-                }
+        $DiscoveryPasswordText = (New-Object PSCredential "user", $DiscoveryPassword).GetNetworkCredential().Password
+        $Payload = Update-DiscoverDevicePayload -Name $Name -HostList $Hosts -Mode $Mode -DiscoveryJob $Discovery -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPasswordText -Email $Email -Schedule $Schedule -ScheduleCron $ScheduleCron
+        $Payload = $Payload | ConvertTo-Json -Depth 6
+        Write-Verbose $Payload
+        $DiscoveryId = $Discovery.Id
+        $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups(" + $DiscoveryId + ")"
+        $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -Method Put -Body $Payload -Headers $Headers -ContentType $Type
+        if ($DiscoverResponse.StatusCode -eq 200) {
+            Write-Verbose "Discovering devices...."
+            Start-Sleep -Seconds 10
+            $DiscoverInfo = $DiscoverResponse.Content | ConvertFrom-Json
+            $DiscoverConfigGroupId = $DiscoverInfo.DiscoveryConfigGroupId
+            $JobId = Get-JobId -BaseUri $BaseUri -Headers $Headers -DiscoverConfigGroupId $DiscoverConfigGroupId
+            if ($Wait -and $Schedule.ToLower() -eq "runnow") {
+                $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
+                return $JobStatus
+            } else {
+                return $JobId
             }
-            else {
-                Write-Error "Unable to discover device $($DiscoverResponse)"
-            }
-        } else {
-            Write-Error "Enter a valid IP Address"
         }
+        else {
+            Write-Error "Unable to discover device $($DiscoverResponse)"
+        }
+
     }
     Catch {
         Write-Error ($_.ErrorDetails)

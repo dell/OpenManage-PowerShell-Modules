@@ -14,7 +14,7 @@ Describe "Firmware Tests" {
         It ("Should create and return a new Catalog object") {
             # Need to implement Delete-Catalog to cleanup for subsequent runs
             #New-OMECatalog -Name $CatalogName -Wait
-            New-OMECatalog -Name $CatalogName -RepositoryType "NFS" -Source "nfs01.gcnose.adc.delllabs.net" -SourcePath "/mnt/data/drm/OSELabAll" -CatalogFile "OSELabAll_1.00_Catalog.xml" -Wait -Verbose
+            New-OMECatalog -Name $CatalogName -RepositoryType "NFS" -Source "100.79.7.16" -SourcePath "/mnt/data/drm/OSELabAll" -CatalogFile "OSELabAll_1.00_Catalog.xml" -Wait -Verbose
             $CatalogName | Get-OMECatalog | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
 
@@ -42,6 +42,6 @@ Describe "Firmware Tests" {
         #    $baseline = $($BaselineName | Get-OMEFirmwareBaseline)
         #    Update-OMEFirmware -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "StageForNextReboot" -ComponentFilter "PERC" -Wait -Verbose | Should -Be "Completed"
         #}
-    
+
     }
 }
