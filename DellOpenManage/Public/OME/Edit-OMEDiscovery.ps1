@@ -218,7 +218,7 @@ limitations under the License.
     Run discovery job now
 .EXAMPLE
     "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Schedule "RunLater" -ScheduleCron "0 0 0 ? * sun *" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-    Run discovery job Every Sunday at 12:00AM UTC
+    Run discovery job every Sunday at 12:00AM UTC
 #>
 
 [CmdletBinding()]
@@ -277,7 +277,6 @@ Process {
         $DiscoveryPasswordText = (New-Object PSCredential "user", $DiscoveryPassword).GetNetworkCredential().Password
         $Payload = Update-DiscoverDevicePayload -Name $Name -HostList $Hosts -Mode $Mode -DiscoveryJob $Discovery -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPasswordText -Email $Email -Schedule $Schedule -ScheduleCron $ScheduleCron
         $Payload = $Payload | ConvertTo-Json -Depth 6
-        Write-Verbose $Payload
         $DiscoveryId = $Discovery.Id
         $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups(" + $DiscoveryId + ")"
         $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -Method Put -Body $Payload -Headers $Headers -ContentType $Type

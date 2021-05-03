@@ -4,7 +4,7 @@
 
 ## Requirements
 - PowerShell 5+
-- OpenManage Enterprise 3.3.1+
+- OpenManage Enterprise 3.4+
 
 ## Scripted Installation
 1. Open PowerShell Command Window
@@ -13,10 +13,10 @@
 4. .\Install-Module.ps1
 
 ## Manual Installation
-1. Determine module path `$Env:PSModulePath` 
+1. Determine module path `$Env:PSModulePath`
     * PowerShell 5: C:\Users\username\Documents\WindowsPowerShell\Modules
     * PowerShell 6+: C:\Users\username\Documents\PowerShell\Modules
-2. Copy the DellOpenManage folder to a directory in your module path 
+2. Copy the DellOpenManage folder to a directory in your module path
     * Example: C:\Users\username\Documents\WindowsPowerShell\Modules\DellOpenManage
 3. List available Modules `Get-Module Dell* -ListAvailable`
 4. Import module `Import-Module DellOpenManage`
@@ -41,7 +41,7 @@ Get-Help Connect-OMEServer -Detailed
 ```
 ## Basic Example
 * Copy and paste these commands into a Test.ps1 script or PowerShell ISE and execute the script.
-* This will Import the Module, connect to server prompting for credentials, list servers by model, then disconnect the current session. 
+* This will Import the Module, connect to server prompting for credentials, list servers by model, then disconnect the current session.
 ```
 Import-Module DellOpenManage
 
@@ -73,15 +73,39 @@ Connect-OMEServer -Name "ome.example.com" -Credentials $credentials -IgnoreCerti
 ## Discovery
 Discover servers by hostname
 ```
-New-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait
+New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait
 ```
 Discover servers by IP Address
 ```
-New-OMEDiscovery -Hosts @('10.35.0.0', '10.35.0.1') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait
+New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('10.35.0.0', '10.35.0.1') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait
 ```
 Discover servers by Subnet
-```    
-New-OMEDiscovery -Hosts @('10.37.0.0/24') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait
+```
+New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('10.37.0.0/24') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait
+```
+Discover servers by Subnet every Sunday at 12:00AM UTC
+```
+New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('10.37.0.0/24') -Schedule "RunLater" -ScheduleCron "0 0 0 ? * sun *" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+```
+Replace host list and run now
+```
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+```
+Append host to host list and run now
+```
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server02-idrac.example.com') -Mode "Append" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+```
+Remove host from host list and run now
+```
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server02-idrac.example.com') -Mode "Remove" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+```
+Run discovery job now
+```
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Schedule "RunNow" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+```
+Run discovery job every Sunday at 12:00AM UTC
+```
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Schedule "RunLater" -ScheduleCron "0 0 0 ? * sun *" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
 ```
 
 ## Devices
@@ -110,7 +134,7 @@ Get-OMEDevice -Group $(Get-OMEGroup "Servers_Win") | Format-Table
 ## Device Details
 Get all inventory
 ```
-10097, 10100 | Get-OMEDevice -FilterBy "Id" | Get-OMEDeviceDetail 
+10097, 10100 | Get-OMEDevice -FilterBy "Id" | Get-OMEDeviceDetail
 ```
 Get network cards and mac addresses
 ```
@@ -193,13 +217,13 @@ Get-OMEFirmwareBaseline | Format-Table
 Get device firmware compliance report
 ```
 $devices = $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag")
-"AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -DeviceFilter $devices | 
+"AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -DeviceFilter $devices |
     Select-Object -Property ServiceTag,DeviceModel,DeviceName,CurrentVersion,Version,UpdateAction,ComplianceStatus,Name | Format-Table
 ```
 Get device firmware compliance report. BIOS only.
 ```
-"AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -ComponentFilter "BIOS" | 
-    Select-Object -Property ServiceTag,DeviceModel,DeviceName,CurrentVersion,Version,UpdateAction,ComplianceStatus,Name | 
+"AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -ComponentFilter "BIOS" |
+    Select-Object -Property ServiceTag,DeviceModel,DeviceName,CurrentVersion,Version,UpdateAction,ComplianceStatus,Name |
     Sort-Object CurrentVersion | Format-Table
 ```
 Create new firmware baseline
@@ -226,7 +250,7 @@ Update-OMEFirmware -Baseline $baseline -UpdateSchedule "RebootNow" -Wait
 ```
 Update firmware on all devices in baseline on next reboot
 ```
-Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "StageForNextReboot" 
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "StageForNextReboot"
 ```
 Update firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
 ```
@@ -238,7 +262,7 @@ Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFil
 ```
 Update firmware on specific components in baseline on next reboot and clear job queue
 ```
-Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue 
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue
 ```
 Update firmware later scheduled at 11/1/2020 12:00AM UTC
 ```
@@ -276,11 +300,11 @@ Deploy template to device
 Deploy template and boot to network ISO over NFS
 ```
 "TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "NFS" -NetworkBootShareIpAddress "192.168.1.100" -NetworkBootIsoPath "/mnt/data/iso/CentOS7-Unattended.iso" -Wait
-``` 
+```
 Deploy template and boot to network ISO over CIFS
 ```
 "TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "CIFS" -NetworkBootShareIpAddress "192.168.1.101" -NetworkBootIsoPath "/Share/ISO/CentOS7-Unattended.iso" -NetworkBootShareUser "Administrator" -NetworkBootSharePassword "Password" -NetworkBootShareName "Share" -Wait
-``` 
+```
 
 ## Jobs
 List all jobs
@@ -303,7 +327,7 @@ Get job by state
 ```
 "Enabled" | Get-OMEJob -FilterBy "State" | Format-Table
 ```
-    
+
 ## Reports
 Run report
 ```
@@ -311,7 +335,7 @@ Invoke-Report -ReportId 11709
 ```
 
 ## Troubleshooting
-Verbose Output 
+Verbose Output
 - Append `-Verbose` to any command
 
 Redirect ALL output to file
@@ -322,7 +346,7 @@ Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSch
 ## Support
 This code is provided as-is and currently not officially supported by Dell EMC.
 
-To report problems or provide feedback https://github.com/dell/OpenManage-PowerShell-Modules/issues 
+To report problems or provide feedback https://github.com/dell/OpenManage-PowerShell-Modules/issues
 
 ## License
 
