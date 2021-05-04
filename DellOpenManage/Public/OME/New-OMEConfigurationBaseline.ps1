@@ -1,8 +1,9 @@
 ﻿using module ..\..\Classes\Device.psm1
 using module ..\..\Classes\Group.psm1
-using module ..\..\Classes\FirmwareBaseline.psm1
+using module ..\..\Classes\Template.psm1
+using module ..\..\Classes\ConfigurationBaseline.psm1
 
-function New-OMEFirmwareBaseline {
+function New-OMEConfigurationBaseline {
 <#
 Copyright (c) 2018 Dell EMC Corporation
 
@@ -28,14 +29,12 @@ limitations under the License.
     Name of baseline
 .PARAMETER Description
     Description of baseline
-.PARAMETER Catalog
-    Object of type Catalog returned from Get-OMECatalog function
+.PARAMETER Template
+    Object of type Template returned from Get-OMETemplate function
 .PARAMETER Group
     Object of type Group returned from Get-OMEGroup function
 .PARAMETER Devices
     Array of type Device returned from Get-OMEDevice function
-.PARAMETER AllowDowngrade
-    Allow downgrade of component firmware
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -56,16 +55,13 @@ param(
     [String]$Description,
 
     [Parameter(Mandatory)]
-    [Catalog]$Catalog,
+    [Template]$Template,
 
     [Parameter(Mandatory=$false)]
     [Group]$Group,
 
     [Parameter(Mandatory=$false)]
     [Device[]]$Devices,
-
-    [Parameter(Mandatory=$false)]
-    [Switch]$AllowDowngrade,
 
     [Parameter(Mandatory=$false)]
     [Switch]$Wait,
@@ -92,17 +88,14 @@ Process {
         $payload = '{
             "Name": "Factory Baseline1",
             "Description": "Factory test1",
-            "CatalogId": 1104,
-            "RepositoryId": 604,
-            "DowngradeEnabled": false,
-            "Is64Bit": true,
-            "Targets": [
+            "TemplateId": 1104,
+            "BaselineTargets": [
                 {
                     "Id":"target_id",
                     "Type": {
                         "Id": "target_type",
                         "Name": "target_name"
-                }
+                    }
                 }
             ]
         }' | ConvertFrom-Json
@@ -132,15 +125,15 @@ Process {
             }
             $TargetArray += $TargetTempHash
         }
-        $payload."Targets" = $TargetArray
+        $payload."BaselineTargets" = $TargetArray
         $payload."Name" = $Name
         $payload."Description" = $Description
-        $payload."DowngradeEnabled" = $AllowDowngrade.IsPresent
-        $payload."CatalogId" = $Catalog.Id
-        $payload."RepositoryId" = $Catalog.Repository.Id
+        # Throw error if template is not type compliance
+        if ($Template.ViewTypeId -ne 1) { throw [System.Exception] "Template must be of type Compliance" }
+        $payload."TemplateId" = $Template.Id
         $BaselinePayload = $payload
 
-        $BaselineURL = $BaseUri + "/api/UpdateService/Baselines"
+        $BaselineURL = $BaseUri + "/api/TemplateService/Baselines"
         $BaselinePayload = $BaselinePayload | ConvertTo-Json -Depth 6
         Write-Verbose $BaselinePayload
         $BaselineResponse = Invoke-WebRequest -Uri $BaselineURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $BaselinePayload
@@ -148,7 +141,7 @@ Process {
             $BaselineData = $BaselineResponse.Content | ConvertFrom-Json
             Write-Verbose $BaselineData
             if ($Wait) {
-                $JobStatus = $($Name | Wait-OnFirmwareBaseline -WaitTime $WaitTime)
+                $JobStatus = $($BaselineData.Id | Wait-OnConfigurationBaseline -WaitTime $WaitTime)
                 return $JobStatus
             } else {
                 return

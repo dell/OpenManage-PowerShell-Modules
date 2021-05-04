@@ -1,4 +1,4 @@
-Class Baseline {
+Class FirmwareBaseline {
     [Int]$Id
     [String]$Name
     [String]$Description

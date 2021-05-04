@@ -1,4 +1,4 @@
-﻿function Wait-OnFirmwareBaseline {
+﻿function Wait-OnConfigurationBaseline {
 <#
 Copyright (c) 2018 Dell EMC Corporation
 
@@ -17,7 +17,7 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Wait on firmware baseline to complete
+   Wait for compliance template to complete
 
  .DESCRIPTION
 
@@ -31,7 +31,7 @@ limitations under the License.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false, ValueFromPipeline)]
-    [String] $BaselineName,
+    [int] $BaselineId,
 
     [Parameter(Mandatory=$false)]
     [int]$WaitTime = 3600
@@ -72,7 +72,7 @@ Process {
     $MAX_RETRIES = $WaitTime / 10
     $SLEEP_INTERVAL = 10
 
-    $BaselineUrl = $BaseUri + "/api/UpdateService/Baselines"
+    $BaselineUrl = $BaseUri + "/api/TemplateService/Baselines"
     $Ctr = 0
     $Status = $null
     do {
@@ -82,9 +82,9 @@ Process {
         if ($BaselineResponse.StatusCode -eq 200) {
             $BaselineInfo = $BaselineResponse.Content | ConvertFrom-Json
             foreach ($Baseline in $BaselineInfo.'value') {
-                if ($Baseline.Name -eq $BaselineName) {
-                    $Status = [int]$Baseline.TaskStatusId
-                    Write-Verbose "Iteration $($Ctr): Status of $($BaselineName) is $($JOB_STATUS_MAP.$Status)"
+                if ($Baseline.Id -eq $BaselineId) {
+                    $Status = [int]$Baseline.TaskStatus
+                    Write-Verbose "Iteration $($Ctr): Status of $($BaselineId) is $($JOB_STATUS_MAP.$Status)"
                     if ($Status -eq 2060) {
                         Write-Verbose "Baseline created successfully..."
                         return $JOB_STATUS_MAP.$Status
@@ -97,7 +97,7 @@ Process {
                 }
             }
         }
-        else {Write-Warning "Unable to get status for $($BaselineName) .. Iteration $($Ctr)"}
+        else {Write-Warning "Unable to get status for $($BaselineId) .. Iteration $($Ctr)"}
     } until ($Ctr -ge $MAX_RETRIES)
 }
 

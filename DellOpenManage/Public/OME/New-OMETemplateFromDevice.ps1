@@ -29,6 +29,10 @@ limitations under the License.
     Single Device object returned from Get-OMEDevice function
 .PARAMETER Component
     Components to include in the template (Default="All", "iDRAC", "BIOS", "System", "NIC", "LifecycleController", "RAID", "EventFilters")
+.PARAMETER Type
+    Type of template to create (Default="Deployment", "Compliance")
+    Deployment: Only 1 template assigned to a device, used with Virtual Identities
+    Compliance: Many templates can be assigned to a device, used with Configuration Compliance
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -37,6 +41,10 @@ limitations under the License.
     None
 .EXAMPLE
     New-OMETemplateFromDevice -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
+    Create new deployment template from device
+.EXAMPLE
+    New-OMETemplateFromDevice -TemplateType "Compliance" -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
+    Create new compliance template from device
 #>
 
 [CmdletBinding()]
@@ -53,6 +61,10 @@ param(
     [Parameter(Mandatory=$false)]
     [ValidateSet("iDRAC", "BIOS", "System", "NIC", "LifecycleController", "RAID", "EventFilters", "All")]
     [String[]]$Component = @("All"),
+
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Deployment", "Compliance")]
+    [String]$TemplateType = "Deployment",
 
     [Parameter(Mandatory=$false)]
     [Switch]$Wait,
@@ -75,6 +87,10 @@ Process {
         $Type        = "application/json"
         $Headers     = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
+        $TEMPLATE_TYPE_MAP = @{
+            "Compliance" = 1;
+            "Deployment" = 2
+        }
         $TemplateUrl = $BaseUri + "/api/TemplateService/Templates"
         $TemplatePayload = '{
             "Name" : "Template From Device",
@@ -87,6 +103,7 @@ Process {
         $TemplatePayload = $TemplatePayload | ConvertFrom-Json
         $TemplatePayload.Name = $Name
         $TemplatePayload.SourceDeviceId = $Device.Id
+        $TemplatePayload.ViewTypeId = $TEMPLATE_TYPE_MAP[$TemplateType]
         $TemplatePayload.Fqdds = $Component -join ","
         $TemplatePayload = $TemplatePayload | ConvertTo-Json -Depth 6
         Write-Verbose $TemplatePayload
@@ -101,10 +118,10 @@ Process {
             }
         }
         return $TemplateId
-    } 
+    }
     Catch {
         Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
+        Write-Error ($_.Exception | Format-List -Force | Out-String)
         Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
     }
 }

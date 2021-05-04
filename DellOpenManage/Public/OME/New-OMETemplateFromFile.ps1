@@ -24,6 +24,10 @@ limitations under the License.
     String that will be assigned the name of the template
 .PARAMETER Content
     XML string containing template to import
+.PARAMETER Type
+    Type of template to create (Default="Deployment", "Compliance")
+    Deployment: Only 1 template assigned to a device, used with Virtual Identities
+    Compliance: Many templates can be assigned to a device, used with Configuration Compliance
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -40,9 +44,13 @@ limitations under the License.
 param(
     [Parameter(Mandatory=$false)]
     [String]$Name = "Template $((Get-Date).ToString('yyyyMMddHHmmss'))",
-    
+
     [Parameter(Mandatory, ValueFromPipeline)]
     [String]$Content,
+
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Deployment", "Compliance")]
+    [String]$TemplateType = "Deployment",
 
     [Parameter(Mandatory=$false)]
     [Switch]$Wait,
@@ -64,9 +72,11 @@ Process {
         $BaseUri = "https://$($SessionAuth.Host)"
         $Type        = "application/json"
         $Headers     = @{}
-
         $Headers."X-Auth-Token" = $SessionAuth.Token
-
+        $TEMPLATE_TYPE_MAP = @{
+            "Compliance" = 1;
+            "Deployment" = 2
+        }
         $TemplateUrl = $BaseUri + "/api/TemplateService/Actions/TemplateService.Import"
         $TemplatePayload = '{
             "Name": "Template Import",
@@ -76,6 +86,7 @@ Process {
         }'
         $TemplatePayload = $TemplatePayload | ConvertFrom-Json
         $TemplatePayload.Name = $Name
+        $TemplatePayload.ViewTypeId = $TEMPLATE_TYPE_MAP[$TemplateType]
         $TemplatePayload.Content = $Content
         $TemplatePayload = $TemplatePayload | ConvertTo-Json -Depth 6
         Write-Verbose $TemplatePayload
@@ -90,10 +101,10 @@ Process {
             }
         }
         return $TemplateId
-    } 
+    }
     Catch {
         Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
+        Write-Error ($_.Exception | Format-List -Force | Out-String)
         Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
     }
 }

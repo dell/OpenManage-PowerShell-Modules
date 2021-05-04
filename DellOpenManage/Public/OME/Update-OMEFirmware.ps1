@@ -1,6 +1,6 @@
 ﻿using module ..\..\Classes\Group.psm1
 using module ..\..\Classes\Device.psm1
-using module ..\..\Classes\Baseline.psm1
+using module ..\..\Classes\FirmwareBaseline.psm1
 
 function Get-TargetPayload($ComplianceReportList) {
     $TargetTypeHash = @{}
@@ -115,7 +115,7 @@ limitations under the License.
 .SYNOPSIS
     Update firmware on devices in OpenManage Enterprise
 .DESCRIPTION
-    This will use an existing firmware baseline to submit a Job that updates firmware on a set of devices. 
+    This will use an existing firmware baseline to submit a Job that updates firmware on a set of devices.
 .PARAMETER Name
     Name of the firmware update job
 .PARAMETER Baseline
@@ -144,7 +144,7 @@ limitations under the License.
     Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) | Format-Table
     Display device compliance report for all devices in baseline. No updates are installed by default.
 .EXAMPLE
-    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "RebootNow" 
+    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "RebootNow"
     Update firmware on all devices in baseline immediately ***Warning: This will force a reboot of all servers
 .EXAMPLE
     Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "StageForNextReboot"
@@ -153,10 +153,10 @@ limitations under the License.
     Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "ScheduleLater" -UpdateScheduleCron "0 0 0 1 11 ?"
     Update firmware on 11/1/2020 12:00AM UTC
 .EXAMPLE
-    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow" 
+    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow"
     Update firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
 .EXAMPLE
-    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue 
+    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue
     Update firmware on specific components in baseline on next reboot and clear job queue before update
 #>
 
@@ -172,7 +172,7 @@ param(
     [String]$ComponentFilter,
 
     [Parameter(Mandatory)]
-    [Baseline]$Baseline,
+    [FirmwareBaseline]$Baseline,
 
     [Parameter(Mandatory=$false)]
     [ValidateSet("Preview", "RebootNow", "ScheduleLater", "StageForNextReboot")]
@@ -219,7 +219,7 @@ Process {
         if ($UpdateSchedule -eq "Preview") { # Only show report, do not perform any updates
             return Get-OMEFirmwareCompliance -Baseline $Baseline -DeviceFilter $DeviceFilter -ComponentFilter $ComponentFilter -UpdateAction $UpdateAction -Output "Report"
         } else { # Apply updates
-            
+
             $ComplianceReportList = Get-OMEFirmwareCompliance -Baseline $Baseline -DeviceFilter $DeviceFilter -ComponentFilter $ComponentFilter -UpdateAction $UpdateAction -Output "Data"
             if ($ComplianceReportList.Length -gt 0) {
                 $TargetPayload = Get-TargetPayload $ComplianceReportList
@@ -243,7 +243,7 @@ Process {
                         }
                     }
                     else {
-                        Write-Error "Update job creation failed" 
+                        Write-Error "Update job creation failed"
                     }
                 }
             }
@@ -251,10 +251,10 @@ Process {
                 Write-Warning "No updates found"
             }
         }
-    } 
+    }
     Catch {
         Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
+        Write-Error ($_.Exception | Format-List -Force | Out-String)
         Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
     }
 }

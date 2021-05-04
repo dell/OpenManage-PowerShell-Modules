@@ -31,6 +31,7 @@ if ($Test -ne "") {
     Invoke-Pester -Script .\Tests\Device.Tests.ps1
     Invoke-Pester -Script .\Tests\Firmware.Tests.ps1
     Invoke-Pester -Script .\Tests\Template.Tests.ps1
+    Invoke-Pester -Script .\Tests\Configuration.Tests.ps1
 }
 
 

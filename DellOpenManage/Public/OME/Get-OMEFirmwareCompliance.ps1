@@ -1,6 +1,6 @@
 ﻿
 using module ..\..\Classes\Device.psm1
-using module ..\..\Classes\Baseline.psm1
+using module ..\..\Classes\FirmwareBaseline.psm1
 using module ..\..\Classes\ComponentCompliance.psm1
 
 function Get-OMEFirmwareCompliance {
@@ -51,7 +51,7 @@ limitations under the License.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false, ValueFromPipeline)]
-    [Baseline[]]$Baseline,
+    [FirmwareBaseline[]]$Baseline,
 
     [Parameter(Mandatory=$false)]
     [Device[]]$DeviceFilter,

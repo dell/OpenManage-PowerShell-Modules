@@ -1,7 +1,6 @@
 ﻿
-using module ..\..\Classes\FirmwareBaseline.psm1
-
-function Get-OMEFirmwareBaseline {
+using module ..\..\Classes\ConfigurationBaseline.psm1
+function Get-OMEConfigurationBaseline {
 <#
 Copyright (c) 2018 Dell EMC Corporation
 
@@ -20,7 +19,7 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Get firmware baseline from OpenManage Enterprise
+    Get compliance baseline from OpenManage Enterprise
 .DESCRIPTION
     Returns all baselines if no input received
 .PARAMETER Value
@@ -30,10 +29,10 @@ limitations under the License.
 .INPUTS
     String[]
 .EXAMPLE
-    Get-OMEFirmwareBaseline | Format-Table
+    Get-OMEConfigurationBaseline | Format-Table
     Get all baselines
 .EXAMPLE
-    "AllLatest" | Get-OMEFirmwareBaseline | Format-Table
+    "AllLatest" | Get-OMEConfigurationBaseline | Format-Table
     Get baseline by name
 #>
 
@@ -58,7 +57,7 @@ Process {
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
         $BaseUri = "https://$($SessionAuth.Host)"
-        $BaselineUrl   = $BaseUri + "/api/UpdateService/Baselines"
+        $BaselineUrl   = $BaseUri + "/api/TemplateService/Baselines"
         $Type        = "application/json"
         $Headers     = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
@@ -70,16 +69,16 @@ Process {
             foreach ($Baseline in $BaselineInfo.'value') {
                 if ($Value.Count -gt 0 -and $FilterBy -eq "Id") {
                     if ($Baseline.Id -eq $Value){
-                        $BaselineData += New-FirmwareBaselineFromJson $Baseline
+                        $BaselineData += New-ComplianceBaselineFromJson $Baseline
                     }
                 }
                 elseif ($Value.Count -gt 0 -and $FilterBy -eq "Name") {
                     if ($Baseline.Name -eq $Value){
-                        $BaselineData += New-FirmwareBaselineFromJson $Baseline
+                        $BaselineData += New-ComplianceBaselineFromJson $Baseline
                     }
                 }
                 else {
-                    $BaselineData += New-FirmwareBaselineFromJson $Baseline
+                    $BaselineData += New-ComplianceBaselineFromJson $Baseline
                 }
             }
             return $BaselineData

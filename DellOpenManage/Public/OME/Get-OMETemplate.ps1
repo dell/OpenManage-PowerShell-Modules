@@ -42,7 +42,7 @@ param(
     [String[]]$Value,
 
     [Parameter(Mandatory=$false)]
-    [ValidateSet("Name", "Id")]
+    [ValidateSet("Name", "Id", "Type")]
     [String]$FilterBy = "Name"
 )
 
@@ -61,11 +61,28 @@ Process {
         $Type = "application/json"
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
-        $FilterMap = @{'Name'='Name'; 'Id'='Id'}
+        $FilterMap = @{
+            'Name'='Name';
+            'Id'='Id';
+            'Type'='ViewTypeId'
+        }
+        $TEMPLATE_TYPE_MAP = @{
+            "Compliance" = 1;
+            "Deployment" = 2
+        }
         $FilterExpr  = $FilterMap[$FilterBy]
-        if ($Value.Count -gt 0) { 
+        if ($Value.Count -gt 0) {
             if ($FilterBy -eq 'Id') {
                 $TemplateUrl += "?`$filter=$($FilterExpr) eq $($Value)"
+            }
+            elseif ($FilterBy -eq 'Type') {
+                Write-Verbose "Supported Template Types"
+                foreach ($n in $TEMPLATE_TYPE_MAP.GetEnumerator().Name) {
+                    Write-Verbose $n
+                }
+                if ($TEMPLATE_TYPE_MAP.GetEnumerator().Name -notcontains $Value) { throw [System.ArgumentException] "FilterBy Value must be either Deployment or Compliance", "Value" }
+                $ViewTypeId = $TEMPLATE_TYPE_MAP[$Value]
+                $TemplateUrl += "?`$filter=$($FilterExpr) eq $($ViewTypeId)"
             }
             else {
                 $TemplateUrl += "?`$filter=$($FilterExpr) eq '$($Value)'"
@@ -80,7 +97,7 @@ Process {
                 foreach ($TemplateJson in $TemplateInfo.'value') {
                     $Template = New-TemplateFromJson $TemplateJson
                     if ($Value.Count -gt 0) { # Filter By
-                        if ($FilterBy -eq 'Id') {
+                        if ($FilterBy -eq 'Id' -or $FilterBy -eq 'Type') {
                             $TemplateData += $Template
                         } elseif ($FilterBy -eq 'Name') {
                             if ($Template.Name -eq $Value) {
@@ -105,7 +122,7 @@ Process {
     }
     Catch {
         Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
+        Write-Error ($_.Exception | Format-List -Force | Out-String)
         Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
     }
 }
