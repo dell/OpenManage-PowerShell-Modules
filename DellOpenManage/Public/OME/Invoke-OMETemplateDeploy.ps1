@@ -51,14 +51,14 @@ limitations under the License.
 .PARAMETER Devices
     Array of type Device returned from Get-OMEDevice function
 .PARAMETER ForceHostReboot
-    Forcefully reboot the host OS if the graceful reboot fails. *This will NOT prevent a reboot of the host, just a forced reboot. 
+    Forcefully reboot the host OS if the graceful reboot fails. *This will NOT prevent a reboot of the host, just a forced reboot.
     A soft reboot will be initiated upon template deploy.
 .PARAMETER NetworkBootShareType
     Share type ("NFS", "CIFS")
 .PARAMETER NetworkBootShareIpAddress
     IP Address of the share server
 .PARAMETER NetworkBootIsoPath
-    Full path to the ISO 
+    Full path to the ISO
 .PARAMETER NetworkBootIsoTimeout
     Lifecycle Controller timeout setting (Default=1) Hour
 .PARAMETER NetworkBootShareName
@@ -95,7 +95,7 @@ param(
     [Device[]] $Devices,
 
     [Parameter(Mandatory=$false)]
-    [Switch]$ForceHostReboot,   
+    [Switch]$ForceHostReboot,
 
     [Parameter(Mandatory=$false)]
     [ValidateSet("CIFS", "NFS")]
@@ -109,7 +109,7 @@ param(
 
     [Parameter(Mandatory=$false)]
     [String]$NetworkBootIsoTimeout = 1,
-    
+
     [Parameter(Mandatory=$false)]
     [String]$NetworkBootShareName,
 
@@ -120,7 +120,7 @@ param(
     [String]$NetworkBootShareWorkGroup,
 
     [Parameter(Mandatory=$false)]
-    [String]$NetworkBootSharePassword, 
+    [String]$NetworkBootSharePassword,
 
     [Parameter(Mandatory=$false)]
     [Switch]$Wait,
@@ -177,8 +177,8 @@ Process {
         $TemplateDeployPayload = $TemplateDeployPayload | ConvertFrom-Json
         $TemplateDeployPayload.Id = $Template.Id
         # The ShutdownType is set to force by default
-        if ($ForceHostReboot) { 
-            $TemplateDeployPayload.Options.ShutdownType = 0 
+        if ($ForceHostReboot) {
+            $TemplateDeployPayload.Options.ShutdownType = 0
         } else {
             $TemplateDeployPayload.Options.ShutdownType = 1
         }
@@ -211,7 +211,7 @@ Process {
         $TemplateDeployPayload = $TemplateDeployPayload |ConvertTo-Json -Depth 6
         #Write-Verbose $TemplateDeployPayload
         # Associate Identity Pool to Template
-        #$AssignIdentityResponse = Set-IdentitiesToTarget $IpAddress $Type $Headers $IdentityPoolId $TemplateId 
+        #$AssignIdentityResponse = Set-IdentitiesToTarget $IpAddress $Type $Headers $IdentityPoolId $TemplateId
 
         $DeployTemplateResponse = Invoke-WebRequest -Uri $TemplateDeployUrl -Method Post -Body $TemplateDeployPayload -ContentType $Type -Headers $Headers
         if ($DeployTemplateResponse.StatusCode -eq 200) {
@@ -229,7 +229,7 @@ Process {
                     # Reserve virtual identities
                     Write-Verbose "Checking assigned identities........."
                     Start-Sleep -Seconds 30
-                    Set-AssignedIdentities -BaseUri $BaseUri -Type $Type -Headers $Headers -TemplateId $Template.Id -TargetIds $DeviceIds    
+                    Set-AssignedIdentities -BaseUri $BaseUri -Type $Type -Headers $Headers -TemplateId $Template.Id -TargetIds $DeviceIds
                 }
             } else {
                 Write-Warning "Failed to deploy template. Only 1 template can be associated to a device at a time. Check Audit Log and Configuration > Profiles"
@@ -238,11 +238,9 @@ Process {
             Write-Error "Failed to deploy template"
         }
         return $DeployResponse
-    } 
+    }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

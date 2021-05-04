@@ -40,6 +40,16 @@ Describe "Template" {
         It "Should return all deployment templates" {
             "Deployment" | Get-OMETemplate -FilterBy "Type" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
         }
+
+        It "Should return multiple deployment templates with a similar name" {
+            "TestDeploymentTemplate" | Get-OMETemplate -FilterBy "Name" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
+        }
+
+        It "Should deploy template to device" {
+            $template = $("TestDeploymentTemplate_FromString" | Get-OMETemplate | Select-Object -first 1)
+            $devices = $DeviceServiceTag | Get-OMEDevice
+            Invoke-OMETemplateDeploy -Template $template -Devices $devices -Wait | Should -Be "Completed"
+        }
     }
     Context "Compliance" {
         It ("Should create a compliance template from source device and return JobId"){
@@ -72,6 +82,22 @@ Describe "Template" {
         It "Should return all compliance templates" {
             "Compliance" | Get-OMETemplate -FilterBy "Type" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
         }
+    }
+    Context "Profile" {
+        It "Should unassign profile by device" {
+            $devices = $DeviceServiceTag | Get-OMEDevice
+            Invoke-OMEProfileUnassign -Devices $devices -Wait -Verbose | Should -Be "Completed"
+        }
 
+        <# TODO: Need multiple profiles assigned to different devices for these to work.
+        It "Should unassign profile by template" {
+            $template = "TestDeploymentTemplate_FromString" | Get-OMETemplate | Select-Object -first 1
+            Invoke-OMEProfileUnassign -Template $template -Wait -Verbose | Should -Be "Completed"
+        }
+
+        It "Should unassign profile by profile name" {
+            Invoke-OMEProfileUnassign -ProfileName "TestDeploymentTemplate_FromString" -Wait -Verbose | Should -Be "Completed"
+        }
+        #>
     }
 }

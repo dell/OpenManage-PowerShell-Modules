@@ -73,8 +73,8 @@ Process {
         2103 = "Canceled"
     }
 
-    $FailedJobStatuses = @(2070, 2090, 2100, 2101, 2102, 2103) 
-    
+    $FailedJobStatuses = @(2070, 2090, 2100, 2101, 2102, 2103)
+
     $MAX_RETRIES = $WaitTime / 10
     $SLEEP_INTERVAL = 30
 
@@ -87,7 +87,7 @@ Process {
             if ($JobResp) {
                 $JobData = $JobResp
                 $JobStatus = $JobData.LastRunStatusId
-                Write-Verbose "Iteration $($Ctr): Status of $($JobId) is $($JOB_STATUS_MAP.$JobStatus)"
+                Write-Verbose "Iteration $($Ctr), Wait $($Ctr * $SLEEP_INTERVAL)s: Status of $($JobId) is $($JOB_STATUS_MAP.$JobStatus)"
                 if ($JobStatus -eq 2060) { # Completed
                     Write-Verbose "Job completed successfully..."
                     return $JOB_STATUS_MAP.$JobStatus
@@ -97,7 +97,7 @@ Process {
                     if ($JobDetails) {
                         #$JobDetails.JobDetail | Format-Table | Out-String | Write-Verbose
                         foreach ($Detail in $JobDetails.JobDetail) {
-                            $Detail | Format-List | Out-String | Write-Verbose 
+                            $Detail | Format-List | Out-String | Write-Verbose
                         }
                     }
                     else {
@@ -111,7 +111,7 @@ Process {
                         Write-Warning "Job failed..."
                         #$JobDetails.JobDetail | Format-Table | Out-String | Write-Verbose
                         foreach ($Detail in $JobDetails.JobDetail) {
-                            $Detail | Format-List | Out-String | Write-Verbose 
+                            $Detail | Format-List | Out-String | Write-Verbose
                         }
                     }
                     else {
@@ -121,8 +121,8 @@ Process {
                 }
                 else { continue }
             }
-            else { 
-                Write-Warning "Unable to get status for $($JobId) .. Iteration $($Ctr)" 
+            else {
+                Write-Warning "Unable to get status for $($JobId) .. Iteration $($Ctr)"
             }
         } until ($Ctr -ge $MAX_RETRIES)
     } else {

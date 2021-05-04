@@ -85,6 +85,7 @@ Process {
                 $TemplateUrl += "?`$filter=$($FilterExpr) eq $($ViewTypeId)"
             }
             else {
+                # The eq filter uses an 'like' type search returning multiple matches
                 $TemplateUrl += "?`$filter=$($FilterExpr) eq '$($Value)'"
             }
         }
@@ -93,20 +94,9 @@ Process {
         if ($TemplateResp.StatusCode -eq 200) {
             $TemplateInfo = $TemplateResp.Content | ConvertFrom-Json
             if ($TemplateInfo.'value') {
-                # The eq filter uses an 'like' type search returning multiple matches
                 foreach ($TemplateJson in $TemplateInfo.'value') {
                     $Template = New-TemplateFromJson $TemplateJson
-                    if ($Value.Count -gt 0) { # Filter By
-                        if ($FilterBy -eq 'Id' -or $FilterBy -eq 'Type') {
-                            $TemplateData += $Template
-                        } elseif ($FilterBy -eq 'Name') {
-                            if ($Template.Name -eq $Value) {
-                                $TemplateData += $Template
-                            }
-                        }
-                    } else { # Show all
-                        $TemplateData += $Template
-                    }
+                    $TemplateData += $Template
                 }
             } else {
                 $TemplateData += New-TemplateFromJson $TemplateInfo
