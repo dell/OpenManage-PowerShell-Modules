@@ -1,6 +1,6 @@
 ﻿using module ..\..\Classes\Device.psm1
 using module ..\..\Classes\Group.psm1
-using module ..\..\Classes\FirmwareBaseline.psm1
+using module ..\..\Classes\Catalog.psm1
 
 function New-OMEFirmwareBaseline {
 <#

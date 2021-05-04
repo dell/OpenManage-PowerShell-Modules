@@ -1,47 +1,45 @@
 $credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Global:OMEUsername, $(ConvertTo-SecureString -Force -AsPlainText $Global:OMEPassword)
-Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials # -IgnoreCertificateWarning
+Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Compliance Tests" {
     BeforeEach {
-        $CatalogName = "Test01"
-        #$BaselineName = "TestBaseline01"
-        $DeviceServiceTag = "37KP0Q2"
+        $BaselineName = "TestBaseline01"
+        $TemplateNameFromString = "TestComplianceTemplate01"
+        $DeviceServiceTags = @("37KP0Q2", "JCWXH63")
     }
     Context "Checks 1" {
-        $xml = '
-        <SystemConfiguration>
-            <Component FQDD="iDRAC.Embedded.1">
-                <Attribute Name="Users.12#UserName">testuser</Attribute>
-            </Component>
-        </SystemConfiguration>
-        '
-        $TemplateNameFromString = "TestComplianceTemplate_FromString_$((Get-Date).ToString('yyyyMMddHHmmss'))"
-        New-OMETemplateFromFile -Name $TemplateNameFromString -TemplateType "Compliance" -Content $xml -Wait -Verbose
+        It ("Should create a new configuration template from XML string") {
+            $xml = '
+            <SystemConfiguration>
+                <Component FQDD="iDRAC.Embedded.1">
+                    <Attribute Name="Users.12#UserName">testuser</Attribute>
+                </Component>
+            </SystemConfiguration>
+            '
+            New-OMETemplateFromFile -Name $TemplateNameFromString -TemplateType "Compliance" -Content $xml -Wait -Verbose
+            $TemplateNameFromString | Get-OMETemplate -FilterBy "Name" | Select-Object -ExpandProperty Name | Should -Be $TemplateNameFromString
+            $TemplateNameFromString | Get-OMETemplate -FilterBy "Name" | Select-Object -ExpandProperty ViewTypeId | Should -Be 1
+        }
 
         It ("Should create and return new Baseline object") {
-            # Need to implement Delete-ConfigurationBaseline
             $template = $($TemplateNameFromString | Get-OMETemplate -FilterBy "Name")
-            $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
-            $BaselineName = "TestBaseline_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+            $devices = $($DeviceServiceTags | Get-OMEDevice -FilterBy "ServiceTag")
             New-OMEConfigurationBaseline -Name $BaselineName -Template $template -Devices $devices -Wait -Verbose
             $BaselineName | Get-OMEConfigurationBaseline | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 1
         }
 
-        It ("Should return data from firmware compliance report"){
-            $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
-            $BaselineName | Get-OMEConfigurationBaseline | Get-OMEComplianceCompliance -DeviceFilter $devices -UpdateAction "All" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
-        }
-
-        It ("Should update firmware but show preview only") {
-            $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
+        It ("Should update configuration on all devices") {
             $baseline = $($BaselineName | Get-OMEConfigurationBaseline)
-            Update-OMECompliance -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "Preview" -ComponentFilter "PERC" -Verbose | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
+            $JobName = "MakeCompliant_AllDevices_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+            $JobId = Update-OMEConfiguration -Name $JobName -Baseline $baseline -Verbose
+            $JobId | Get-OMEJob -FilterBy "Id" | Select-Object -ExpandProperty Targets | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 2
         }
 
-        #It ("Should try to update firmware") {
-        #    $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
-        #    $baseline = $($BaselineName | Get-OMEConfigurationBaseline)
-        #    Update-OMECompliance -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "StageForNextReboot" -ComponentFilter "PERC" -Wait -Verbose | Should -Be "Completed"
-        #}
-
+        It ("Should update configuration on devices by filter") {
+            $devices = $($DeviceServiceTags[0] | Get-OMEDevice -FilterBy "ServiceTag")
+            $baseline = $($BaselineName | Get-OMEConfigurationBaseline)
+            $JobName = "MakeCompliant_SingleDevice_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+            $JobId = Update-OMEConfiguration -Name $JobName -Baseline $baseline -DeviceFilter $devices -Verbose
+            $JobId | Get-OMEJob -FilterBy "Id" | Select-Object -ExpandProperty Targets | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 1
+        }
     }
 }

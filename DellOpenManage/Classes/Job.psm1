@@ -18,5 +18,6 @@ Class Job {
     [Boolean]$UserGenerated
     [Int]$LastRunStatusId
     [String]$LastRunStatus
+    [PSCustomObject[]]$Targets
     [JobDetail[]]$JobDetail
 }

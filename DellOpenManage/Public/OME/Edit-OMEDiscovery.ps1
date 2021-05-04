@@ -83,7 +83,7 @@ function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $Discover
         $NewHostList = @()
         if ($Mode.ToLower() -eq "append") {
             $NewHostList = $DiscoveryJob.Hosts
-            $CurrentHostList = $DiscoveryJob.Hosts | Select-Object -Property NetworkAddressDetail
+            $CurrentHostList = $DiscoveryJob.Hosts | Select-Object -ExpandProperty NetworkAddressDetail
             foreach ($DiscoveryHost in $HostList) {
                 if ($CurrentHostList -notcontains $DiscoveryHost) {
                     $NewHostList += [PSCustomObject]@{

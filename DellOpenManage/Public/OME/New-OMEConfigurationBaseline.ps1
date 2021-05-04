@@ -42,7 +42,7 @@ limitations under the License.
 .INPUTS
     None
 .EXAMPLE
-    New-OMEFirmwareBaseline -Name "TSTestBaseline01" -Catalog $("Auto-Update-Online" | Get-OMECatalog) -Devices $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") | Format-Table
+    New-OMEFirmwareBaseline -Name "TestBaseline01" -Catalog $("Auto-Update-Online" | Get-OMECatalog) -Devices $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") | Format-Table
     Create new firmware baseline using existing catalog
 #>
 

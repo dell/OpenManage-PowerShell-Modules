@@ -8,7 +8,7 @@
         $ExecHistoryUrl = "$($JobExecUrl)($($HistoryId))/ExecutionHistoryDetails"
         $HistoryResp = Invoke-WebRequest -UseBasicParsing -Uri $ExecHistoryUrl -Method Get -Headers $Headers -ContentType $Type
         if ($HistoryResp.StatusCode -eq 200) {
-            $HistoryData = $HistoryResp.Content | ConvertFrom-Json 
+            $HistoryData = $HistoryResp.Content | ConvertFrom-Json
             foreach ($HistoryDetail in $HistoryData.value) {
                 $HistoryDetails += $HistoryDetail
             }
@@ -106,7 +106,7 @@ Process {
             'State'='State'
         }
         $FilterExpr  = $FilterMap[$FilterBy]
-        
+
         $JobUrl = $BaseUri  + "/api/JobService/Jobs"
         if ($Value) {
             if ($FilterBy -ne 'State') {
@@ -116,7 +116,7 @@ Process {
                 $JobUrl += "?`$filter=$($FilterExpr) eq '$($Value)'"
             }
         }
-        
+
         $JobData = @()
         $JobResponse = Invoke-WebRequest -UseBasicParsing -Uri $JobUrl -Headers $Headers -Method Get
         if ($JobResponse.StatusCode -eq 200) {
@@ -160,11 +160,9 @@ Process {
         else {
             Write-Error "Unable to get JobId"
         }
-    } 
+    }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

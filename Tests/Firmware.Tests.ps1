@@ -1,5 +1,5 @@
 $credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Global:OMEUsername, $(ConvertTo-SecureString -Force -AsPlainText $Global:OMEPassword)
-Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials # -IgnoreCertificateWarning
+Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Firmware Tests" {
     BeforeEach {
         $CatalogName = "Test01"
