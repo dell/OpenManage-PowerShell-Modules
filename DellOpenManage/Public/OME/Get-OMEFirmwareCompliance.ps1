@@ -27,7 +27,7 @@ limitations under the License.
     To get the list of firmware updates for a device you need a Catalog and a Baseline first.
     Then you can see the firmware that needs updated.
 .PARAMETER Baseline
-    Array of type Baseline returned from Get-Baseline function
+    Array of type Baseline returned from Get-OMEFirmwareBaseline function
 .PARAMETER DeviceFilter
     Array of type Device returned from Get-OMEDevice function. Used to limit the devices updated within the baseline.
 .PARAMETER ComponentFilter

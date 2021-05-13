@@ -5,75 +5,79 @@ online version:
 schema: 2.0.0
 ---
 
-# New-OMETemplateFromFile
+# Invoke-OMEProfileDetach
 
 ## SYNOPSIS
-Create template from XML string in OpenManage Enterprise
+Detach profile from device in OpenManage Enterprise
 
 ## SYNTAX
 
 ```
-New-OMETemplateFromFile [[-Name] <String>] [-Content] <String> [[-TemplateType] <String>] [-Wait]
+Invoke-OMEProfileDetach [[-Devices] <Device[]>] [[-Template] <Template>] [[-ProfileName] <String>] [-Wait]
  [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Perform an export of the System Configuration Profile (SCP) as an example
+This action will unassign the profile(s) from all selected targets, disassociating the profile(s) from target(s).
+The server will be forcefully rebooted in order to remove any deployed identities from applicable devices.
+As of OME 3.4 only one template can be associated to a device.
+However, you can deploy a template to multiple devices.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-" -Wait
-Create new deployment template from string
+Invoke-OMEProfileDetach -Devices $("37KP0ZZ", "GV6V0ZZ" | Get-OMEDevice) -Wait -Verbose
+Unassign profile by device
 ```
 
 ### EXAMPLE 2
 ```
-New-OMETemplateFromFile -Name "TestTemplate" -Content $(Get-Content -Path .\Data.xml | Out-String)
-Create new deployment template from file
+Invoke-OMEProfileDetach -Template $("TestTemplate01" | Get-OMETemplate) -Wait -Verbose
+Unassign profile by template
 ```
 
 ### EXAMPLE 3
 ```
-New-OMETemplateFromFile -Name "TestTemplate" -TemplateType "Configuration" -Content $(Get-Content -Path .\Data.xml | Out-String)
-Create new configuration template from file
+Invoke-OMEProfileDetach -ProfileName "Profile from template 'TestTemplate01' 00001" -Wait -Verbose
+Unassign profile by profile name
 ```
 
 ## PARAMETERS
 
-### -Name
-String that will be assigned the name of the template
+### -Devices
+Array of type Device returned from Get-OMEDevice function
 
 ```yaml
-Type: String
+Type: Device[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 1
-Default value: "Template $((Get-Date).ToString('yyyyMMddHHmmss'))"
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Content
-XML string containing template to import
+### -Template
+Object of type Template returned from Get-OMETemplate function
 
 ```yaml
-Type: String
+Type: Template
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 2
 Default value: None
-Accept pipeline input: True (ByValue)
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TemplateType
-{{ Fill TemplateType Description }}
+### -ProfileName
+Name of Profile to detach.
+Uses contains style operator and supports partial string matching.
 
 ```yaml
 Type: String
@@ -82,7 +86,7 @@ Aliases:
 
 Required: False
 Position: 3
-Default value: Deployment
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -122,7 +126,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### [String]Content
+### Devices
 ## OUTPUTS
 
 ## NOTES

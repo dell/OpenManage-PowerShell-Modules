@@ -270,15 +270,27 @@ Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFil
 ```
 
 ## Templates
-Create new template from source device
+Get all templates
+```
+Get-OMETemplate | Format-Table
+```
+Get template by name
+```
+"DRM" | Get-OMETemplate | Format-Table
+```
+Get template by type
+```
+"Deployment" | Get-OMETemplate -FilterBy "Type" | Format-Table
+```
+Create new deployment template from source device
 ```
 New-OMETemplateFromDevice -Name "TestTemplate" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
 ```
-Create new template from source device and capture specific components
+Create new deployment template from source device and capture specific components
 ```
 New-OMETemplateFromDevice -Name "TestTemplate" -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
 ```
-Create new template from XML string
+Create new deployment template from XML string
 ```
 $xml = @'
 <SystemConfiguration>
@@ -289,7 +301,7 @@ $xml = @'
 '@
 New-OMETemplateFromFile -Name "TestTemplate" -Content $xml
 ```
-Create new template from XML file
+Create new deployment template from XML file
 ```
 New-OMETemplateFromFile -Name "TestTemplate" -Content $(Get-Content -Path .\Data.xml | Out-String)
 ```
@@ -304,6 +316,54 @@ Deploy template and boot to network ISO over NFS
 Deploy template and boot to network ISO over CIFS
 ```
 "TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "CIFS" -NetworkBootShareIpAddress "192.168.1.101" -NetworkBootIsoPath "/Share/ISO/CentOS7-Unattended.iso" -NetworkBootShareUser "Administrator" -NetworkBootSharePassword "Password" -NetworkBootShareName "Share" -Wait
+```
+
+## Configuration Compliance
+Get template by type
+```
+"Configuration" | Get-OMETemplate -FilterBy "Type" | Format-Table
+```
+Create new configuration compliance template from source device
+```
+New-OMETemplateFromDevice -Name "TestTemplate" -TemplateType "Configuration" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
+```
+Create new configuration compliance template from XML file
+```
+New-OMETemplateFromFile -Name "TestTemplate" -TemplateType "Configuration" -Content $(Get-Content -Path .\Data.xml | Out-String)
+```
+Create new configuration compliance baseline
+```
+New-OMEConfigurationBaseline -Name "TestBaseline01" -Template $("Template01" | Get-OMETemplate -FilterBy "Name") -Devices $("37KPZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
+```
+Update configuration compliance on all devices in baseline ***This will force a reboot if necessary***
+```
+Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -Wait -Verbose
+```
+Update configuration compliance on filtered devices in baseline ***This will force a reboot if necessary***
+```
+Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
+```
+Check configuration compliance for baseline
+```
+$("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationCheck -Wait -Verbose
+```
+
+## Profiles
+Unassign profile by device
+```
+Invoke-OMEProfileUnassign -Device $("37KP0ZZ" | Get-OMEDevice) -Wait -Verbose
+```
+Unassign profile on multiple devices
+```
+$("37KP0ZZ", "37KT0ZZ" | Get-OMEDevice) | Invoke-OMEProfileUnassign -Wait -Verbose
+```
+Unassign profile by template
+```
+Invoke-OMEProfileUnassign -Template $("TestTemplate01" | Get-OMETemplate) -Wait -Verbose
+```
+Unassign profile by profile name
+```
+Invoke-OMEProfileUnassign -ProfileName "Profile from template 'TestTemplate01' 00001" -Wait -Verbose
 ```
 
 ## Jobs

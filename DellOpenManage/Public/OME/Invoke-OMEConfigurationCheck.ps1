@@ -3,7 +3,7 @@ using module ..\..\Classes\Group.psm1
 using module ..\..\Classes\Template.psm1
 using module ..\..\Classes\ConfigurationBaseline.psm1
 
-function New-OMEConfigurationBaseline {
+function Invoke-OMEConfigurationCheck {
 <#
 Copyright (c) 2018 Dell EMC Corporation
 
@@ -22,46 +22,26 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Create new configuration baseline in OpenManage Enterprise
+    Check or refresh configuration compliance for a baseline
 .DESCRIPTION
     A baseline is used to compare configuration against a template
-.PARAMETER Name
-    Name of baseline
-.PARAMETER Description
-    Description of baseline
-.PARAMETER Template
-    Object of type Template returned from Get-OMETemplate function
-.PARAMETER Group
-    Object of type Group returned from Get-OMEGroup function
-.PARAMETER Devices
-    Array of type Device returned from Get-OMEDevice function
+.PARAMETER Baseline
+    Object of type ConfigurationBaseline returned from Get-OMEConfigurationBaseline function
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
     Time, in seconds, to wait for the job to complete
 .INPUTS
-    None
+    ConfigurationBaseline
 .EXAMPLE
-    New-OMEConfigurationBaseline -Name "TestBaseline01" -Template $("Template01" | Get-OMETemplate -FilterBy "Name") -Devices $("37KPZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
-    Create new configuration compliance baseline
+    $("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationCheck -Wait -Verbose
+    Check configuration compliance for baseline
 #>
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)]
-    [String]$Name,
-
-    [Parameter(Mandatory=$false)]
-    [String]$Description,
-
-    [Parameter(Mandatory)]
-    [Template]$Template,
-
-    [Parameter(Mandatory=$false)]
-    [Group]$Group,
-
-    [Parameter(Mandatory=$false)]
-    [Device[]]$Devices,
+    [Parameter(Mandatory, ValueFromPipeline)]
+    [ConfigurationBaseline]$Baseline,
 
     [Parameter(Mandatory=$false)]
     [Switch]$Wait,
@@ -86,6 +66,7 @@ Process {
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
         $payload = '{
+            "Id": 1,
             "Name": "Factory Baseline1",
             "Description": "Factory test1",
             "TemplateId": 1104,
@@ -100,56 +81,30 @@ Process {
             ]
         }' | ConvertFrom-Json
 
-        $TargetArray = @()
-        if ($Devices.Count -gt 0) {
-            $TargetTypeHash = @{
-                Id = 1000
-                Name = "DEVICE"
-            }
-            foreach ($Device in $Devices) {
-                $TargetTempHash = @{
-                    Id = $Device.Id
-                    Type = $TargetTypeHash
-                }
-                $TargetArray += $TargetTempHash
-            }
-        }
-        elseif ($Group) {
-            $TargetTypeHash = @{
-                Id = 2000
-                Name = "GROUP"
-            }
-            $TargetTempHash = @{
-                Id = $Group.Id
-                Type = $TargetTypeHash
-            }
-            $TargetArray += $TargetTempHash
-        }
-        $payload."BaselineTargets" = $TargetArray
-        $payload."Name" = $Name
-        $payload."Description" = $Description
-        # Throw error if template is not type compliance
-        if ($Template.ViewTypeId -ne 1) { throw [System.Exception] "Template must be of type Configuration not Deployment" }
-        $payload."TemplateId" = $Template.Id
+        $payload."BaselineTargets" = $Baseline.BaselineTargets
+        $payload."Name" = $Baseline.Name
+        $payload."Description" = $Baseline.Description
+        $payload."Id" = $Baseline.Id
+        $payload."TemplateId" = $Baseline.TemplateId
         $BaselinePayload = $payload
 
-        $BaselineURL = $BaseUri + "/api/TemplateService/Baselines"
+        $BaselineURL = $BaseUri + "/api/TemplateService/Baselines($($Baseline.Id))"
         $BaselinePayload = $BaselinePayload | ConvertTo-Json -Depth 6
         Write-Verbose $BaselinePayload
-        $BaselineResponse = Invoke-WebRequest -Uri $BaselineURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $BaselinePayload
-        if ($BaselineResponse.StatusCode -eq 201) {
+        $BaselineResponse = Invoke-WebRequest -Uri $BaselineURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method PUT -Body $BaselinePayload
+        if ($BaselineResponse.StatusCode -eq 200) {
             $BaselineData = $BaselineResponse.Content | ConvertFrom-Json
             Write-Verbose $BaselineData
             if ($Wait) {
                 $JobStatus = $($BaselineData.Id | Wait-OnConfigurationBaseline -WaitTime $WaitTime)
                 return $JobStatus
             } else {
-                return
+                return "Completed"
             }
-            Write-Verbose "Baseline creation successful..."
+            Write-Verbose "Baseline check successful..."
         }
         else {
-            Write-Error "Baseline creation failed"
+            Write-Error "Baseline check failed"
         }
     }
     Catch {

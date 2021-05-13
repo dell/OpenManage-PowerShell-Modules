@@ -5,45 +5,40 @@ online version:
 schema: 2.0.0
 ---
 
-# New-OMETemplateFromFile
+# Update-OMEConfiguration
 
 ## SYNOPSIS
-Create template from XML string in OpenManage Enterprise
+Update configuration on devices in OpenManage Enterprise
 
 ## SYNTAX
 
 ```
-New-OMETemplateFromFile [[-Name] <String>] [-Content] <String> [[-TemplateType] <String>] [-Wait]
- [[-WaitTime] <Int32>] [<CommonParameters>]
+Update-OMEConfiguration [[-Name] <String>] [[-DeviceFilter] <Device[]>] [-Baseline] <ConfigurationBaseline>
+ [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Perform an export of the System Configuration Profile (SCP) as an example
+This will use an existing configuration baseline to submit a Job that updates configuration on a set of devices immediately.
+***This will force a reboot if necessary***
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-" -Wait
-Create new deployment template from string
+Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -Wait -Verbose
+Update configuration compliance on all devices in baseline ***This will force a reboot if necessary***
 ```
 
 ### EXAMPLE 2
 ```
-New-OMETemplateFromFile -Name "TestTemplate" -Content $(Get-Content -Path .\Data.xml | Out-String)
-Create new deployment template from file
-```
-
-### EXAMPLE 3
-```
-New-OMETemplateFromFile -Name "TestTemplate" -TemplateType "Configuration" -Content $(Get-Content -Path .\Data.xml | Out-String)
-Create new configuration template from file
+Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
+Update configuration compliance on filtered devices in baseline ***This will force a reboot if necessary***
 ```
 
 ## PARAMETERS
 
 ### -Name
-String that will be assigned the name of the template
+Name of the configuration update job
 
 ```yaml
 Type: String
@@ -52,37 +47,38 @@ Aliases:
 
 Required: False
 Position: 1
-Default value: "Template $((Get-Date).ToString('yyyyMMddHHmmss'))"
+Default value: "Make Devices Compliant $((Get-Date).ToString('yyyyMMddHHmmss'))"
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Content
-XML string containing template to import
+### -DeviceFilter
+Array of type Device returned from Get-OMEDevice function.
+Used to limit the devices updated within the baseline.
 
 ```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 2
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
-```
-
-### -TemplateType
-{{ Fill TemplateType Description }}
-
-```yaml
-Type: String
+Type: Device[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Baseline
+Array of type ConfigurationBaseline returned from Get-OMEConfigurationBaseline function
+
+```yaml
+Type: ConfigurationBaseline
+Parameter Sets: (All)
+Aliases:
+
+Required: True
 Position: 3
-Default value: Deployment
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -122,7 +118,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### [String]Content
+### None
 ## OUTPUTS
 
 ## NOTES

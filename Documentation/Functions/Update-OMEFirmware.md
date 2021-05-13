@@ -14,7 +14,7 @@ Update firmware on devices in OpenManage Enterprise
 
 ```
 Update-OMEFirmware [[-Name] <String>] [[-DeviceFilter] <Device[]>] [[-ComponentFilter] <String>]
- [-Baseline] <Baseline> [[-UpdateSchedule] <String>] [[-UpdateScheduleCron] <String>]
+ [-Baseline] <FirmwareBaseline> [[-UpdateSchedule] <String>] [[-UpdateScheduleCron] <String>]
  [[-UpdateAction] <String[]>] [-ResetiDRAC] [-ClearJobQueue] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
@@ -31,7 +31,7 @@ Display device compliance report for all devices in baseline. No updates are ins
 
 ### EXAMPLE 2
 ```
-Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "RebootNow" 
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "RebootNow"
 Update firmware on all devices in baseline immediately ***Warning: This will force a reboot of all servers
 ```
 
@@ -49,13 +49,13 @@ Update firmware on 11/1/2020 12:00AM UTC
 
 ### EXAMPLE 5
 ```
-Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow" 
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow"
 Update firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
 ```
 
 ### EXAMPLE 6
 ```
-Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue 
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue
 Update firmware on specific components in baseline on next reboot and clear job queue before update
 ```
 
@@ -113,7 +113,7 @@ Accept wildcard characters: False
 Array of type Baseline returned from Get-Baseline function
 
 ```yaml
-Type: Baseline
+Type: FirmwareBaseline
 Parameter Sets: (All)
 Aliases:
 

@@ -69,16 +69,16 @@ Process {
             foreach ($Baseline in $BaselineInfo.'value') {
                 if ($Value.Count -gt 0 -and $FilterBy -eq "Id") {
                     if ($Baseline.Id -eq $Value){
-                        $BaselineData += New-ComplianceBaselineFromJson $Baseline
+                        $BaselineData += New-ConfigurationBaselineFromJson $Baseline
                     }
                 }
                 elseif ($Value.Count -gt 0 -and $FilterBy -eq "Name") {
                     if ($Baseline.Name -eq $Value){
-                        $BaselineData += New-ComplianceBaselineFromJson $Baseline
+                        $BaselineData += New-ConfigurationBaselineFromJson $Baseline
                     }
                 }
                 else {
-                    $BaselineData += New-ComplianceBaselineFromJson $Baseline
+                    $BaselineData += New-ConfigurationBaselineFromJson $Baseline
                 }
             }
             return $BaselineData
@@ -88,9 +88,7 @@ Process {
         }
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String)
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

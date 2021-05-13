@@ -86,11 +86,11 @@ Process {
                     $Status = [int]$Baseline.TaskStatus
                     Write-Verbose "Iteration $($Ctr): Status of $($BaselineId) is $($JOB_STATUS_MAP.$Status)"
                     if ($Status -eq 2060) {
-                        Write-Verbose "Baseline created successfully..."
+                        Write-Verbose "Baseline successfull..."
                         return $JOB_STATUS_MAP.$Status
                     }
                     elseif ($FailedJobStatuses -contains $Status) {
-                        Write-Verbose "Baseline created failed..."
+                        Write-Verbose "Baseline failed..."
                         return $JOB_STATUS_MAP.$Status
                     }
                     else { continue }

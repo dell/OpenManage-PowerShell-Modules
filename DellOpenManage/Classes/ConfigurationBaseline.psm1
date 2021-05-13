@@ -6,5 +6,6 @@ Class ConfigurationBaseline {
     [String]$TemplateName
     [Int]$TemplateType
     [nullable[DateTime]]$LastRun
+    [PSCustomObject]$BaselineTargets
     [Int[]]$Targets
 }

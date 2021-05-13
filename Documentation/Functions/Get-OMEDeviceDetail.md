@@ -31,7 +31,7 @@ Get all inventory for devices
 
 ### EXAMPLE 2
 ```
-"C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail -InventoryType "software"
+"C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail -InventoryType "deviceSoftware"
 Get software inventory for devices
 ```
 
@@ -53,7 +53,9 @@ Accept wildcard characters: False
 ```
 
 ### -InventoryType
-String to specify the inventory section to return ("capabilities","cards","controllers","cpus","disks","fc","flash","fru","license","location","management","memory","network","os","powerstates","psu","software","storage","subsystem")
+String to specify the inventory section to return (deviceCapabilities,serverDeviceCards,chassisControllerList,chassisFansList,chassisPciDeviceList,chassisPowerSupplies,chassisSlotsList,chassisStorageComputeAssociations,chassisTemperatureList,serverRaidControllers,serverProcessors,serverArrayDisks,serverFcCards,serverVirtualFlashes,deviceFru,deviceLicense,deviceLocation,deviceManagement,serverMemoryDevices,serverNetworkInterfaces,serverOperatingSystems,serverSupportedPowerStates,serverPowerSupplies,deviceSoftware,serverStorageEnclosures,subsystemRollupStatus)
+These are device specific.
+A full list can be found by querying the OME API at /api/DeviceService/Devices(DeviceId)/InventoryTypes
 
 ```yaml
 Type: String

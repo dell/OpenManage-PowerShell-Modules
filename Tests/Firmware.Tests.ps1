@@ -14,7 +14,7 @@ Describe "Firmware Tests" {
         It ("Should create and return a new Catalog object") {
             # Need to implement Delete-Catalog to cleanup for subsequent runs
             #New-OMECatalog -Name $CatalogName -Wait
-            New-OMECatalog -Name $CatalogName -RepositoryType "NFS" -Source "100.79.7.16" -SourcePath "/mnt/data/drm/OSELabAll" -CatalogFile "OSELabAll_1.00_Catalog.xml" -Wait -Verbose
+            New-OMECatalog -Name $CatalogName -RepositoryType "NFS" -Source "100.79.7.16" -SourcePath "/mnt/data/drm/OSELabAll" -CatalogFile "OSELabAll_1.00_Catalog.xml" -Wait
             $CatalogName | Get-OMECatalog | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
 
@@ -22,7 +22,7 @@ Describe "Firmware Tests" {
             # Need to implement Delete-FirmwareBaseline
             $catalog = $($CatalogName | Get-OMECatalog)
             $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
-            New-OMEFirmwareBaseline -Name $BaselineName -Catalog $catalog -Devices $devices -AllowDowngrade -Wait -Verbose
+            New-OMEFirmwareBaseline -Name $BaselineName -Catalog $catalog -Devices $devices -AllowDowngrade -Wait
             $BaselineName | Get-OMEFirmwareBaseline | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
 
@@ -34,13 +34,13 @@ Describe "Firmware Tests" {
         It ("Should update firmware but show preview only") {
             $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
             $baseline = $($BaselineName | Get-OMEFirmwareBaseline)
-            Update-OMEFirmware -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "Preview" -ComponentFilter "PERC" -Verbose | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
+            Update-OMEFirmware -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "Preview" -ComponentFilter "PERC" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
 
         #It ("Should try to update firmware") {
         #    $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
         #    $baseline = $($BaselineName | Get-OMEFirmwareBaseline)
-        #    Update-OMEFirmware -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "StageForNextReboot" -ComponentFilter "PERC" -Wait -Verbose | Should -Be "Completed"
+        #    Update-OMEFirmware -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "StageForNextReboot" -ComponentFilter "PERC" -Wait | Should -Be "Completed"
         #}
 
     }

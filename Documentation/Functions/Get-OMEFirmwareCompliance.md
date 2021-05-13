@@ -13,12 +13,12 @@ Get device firmware compliance report from OpenManage Enterprise
 ## SYNTAX
 
 ```
-Get-OMEFirmwareCompliance [[-Baseline] <Baseline[]>] [[-DeviceFilter] <Device[]>] [[-ComponentFilter] <String>]
- [[-UpdateAction] <String[]>] [[-Output] <String>] [<CommonParameters>]
+Get-OMEFirmwareCompliance [[-Baseline] <FirmwareBaseline[]>] [[-DeviceFilter] <Device[]>]
+ [[-ComponentFilter] <String>] [[-UpdateAction] <String[]>] [[-Output] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-To get the list of firmware updates for a device you need a Catalog and a Baseline first. 
+To get the list of firmware updates for a device you need a Catalog and a Baseline first.
 Then you can see the firmware that needs updated.
 
 ## EXAMPLES
@@ -44,10 +44,10 @@ Filter report by component in baseline
 ## PARAMETERS
 
 ### -Baseline
-Array of type Baseline returned from Get-Baseline function
+Array of type Baseline returned from Get-OMEFirmwareBaseline function
 
 ```yaml
-Type: Baseline[]
+Type: FirmwareBaseline[]
 Parameter Sets: (All)
 Aliases:
 

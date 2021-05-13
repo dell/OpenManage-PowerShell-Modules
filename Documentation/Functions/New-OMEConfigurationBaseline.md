@@ -5,42 +5,36 @@ online version:
 schema: 2.0.0
 ---
 
-# New-OMETemplateFromDevice
+# New-OMEConfigurationBaseline
 
 ## SYNOPSIS
-Create template from source device in OpenManage Enterprise
+Create new configuration baseline in OpenManage Enterprise
 
 ## SYNTAX
 
 ```
-New-OMETemplateFromDevice [-Device] <Device> [[-Name] <String>] [[-Description] <String>]
- [[-Component] <String[]>] [[-TemplateType] <String>] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
+New-OMEConfigurationBaseline [-Name] <String> [[-Description] <String>] [-Template] <Template>
+ [[-Group] <Group>] [[-Devices] <Device[]>] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+A baseline is used to compare configuration against a template
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-OMETemplateFromDevice -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
-Create new deployment template from device
-```
-
-### EXAMPLE 2
-```
-New-OMETemplateFromDevice -TemplateType "Configuration" -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
-Create new configuration template from device
+New-OMEConfigurationBaseline -Name "TestBaseline01" -Template $("Template01" | Get-OMETemplate -FilterBy "Name") -Devices $("37KPZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
+Create new configuration compliance baseline
 ```
 
 ## PARAMETERS
 
-### -Device
-Single Device object returned from Get-OMEDevice function
+### -Name
+Name of baseline
 
 ```yaml
-Type: Device
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -51,8 +45,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Name
-String that will be assigned the name of the template
+### -Description
+Description of baseline
 
 ```yaml
 Type: String
@@ -61,52 +55,52 @@ Aliases:
 
 Required: False
 Position: 2
-Default value: "Template $((Get-Date).ToString('yyyyMMddHHmmss'))"
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Description
-String that will be assigned the description of the template
+### -Template
+Object of type Template returned from Get-OMETemplate function
 
 ```yaml
-Type: String
+Type: Template
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Component
-Components to include in the template (Default="All", "iDRAC", "BIOS", "System", "NIC", "LifecycleController", "RAID", "EventFilters")
+### -Group
+Object of type Group returned from Get-OMEGroup function
 
 ```yaml
-Type: String[]
+Type: Group
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 4
-Default value: @("All")
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TemplateType
-{{ Fill TemplateType Description }}
+### -Devices
+Array of type Device returned from Get-OMEDevice function
 
 ```yaml
-Type: String
+Type: Device[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 5
-Default value: Deployment
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

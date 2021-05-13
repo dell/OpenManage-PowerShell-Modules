@@ -5,38 +5,32 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-OMETemplate
+# Get-OMEConfigurationBaseline
 
 ## SYNOPSIS
-Get template from OpenManage Enterprise
+Get compliance baseline from OpenManage Enterprise
 
 ## SYNTAX
 
 ```
-Get-OMETemplate [[-Value] <String[]>] [[-FilterBy] <String>] [<CommonParameters>]
+Get-OMEConfigurationBaseline [[-Value] <String[]>] [[-FilterBy] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Returns all templates if no input received
+Returns all baselines if no input received
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-OMETemplate | Format-Table
-Get all templates
+Get-OMEConfigurationBaseline | Format-Table
+Get all baselines
 ```
 
 ### EXAMPLE 2
 ```
-"DRM" | Get-OMETemplate | Format-Table
-Get template by name
-```
-
-### EXAMPLE 3
-```
-"Configuration" | Get-OMETemplate -FilterBy "Type" | Format-Table
-Get template by type
+"AllLatest" | Get-OMEConfigurationBaseline | Format-Table
+Get baseline by name
 ```
 
 ## PARAMETERS

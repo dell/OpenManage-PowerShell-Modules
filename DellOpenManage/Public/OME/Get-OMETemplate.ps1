@@ -34,6 +34,9 @@ limitations under the License.
 .EXAMPLE
     "DRM" | Get-OMETemplate | Format-Table
     Get template by name
+.EXAMPLE
+    "Configuration" | Get-OMETemplate -FilterBy "Type" | Format-Table
+    Get template by type
 #>
 
 [CmdletBinding()]
@@ -67,7 +70,7 @@ Process {
             'Type'='ViewTypeId'
         }
         $TEMPLATE_TYPE_MAP = @{
-            "Compliance" = 1;
+            "Configuration" = 1;
             "Deployment" = 2
         }
         $FilterExpr  = $FilterMap[$FilterBy]
@@ -80,7 +83,7 @@ Process {
                 foreach ($n in $TEMPLATE_TYPE_MAP.GetEnumerator().Name) {
                     Write-Verbose $n
                 }
-                if ($TEMPLATE_TYPE_MAP.GetEnumerator().Name -notcontains $Value) { throw [System.ArgumentException] "FilterBy Value must be either Deployment or Compliance", "Value" }
+                if ($TEMPLATE_TYPE_MAP.GetEnumerator().Name -notcontains $Value) { throw [System.ArgumentException] "FilterBy Value must be either Deployment or Configuration", "Value" }
                 $ViewTypeId = $TEMPLATE_TYPE_MAP[$Value]
                 $TemplateUrl += "?`$filter=$($FilterExpr) eq $($ViewTypeId)"
             }
@@ -93,13 +96,11 @@ Process {
         $TemplateResp = Invoke-WebRequest -Uri $TemplateUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
         if ($TemplateResp.StatusCode -eq 200) {
             $TemplateInfo = $TemplateResp.Content | ConvertFrom-Json
-            if ($TemplateInfo.'value') {
+            if ($TemplateInfo.'value'.Length -gt 0) {
                 foreach ($TemplateJson in $TemplateInfo.'value') {
                     $Template = New-TemplateFromJson $TemplateJson
                     $TemplateData += $Template
                 }
-            } else {
-                $TemplateData += New-TemplateFromJson $TemplateInfo
             }
 
             return $TemplateData
@@ -107,13 +108,9 @@ Process {
         else {
             Write-Error "Unable to retrieve Template list from $($SessionAuth.Host)"
         }
-        # Add ability to list all templates
-        # Add ability to list and search attributes
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String)
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

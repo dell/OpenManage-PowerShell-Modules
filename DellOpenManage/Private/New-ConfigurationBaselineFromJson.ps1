@@ -1,5 +1,5 @@
 using module ..\Classes\ConfigurationBaseline.psm1
-function New-ComplianceBaselineFromJson {
+function New-ConfigurationBaselineFromJson {
     Param(
         [PSCustomObject]$ConfigurationBaseline
     )
@@ -15,6 +15,7 @@ function New-ComplianceBaselineFromJson {
         TemplateName = $ConfigurationBaseline.TemplateName
         TemplateType = $ConfigurationBaseline.TemplateType
         LastRun = $ConfigurationBaseline.LastRun
+        BaselineTargets = $ConfigurationBaseline.BaselineTargets
         Targets = $Targets
     }
 }

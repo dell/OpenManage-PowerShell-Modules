@@ -56,7 +56,7 @@ param(
     Try {
         if ($IgnoreCertificateWarning) { Set-CertPolicy }
         $Type = "application/json"
-        # Allow for use of Environment Variables 
+        # Allow for use of Environment Variables
         if ($Name) {
             $OMEHost = $Name
         } else {
@@ -90,10 +90,8 @@ param(
         } else {
             Write-Error "Unable to create a session with appliance $($OMEHost)"
         }
-    } 
+    }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }

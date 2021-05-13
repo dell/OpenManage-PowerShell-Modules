@@ -5,38 +5,32 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-OMETemplate
+# Get-OMEDiscovery
 
 ## SYNOPSIS
-Get template from OpenManage Enterprise
+Get firmware/driver catalog from OpenManage Enterprise
 
 ## SYNTAX
 
 ```
-Get-OMETemplate [[-Value] <String[]>] [[-FilterBy] <String>] [<CommonParameters>]
+Get-OMEDiscovery [[-Value] <String[]>] [[-FilterBy] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Returns all templates if no input received
+Returns all catalogs if no input received
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-OMETemplate | Format-Table
-Get all templates
+Get-OMEDiscovery | Format-Table
+Get all discovery jobs
 ```
 
 ### EXAMPLE 2
 ```
-"DRM" | Get-OMETemplate | Format-Table
-Get template by name
-```
-
-### EXAMPLE 3
-```
-"Configuration" | Get-OMETemplate -FilterBy "Type" | Format-Table
-Get template by type
+"DRM" | Get-OMEDiscovery | Format-Table
+Get job by name by name
 ```
 
 ## PARAMETERS

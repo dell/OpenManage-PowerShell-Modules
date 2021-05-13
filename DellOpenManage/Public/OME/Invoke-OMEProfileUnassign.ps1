@@ -27,7 +27,7 @@ limitations under the License.
     As of OME 3.4 only one template can be associated to a device. However, you can deploy a template to multiple devices.
 .PARAMETER Template
     Object of type Template returned from Get-OMETemplate function
-.PARAMETER Devices
+.PARAMETER Device
     Array of type Device returned from Get-OMEDevice function
 .PARAMETER ProfileName
     Name of Profile to detach. Uses contains style operator and supports partial string matching.
@@ -36,10 +36,13 @@ limitations under the License.
 .PARAMETER WaitTime
     Time, in seconds, to wait for the job to complete
 .INPUTS
-    Devices
+    Device
 .EXAMPLE
-    Invoke-OMEProfileUnassign -Devices $("37KP0ZZ", "GV6V0ZZ" | Get-OMEDevice) -Wait -Verbose
+    Invoke-OMEProfileUnassign -Device $("37KP0ZZ" | Get-OMEDevice) -Wait -Verbose
     Unassign profile by device
+.EXAMPLE
+    $("37KP0ZZ", "37KT0ZZ" | Get-OMEDevice) | Invoke-OMEProfileUnassign -Wait -Verbose
+    Unassign profile on multiple device
 .EXAMPLE
     Invoke-OMEProfileUnassign -Template $("TestTemplate01" | Get-OMETemplate) -Wait -Verbose
     Unassign profile by template
@@ -50,8 +53,8 @@ limitations under the License.
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$false)]
-    [Device[]] $Devices,
+    [Parameter(Mandatory=$false, ValueFromPipeline)]
+    [Device] $Device,
 
     [Parameter(Mandatory=$false)]
     [Template] $Template,
@@ -81,46 +84,47 @@ Process {
         $Headers     = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
-        $ProfileUnassignUrl = $BaseUri + "/api/ProfileService/Actions/ProfileService.ProfileUnassigns"
+        $ProfileUnassignUrl = $BaseUri + "/api/ProfileService/Actions/ProfileService.UnassignProfiles"
         $ProfileUnassignPayload = '{
             "SelectAll":true,
-            "Filters":"=contains(TargetId, 0, 0)"
+            "Filters":"=contains()"
         }' | ConvertFrom-Json
 
-        $DeviceIds = @()
-        foreach ($Device in $Devices) {
-            $DeviceIds += $Device.Id
-        }
-        if ($DeviceIds.Length -gt 0) {
-            $ProfileUnassignPayload.Filters = "=contains(TargetId, $($DeviceIds -join ','))"
+        if ($Device) {
+            $ProfileUnassignPayload.Filters = "=contains(TargetName, '$($Device.DeviceName)')"
         } elseif ($Template) {
-            $ProfileUnassignPayload.Filters = "=contains(TemplateId, $($Template.Id))"
+            $ProfileUnassignPayload.Filters = "=contains(TemplateName, '$($Template.Name)')"
         } elseif ($ProfileName) {
             $ProfileUnassignPayload.Filters = "=contains(ProfileName, '$($ProfileName)')"
         } else {
-            throw [System.Exception] "Must specify one of the following parameters: -Devices -Template -ProfileName"
+            throw [System.Exception] "You must specify one of the following parameters: -Device -Template -ProfileName"
         }
         $ProfileUnassignPayload = $ProfileUnassignPayload |ConvertTo-Json -Depth 6
         Write-Verbose $ProfileUnassignPayload
-        $ProfileUnassignResponse = Invoke-WebRequest -Uri $ProfileUnassignUrl -Method Post -Body $ProfileUnassignPayload -ContentType $Type -Headers $Headers
-        if ($ProfileUnassignResponse.StatusCode -eq 200) {
-            $ProfileUnassignContent = $ProfileUnassignResponse.Content | ConvertFrom-Json
-            $JobId = $ProfileUnassignContent
-            if ($JobId -ne 0) {
-                Write-Verbose "Created job $($JobId) to unassign profiles..."
-                if ($Wait) {
-                    $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
-                    return $JobStatus
+        Try { # Workaround to capture 400 (Bad Request) error when trying to unassign profile without target device found
+            $ProfileUnassignResponse = Invoke-WebRequest -Uri $ProfileUnassignUrl -Method Post -Body $ProfileUnassignPayload -ContentType $Type -Headers $Headers
+            if ($ProfileUnassignResponse.StatusCode -eq 200) {
+                $ProfileUnassignContent = $ProfileUnassignResponse.Content | ConvertFrom-Json
+                $JobId = $ProfileUnassignContent
+                if ($JobId -ne 0) {
+                    Write-Verbose "Created job $($JobId) to unassign profiles..."
+                    if ($Wait) {
+                        $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
+                        return $JobStatus
+                    } else {
+                        return $JobId
+                    }
                 } else {
-                    return $JobId
+                    Write-Warning "No profiles unassigned"
                 }
             } else {
-                Write-Warning "No profiles unassigned"
+                Write-Error "Failed to unassign profiles"
             }
-        } else {
-            Write-Error "Failed to unassign profiles"
+            return $ProfileUnassignResponse
         }
-        return $ProfileUnassignResponse
+        Catch {
+            Write-Warning "No profiles unassigned"
+        }
     }
     Catch {
         Resolve-Error $_

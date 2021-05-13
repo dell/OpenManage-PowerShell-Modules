@@ -145,7 +145,7 @@ Aliases:
 
 Required: False
 Position: 6
-Default value: 30
+Default value: 3600
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

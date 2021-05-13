@@ -4,7 +4,7 @@ function Get-PowerShellVersion {
     return $major_number
 }
 
-$MajorVersion = Get-PowerShellVersion 
+$MajorVersion = Get-PowerShellVersion
 if ($MajorVersion -lt 5) {
     Write-Error "PowerShell Version 5 or later required"
     exit
@@ -21,6 +21,7 @@ if ($MajorVersion -lt 5) {
     }
     if ((Test-Path -Path $Destination) -and (Test-Path -Path $Source)) {
         Try {
+            Remove-Item ($Destination + $ModuleDir + "\*") -Recurse -Force
             Copy-Item -Path $Source -Destination $Destination -Recurse -Force -ErrorAction Stop
             Get-ChildItem ($Destination + $ModuleDir) -Recurse | Unblock-File
             Write-Output "Sucessfully installed OpenManage Module to $Destination"

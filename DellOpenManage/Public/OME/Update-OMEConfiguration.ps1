@@ -2,19 +2,16 @@
 using module ..\..\Classes\Device.psm1
 using module ..\..\Classes\ConfigurationBaseline.psm1
 
-function Get-TargetConfigurationPayload($Targets, $DeviceFilter) {
+function Get-TargetConfigurationPayload($Targets) {
     $TargetTypeHash = @{}
     $TargetTypeHash.'Id' = 1000
     $TargetTypeHash.'Name' = "DEVICE"
     $ComplianceReportTargetList = @()
-    $DeviceFilterIds = $DeviceFilter | Select-Object -ExpandProperty Id
     foreach ($Target in $Targets) {
         $TargetHash = @{}
-        if ($DeviceFilterIds.Length -eq 0 -or $DeviceFilterIds -contains $Target) {
-            $TargetHash.TargetType = $TargetTypeHash
-            $TargetHash.Id = $Target
-            $ComplianceReportTargetList += $TargetHash
-        }
+        $TargetHash.TargetType = $TargetTypeHash
+        $TargetHash.Id = $Target
+        $ComplianceReportTargetList += $TargetHash
     }
     return ,$ComplianceReportTargetList # Preceeding comma is a workaround to ensure an array is returned when only a single item is present
 }
@@ -144,7 +141,7 @@ limitations under the License.
     Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -Wait -Verbose
     Update configuration compliance on all devices in baseline ***This will force a reboot if necessary***
 .EXAMPLE
-    Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
+    Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
     Update configuration compliance on filtered devices in baseline ***This will force a reboot if necessary***
 #>
 
@@ -181,11 +178,20 @@ Process {
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
-        $BaselineId = $Baseline.Id
         $TemplateId = $Baseline.TemplateId
         if ($Baseline.Targets.Length -gt 0) {
-            $TargetPayload = Get-TargetConfigurationPayload $Baseline.Targets $DeviceFilter
-            if ($TargetPayload.Length -gt 0) {
+            $ComplianceReportList = Get-OMEConfigurationCompliance -Baseline $Baseline -DeviceFilter $DeviceFilter
+            $DeviceList = @()
+            if ($ComplianceReportList.Length -gt 0) {
+                # Build list of device ids that are not compliant with the baseline
+                foreach ($ComplianceDevice in $ComplianceReportList) {
+                    if ($ComplianceDevice.ComplianceStatus -eq "Not Compliant") {
+                        $DeviceList += $ComplianceDevice.Id
+                    }
+                }
+            }
+            if ($DeviceList.Length -gt 0) {
+                $TargetPayload = Get-TargetConfigurationPayload $DeviceList
                 $UpdatePayload = Get-ConfigurationPayload -Name $Name -TemplateId $TemplateId -TargetPayload $TargetPayload
                 # Update configuration
                 $UpdateJobURL = $BaseUri + "/api/JobService/Jobs"
@@ -207,10 +213,13 @@ Process {
                 else {
                     Write-Error "Update job creation failed"
                 }
+            } else {
+                Write-Warning "All devices compliant with baseline"
+                return "Completed"
             }
         }
         else {
-            Write-Warning "No updates found"
+            Write-Warning "No devices to make compliant"
         }
     }
     Catch {

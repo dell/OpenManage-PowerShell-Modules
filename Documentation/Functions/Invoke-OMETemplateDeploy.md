@@ -80,7 +80,7 @@ Accept wildcard characters: False
 
 ### -ForceHostReboot
 Forcefully reboot the host OS if the graceful reboot fails.
-*This will NOT prevent a reboot of the host, just a forced reboot. 
+*This will NOT prevent a reboot of the host, just a forced reboot.
 A soft reboot will be initiated upon template deploy.
 
 ```yaml

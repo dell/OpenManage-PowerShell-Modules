@@ -1,8 +1,10 @@
-using module ..\DellOpenManage\Classes\Baseline.psm1
 using module ..\DellOpenManage\Classes\Catalog.psm1
 using module ..\DellOpenManage\Classes\Repository.psm1
 using module ..\DellOpenManage\Classes\Schedule.psm1
 using module ..\DellOpenManage\Classes\ComponentCompliance.psm1
+using module ..\DellOpenManage\Classes\FirmwareBaseline.psm1
+using module ..\DellOpenManage\Classes\ConfigurationBaseline.psm1
+using module ..\DellOpenManage\Classes\ConfigurationCompliance.psm1
 using module ..\DellOpenManage\Classes\Device.psm1
 using module ..\DellOpenManage\Classes\Group.psm1
 using module ..\DellOpenManage\Classes\SessionAuth.psm1
@@ -12,14 +14,17 @@ using module ..\DellOpenManage\Classes\NetworkPartition.psm1
 using module ..\DellOpenManage\Classes\InventoryDetail.psm1
 using module ..\DellOpenManage\Classes\Job.psm1
 using module ..\DellOpenManage\Classes\JobDetail.psm1
+using module ..\DellOpenManage\Classes\Discovery.psm1
+using module ..\DellOpenManage\Classes\DiscoveryTarget.psm1
 
+#Install-Module -Name platyPS -Scope CurrentUser -Force
+Import-Module platyPS
 $module = "DellOpenManage"
 Remove-Module $module
 Import-Module $module
-Import-Module platyPS
 
 $FunctionList = @()
-foreach ($cmdlet in (Get-Command -Module DellOpenManage)) { 
+foreach ($cmdlet in (Get-Command -Module DellOpenManage)) {
     $meta = @{
         'layout' = 'post';
         'author' = 'Trevor Squillario';
@@ -28,7 +33,7 @@ foreach ($cmdlet in (Get-Command -Module DellOpenManage)) {
         'tags' = 'OnlineHelp PowerShell';
     }
     $FunctionList += $cmdlet.Name
-    New-MarkdownHelp -Command $cmdlet -OutputFolder .\Documentation\Functions -Force 
+    New-MarkdownHelp -Command $cmdlet -OutputFolder .\Documentation\Functions -Force
 }
 
 $IndexFile = "./Documentation/CommandReference.md"
@@ -50,9 +55,9 @@ foreach ($folder in $folders) {
         foreach ($Class in $ClassFiles) {
             $ClassProperties = New-Object -TypeName $Class.BaseName | Get-Member -MemberType Property
             "## $($Class.BaseName)" | Add-Content $IndexFile
-            foreach ($Property in $ClassProperties) { 
+            foreach ($Property in $ClassProperties) {
                 "- $($Property.Name) ($($Property.Definition))" | Add-Content $IndexFile
             }
         }
-    }    
+    }
 }

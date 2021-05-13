@@ -25,9 +25,9 @@ limitations under the License.
 .PARAMETER Content
     XML string containing template to import
 .PARAMETER Type
-    Type of template to create (Default="Deployment", "Compliance")
+    Type of template to create (Default="Deployment", "Configuration")
     Deployment: Only 1 template assigned to a device, used with Virtual Identities
-    Compliance: Many templates can be assigned to a device, used with Configuration Compliance
+    Configuration: Many templates can be assigned to a device, used with Configuration Compliance
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -36,8 +36,13 @@ limitations under the License.
     [String]Content
 .EXAMPLE
     New-OMETemplateFromFile -Name "TestTemplate" -Content "<XML>" -Wait
+    Create new deployment template from string
 .EXAMPLE
     New-OMETemplateFromFile -Name "TestTemplate" -Content $(Get-Content -Path .\Data.xml | Out-String)
+    Create new deployment template from file
+.EXAMPLE
+    New-OMETemplateFromFile -Name "TestTemplate" -TemplateType "Configuration" -Content $(Get-Content -Path .\Data.xml | Out-String)
+    Create new configuration template from file
 #>
 
 [CmdletBinding()]
@@ -49,7 +54,7 @@ param(
     [String]$Content,
 
     [Parameter(Mandatory=$false)]
-    [ValidateSet("Deployment", "Compliance")]
+    [ValidateSet("Deployment", "Configuration")]
     [String]$TemplateType = "Deployment",
 
     [Parameter(Mandatory=$false)]
@@ -74,7 +79,7 @@ Process {
         $Headers     = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
         $TEMPLATE_TYPE_MAP = @{
-            "Compliance" = 1;
+            "Configuration" = 1;
             "Deployment" = 2
         }
         $TemplateUrl = $BaseUri + "/api/TemplateService/Actions/TemplateService.Import"
@@ -103,9 +108,7 @@ Process {
         return $TemplateId
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String)
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

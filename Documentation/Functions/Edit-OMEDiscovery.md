@@ -5,17 +5,17 @@ online version:
 schema: 2.0.0
 ---
 
-# New-OMEDiscovery
+# Edit-OMEDiscovery
 
 ## SYNOPSIS
-Create new device discovery job in OpenManage Enterprise
+Edit device discovery job in OpenManage Enterprise
 
 ## SYNTAX
 
 ```
-New-OMEDiscovery [[-Name] <String>] [[-DeviceType] <String>] [-Hosts] <String[]> [-DiscoveryUserName] <String>
- [-DiscoveryPassword] <SecureString> [[-Email] <String>] [-SetTrapDestination] [[-Schedule] <String>]
- [[-ScheduleCron] <String>] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
+Edit-OMEDiscovery [-Discovery] <Discovery> [[-Name] <String>] [[-Hosts] <String[]>]
+ [-DiscoveryUserName] <String> [-DiscoveryPassword] <SecureString> [[-Email] <String>] [[-Schedule] <String>]
+ [[-ScheduleCron] <String>] [[-Mode] <String>] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -23,36 +23,55 @@ This is used to onboard devices into OpenManage Enterprise.
 Specify a list of IP Addresses or hostnames.
 You can also specify a subnet.
 Wildcards are supported as well.
-Only implemented protocols are WSMAN/REDFISH.
-Submit an Issue on Github to request additional features.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Discover servers by hostname
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+Replace host list and run now
 ```
 
 ### EXAMPLE 2
 ```
-New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('10.35.0.0', '10.35.0.1') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Discover servers by IP Address
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server02-idrac.example.com') -Mode "Append" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+Append host to host list and run now
 ```
 
 ### EXAMPLE 3
 ```
-New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('10.37.0.0/24') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Discover servers by Subnet
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server02-idrac.example.com') -Mode "Remove" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+Remove host from host list and run now
 ```
 
 ### EXAMPLE 4
 ```
-New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('10.37.0.0/24') -Schedule "RunLater" -ScheduleCron "0 0 0 ? * sun *" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Discover servers by Subnet every Sunday at 12:00AM UTC
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Schedule "RunNow" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+Run discovery job now
+```
+
+### EXAMPLE 5
+```
+"TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Schedule "RunLater" -ScheduleCron "0 0 0 ? * sun *" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
+Run discovery job every Sunday at 12:00AM UTC
 ```
 
 ## PARAMETERS
+
+### -Discovery
+{{ Fill Discovery Description }}
+
+```yaml
+Type: Discovery
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
 
 ### -Name
 Name of the discovery job
@@ -63,23 +82,8 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
-Default value: "Server Discovery $((Get-Date).ToString('yyyyMMddHHmmss'))"
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -DeviceType
-Type of device ("Server", "Chassis", "Storage", "Network")
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
 Position: 2
-Default value: Server
+Default value: "Server Discovery $((Get-Date).ToString('yyyyMMddHHmmss'))"
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -105,7 +109,7 @@ Type: String[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 3
 Default value: None
 Accept pipeline input: False
@@ -159,21 +163,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SetTrapDestination
-Set trap destination of iDRAC to OpenManage Enterprise upon discovery
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Schedule
 Determines when the discovery job will be executed.
 (Default="RunNow", "RunLater")
@@ -209,6 +198,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Mode
+Method by which hosts are added or removed from discovery job ("Append", Default="Replace", "Remove")
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
+Default value: Replace
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Wait
 Wait for job to complete
 
@@ -233,7 +237,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 10
 Default value: 3600
 Accept pipeline input: False
 Accept wildcard characters: False
