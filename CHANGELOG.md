@@ -19,3 +19,8 @@ Release 2.1.0 5/13/2021
 * Update-OMEConfiguration new commandlet
 * Invoke-OMEProfileUnassign new commandlet
 * Invoke-OMEConfigurationCheck new commandlet
+
+Release 2.2.0 6/22/2021
+* New-OMEGroup new commandlet
+* Edit-OMEGroup new commandlet
+* Remove-OMEGroup new commandlet

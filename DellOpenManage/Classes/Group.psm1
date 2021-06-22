@@ -12,4 +12,5 @@ Class Group {
     [Int]$TypeId
     [Int]$MembershipTypeId
     [Boolean]$HasAttributes
+    [Int]$ParentId
 }

@@ -7,7 +7,6 @@ Describe "Device Tests" {
         $TestDeviceServiceTags = @("37KP0Q2")
         $TestDiscoveryJobName = "TestDiscovery01"
         $TestDeviceModel = "PowerEdge R740"
-        $TestGroup = "Dell iDRAC Servers"
         $TestiDRACUsername = $Global:iDRACUsername
         $TestiDRACPassword = $Global:iDRACPassword
     }
@@ -60,19 +59,6 @@ Describe "Device Tests" {
 
         It "Should return device inventory" {
             $TestDeviceServiceTags | Get-OMEDevice | Get-OMEDeviceDetail -InventoryType "deviceSoftware" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
-        }
-    }
-    Context "Group Checks" {
-        It "Should return ALL Groups" {
-            Get-OMEGroup | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 2
-        }
-
-        It "Should return a specific Group" {
-            $TestGroup | Get-OMEGroup | Select-Object -ExpandProperty Name | Should -Be $TestGroup
-        }
-
-        It "Should return Devices by Group" {
-            $TestGroup | Get-OMEGroup | Get-OMEDevice | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
     }
 }

@@ -17,5 +17,6 @@ function New-GroupFromJson {
         TypeId = $Group.TypeId
         MembershipTypeId = $Group.MembershipTypeId
         HasAttributes = $Group.HasAttributes
+        ParentId = $Group.ParentId
     }
 }
