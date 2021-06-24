@@ -2,19 +2,7 @@
 using module ..\..\Classes\Device.psm1
 using module ..\..\Classes\ConfigurationBaseline.psm1
 
-function Get-TargetConfigurationPayload($Targets) {
-    $TargetTypeHash = @{}
-    $TargetTypeHash.'Id' = 1000
-    $TargetTypeHash.'Name' = "DEVICE"
-    $ComplianceReportTargetList = @()
-    foreach ($Target in $Targets) {
-        $TargetHash = @{}
-        $TargetHash.TargetType = $TargetTypeHash
-        $TargetHash.Id = $Target
-        $ComplianceReportTargetList += $TargetHash
-    }
-    return ,$ComplianceReportTargetList # Preceeding comma is a workaround to ensure an array is returned when only a single item is present
-}
+
 
 function Get-ConfigurationPayload($Name, $TemplateId, $TargetPayload) {
     $Payload = '{
@@ -191,7 +179,7 @@ Process {
                 }
             }
             if ($DeviceList.Length -gt 0) {
-                $TargetPayload = Get-TargetConfigurationPayload $DeviceList
+                $TargetPayload = Get-JobTargetPayload $DeviceList
                 $UpdatePayload = Get-ConfigurationPayload -Name $Name -TemplateId $TemplateId -TargetPayload $TargetPayload
                 # Update configuration
                 $UpdateJobURL = $BaseUri + "/api/JobService/Jobs"

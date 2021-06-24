@@ -130,6 +130,14 @@ Get device by group
 Get-OMEDevice -Group $(Get-OMEGroup "Servers_Win") | Format-Table
 "Servers_ESXi", "Servers_Win" | Get-OMEGroup | Get-OMEDevice | Format-Table
 ```
+Create separate inventory refresh job for each device in list
+```
+"PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Invoke-OMEInventoryRefresh -Verbose
+```
+Create one inventory refresh job for all devices in list. Notice the preceeding comma before the device list.
+```
+,$("PowerEdge R640" | Get-OMEDevice -FilterBy "Model") | Invoke-OMEInventoryRefresh -Verbose
+```
 
 ## Device Details
 Get all inventory
@@ -175,6 +183,7 @@ deviceSoftware
 serverStorageEnclosures
 subsystemRollupStatus
 ```
+
 ## Groups
 Get all groups
 ```
@@ -183,6 +192,26 @@ Get-OMEGroup | Format-Table
 Get group by name
 ```
 Get-OMEGroup "R640Test" | Format-Table
+```
+Create a new static group
+```
+New-OMEGroup -Name "Test Group 01"
+```
+Edit group name and description
+```
+Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Name "Test Group 001" -Description "This is a new group"
+```
+Add devices to group
+```
+Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
+```
+Remove devices from group
+```
+Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Mode "Remove" -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
+```
+Remove group
+```
+Get-OMEGroup "Test Group 01" | Remove-OMEGroup
 ```
 
 ## Power

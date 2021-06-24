@@ -28,11 +28,11 @@ $Global:iDRACPassword = $iDRACPassword
 if ($Test -ne "") {
     Invoke-Pester -Script ".\Tests\$($Test).Tests.ps1"
 } else {
+    Invoke-Pester -Script .\Tests\Discovery.Tests.ps1
     Invoke-Pester -Script .\Tests\Device.Tests.ps1
     Invoke-Pester -Script .\Tests\Group.Tests.ps1
     Invoke-Pester -Script .\Tests\Firmware.Tests.ps1
     Invoke-Pester -Script .\Tests\Template.Tests.ps1
-    Invoke-Pester -Script .\Tests\Configuration.Tests.ps1
 }
 
 

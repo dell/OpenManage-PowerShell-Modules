@@ -51,7 +51,7 @@ Describe "Template" {
         It "Should deploy template to device" {
             $template = $("TestDeploymentTemplate_FromString" | Get-OMETemplate | Select-Object -first 1)
             $devices = $Script:DeviceServiceTag1, $Script:DeviceServiceTag2, $Script:DeviceServiceTag3 | Get-OMEDevice
-            Invoke-OMETemplateDeploy -Template $template -Devices $devices -Wait | Should -Be "Completed"
+            Invoke-OMETemplateDeploy -Template $template -Devices $devices -Wait | Should -BeIn @("Completed", "Warning")
         }
     }
     Context "Configuration" {
