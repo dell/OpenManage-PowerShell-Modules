@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Invoke-OMEConfigurationCheck
+# Invoke-OMEConfigurationBaselineRefresh
 
 ## SYNOPSIS
 Check or refresh configuration compliance for a baseline
@@ -13,7 +13,7 @@ Check or refresh configuration compliance for a baseline
 ## SYNTAX
 
 ```
-Invoke-OMEConfigurationCheck [-Baseline] <ConfigurationBaseline> [-Wait] [[-WaitTime] <Int32>]
+Invoke-OMEConfigurationBaselineRefresh [-Baseline] <ConfigurationBaseline> [-Wait] [[-WaitTime] <Int32>]
  [<CommonParameters>]
 ```
 
@@ -24,7 +24,7 @@ A baseline is used to compare configuration against a template
 
 ### EXAMPLE 1
 ```
-$("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationCheck -Wait -Verbose
+$("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationBaselineRefresh -Wait -Verbose
 Check configuration compliance for baseline
 ```
 

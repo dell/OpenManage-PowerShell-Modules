@@ -2,6 +2,8 @@ Class FirmwareBaseline {
     [Int]$Id
     [String]$Name
     [String]$Description
+    [Int]$TaskId
+    [Int]$TaskStatusId
     [Int]$CatalogId
     [Int]$RepositoryId
     [String]$RepositoryName

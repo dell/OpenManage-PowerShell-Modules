@@ -37,6 +37,10 @@ Describe "Firmware Tests" {
             Update-OMEFirmware -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "Preview" -ComponentFilter "PERC" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
 
+        It ("Should refresh firmware baseline") {
+            $BaselineName | Get-OMEFirmwareBaseline | Invoke-OMEFirmwareBaselineRefresh -Wait | Should -Be "Completed"
+        }
+
         #It ("Should try to update firmware") {
         #    $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
         #    $baseline = $($BaselineName | Get-OMEFirmwareBaseline)

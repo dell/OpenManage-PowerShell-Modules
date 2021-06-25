@@ -151,7 +151,7 @@ Process {
                 $JobStatus = $($Name | Wait-OnFirmwareBaseline -WaitTime $WaitTime)
                 return $JobStatus
             } else {
-                return
+                return "Completed"
             }
             Write-Verbose "Baseline creation successful..."
         }

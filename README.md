@@ -374,7 +374,7 @@ Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline0
 ```
 Check configuration compliance for baseline
 ```
-$("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationCheck -Wait -Verbose
+$("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationBaselineRefresh -Wait -Verbose
 ```
 
 ## Profiles
@@ -415,6 +415,10 @@ Get job by last run status
 Get job by state
 ```
 "Enabled" | Get-OMEJob -FilterBy "State" | Format-Table
+```
+Run job
+```
+28991 | Invoke-OMEJobRun -Wait -Verbose
 ```
 
 ## Reports

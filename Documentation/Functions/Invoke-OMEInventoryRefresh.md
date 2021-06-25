@@ -23,14 +23,14 @@ This will submit a job to refresh the inventory on provided Devices.
 
 ### EXAMPLE 1
 ```
-Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -Wait -Verbose
-Update configuration compliance on all devices in baseline ***This will force a reboot if necessary***
+"PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Invoke-OMEInventoryRefresh -Verbose
+Create separate inventory refresh job for each device in list
 ```
 
 ### EXAMPLE 2
 ```
-Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
-Update configuration compliance on filtered devices in baseline ***This will force a reboot if necessary***
+,$("PowerEdge R640" | Get-OMEDevice -FilterBy "Model") | Invoke-OMEInventoryRefresh -Verbose
+Create one inventory refresh job for all devices in list. Notice the preceeding comma before the device list.
 ```
 
 ## PARAMETERS

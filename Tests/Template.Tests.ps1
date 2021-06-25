@@ -104,7 +104,7 @@ Describe "Template" {
 
         It "Should check configuration compliance for baseline" {
             $baseline = $Script:ConfigurationBaselineName | Get-OMEConfigurationBaseline
-            $baseline  | Invoke-OMEConfigurationCheck -Wait | Should -Be "Completed"
+            $baseline  | Invoke-OMEConfigurationBaselineRefresh -Wait | Should -Be "Completed"
         }
     }
     Context "Profile" {

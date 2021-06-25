@@ -12,6 +12,8 @@ function New-FirmwareBaselineFromJson {
         Name = $FirmwareBaseline.Name
         Description = $FirmwareBaseline.Description
         CatalogId = $FirmwareBaseline.CatalogId
+        TaskId = $FirmwareBaseline.TaskId
+        TaskStatusId = $FirmwareBaseline.TaskStatusId
         RepositoryId = $FirmwareBaseline.RepositoryId
         RepositoryName = $FirmwareBaseline.RepositoryName
         RepositoryType = $FirmwareBaseline.RepositoryType

@@ -3,7 +3,7 @@ using module ..\..\Classes\Group.psm1
 using module ..\..\Classes\Template.psm1
 using module ..\..\Classes\ConfigurationBaseline.psm1
 
-function Invoke-OMEConfigurationCheck {
+function Invoke-OMEConfigurationBaselineRefresh {
 <#
 Copyright (c) 2018 Dell EMC Corporation
 
@@ -22,7 +22,7 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Check or refresh configuration compliance for a baseline
+    Check or refresh compliance for a configuration baseline
 .DESCRIPTION
     A baseline is used to compare configuration against a template
 .PARAMETER Baseline
@@ -34,8 +34,8 @@ limitations under the License.
 .INPUTS
     ConfigurationBaseline
 .EXAMPLE
-    $("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationCheck -Wait -Verbose
-    Check configuration compliance for baseline
+    $("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationBaselineRefresh -Wait -Verbose
+    Refresh compliance for configuration baseline
 #>
 
 [CmdletBinding()]

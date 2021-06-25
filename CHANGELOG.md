@@ -18,7 +18,7 @@ Release 2.1.0 5/13/2021
 * Get-OMEConfigurationCompliance new commandlet
 * Update-OMEConfiguration new commandlet
 * Invoke-OMEProfileUnassign new commandlet
-* Invoke-OMEConfigurationCheck new commandlet
+* Invoke-OMEConfigurationBaselineRefresh new commandlet
 
 Release 2.2.0 6/24/2021
 * OME 3.6.1 testing completed
@@ -26,3 +26,8 @@ Release 2.2.0 6/24/2021
 * Edit-OMEGroup new commandlet
 * Remove-OMEGroup new commandlet
 * Invoke-OMEInventoryRefresh new commandlet
+
+Release 2.2.1 6/25/2021
+* Invoke-OMEJobRun new commandlet
+* Invoke-OMEFirmwareBaselineRefresh new commandlet
+* Invoke-OMEConfigurationCheck renamed to Invoke-OMEConfigurationBaselineRefresh
