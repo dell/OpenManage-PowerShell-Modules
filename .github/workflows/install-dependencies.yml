@@ -1,5 +1,8 @@
 name: Test PowerShell on Windows
-on: push
+
+on:
+  push:
+    branches: [ "gitaction" ]
 
 jobs:
   tests:
@@ -22,7 +25,7 @@ jobs:
       if: success()
       shell: pwsh
       run: |
-            Invoke-ScriptAnalyzer -Severity Error -Path .\DellOpenManage\ -Recurse -Outvariable issues -ExcludeRule PSAvoidUsingWriteHost,PSUseShouldProcessForStateChangingFunctions
+            Invoke-ScriptAnalyzer -Path .\DellOpenManage\ -Recurse -Outvariable issues -ExcludeRule PSAvoidUsingWriteHost,PSUseShouldProcessForStateChangingFunctions
             $errors   = $issues.Where({$_.Severity -eq 'Error'})
             $warnings = $issues.Where({$_.Severity -eq 'Warning'})
             if ($errors) {
