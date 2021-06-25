@@ -8,7 +8,7 @@ schema: 2.0.0
 # Invoke-OMEFirmwareBaselineRefresh
 
 ## SYNOPSIS
-Check or refresh configuration compliance for a baseline
+Check or refresh compliance for a firmware baseline
 
 ## SYNTAX
 
@@ -18,20 +18,20 @@ Invoke-OMEFirmwareBaselineRefresh [-Baseline] <FirmwareBaseline> [-Wait] [[-Wait
 ```
 
 ## DESCRIPTION
-A baseline is used to compare configuration against a template
+A baseline is used to compare firmware versions against a catalog
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-$("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationBaselineRefresh -Wait -Verbose
-Check configuration compliance for baseline
+"TestBaseline01"  | Get-OMEFirmwareBaseline | Invoke-OMEFirmwareBaselineRefresh -Wait
+Refresh compliance for firmware baseline
 ```
 
 ## PARAMETERS
 
 ### -Baseline
-Object of type ConfigurationBaseline returned from Get-OMEConfigurationBaseline function
+Object of type FirmwareBaseline returned from Get-OMEFirmwareBaseline function
 
 ```yaml
 Type: FirmwareBaseline
@@ -80,7 +80,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### ConfigurationBaseline
+### FirmwareBaseline
 ## OUTPUTS
 
 ## NOTES

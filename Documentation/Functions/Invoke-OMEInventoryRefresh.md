@@ -13,7 +13,8 @@ Refresh inventory on devices in OpenManage Enterprise
 ## SYNTAX
 
 ```
-Invoke-OMEInventoryRefresh [[-Name] <String>] [[-Devices] <Device[]>] [<CommonParameters>]
+Invoke-OMEInventoryRefresh [[-Name] <String>] [[-Devices] <Device[]>] [-Wait] [[-WaitTime] <Int32>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -62,6 +63,36 @@ Required: False
 Position: 2
 Default value: None
 Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -Wait
+{{ Fill Wait Description }}
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WaitTime
+{{ Fill WaitTime Description }}
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: 3600
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

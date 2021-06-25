@@ -71,7 +71,13 @@ param(
     [String]$Name = "Inventory Task Device $((Get-Date).ToString('yyyyMMddHHmmss'))",
 
     [Parameter(Mandatory=$false, ValueFromPipeline)]
-    [Device[]] $Devices
+    [Device[]] $Devices,
+
+    [Parameter(Mandatory=$false)]
+    [Switch]$Wait,
+
+    [Parameter(Mandatory=$false)]
+    [int]$WaitTime = 3600
 )
 
 Begin {
@@ -107,7 +113,7 @@ Process {
                 $JobInfo = $JobResp.Content | ConvertFrom-Json
                 $JobId = $JobInfo.Id
                 Write-Verbose "Created job $($JobId) to refresh inventory..."
-                if ($Wait.IsPresent) {
+                if ($Wait) {
                     $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
                     return $JobStatus
                 } else {

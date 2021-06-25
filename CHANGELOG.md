@@ -31,3 +31,6 @@ Release 2.2.1 6/25/2021
 * Invoke-OMEJobRun new commandlet
 * Invoke-OMEFirmwareBaselineRefresh new commandlet
 * Invoke-OMEConfigurationCheck renamed to Invoke-OMEConfigurationBaselineRefresh
+
+Release 2.2.2 6/25/2021
+* Invoke-OMEInventoryRefresh added -Wait parameter

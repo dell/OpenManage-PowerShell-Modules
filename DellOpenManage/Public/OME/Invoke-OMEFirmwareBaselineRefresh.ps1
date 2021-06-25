@@ -69,7 +69,7 @@ Process {
         $Baseline.TaskId | Invoke-OMEJobRun | Out-Null
         # Since we can't check the status for a Baseline refresh job the standard way. We have to use a specific function for this.
         if ($Wait) {
-            $JobStatus = $($Baseline.Name | Wait-OnFirmwareBaseline -WaitTime $WaitTime -Verbose)
+            $JobStatus = $($Baseline.Name | Wait-OnFirmwareBaseline -WaitTime $WaitTime)
             return $JobStatus
         } else {
             return "Completed"

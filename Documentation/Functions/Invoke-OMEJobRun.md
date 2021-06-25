@@ -8,7 +8,7 @@ schema: 2.0.0
 # Invoke-OMEJobRun
 
 ## SYNOPSIS
-Check or refresh configuration compliance for a baseline
+Run job now
 
 ## SYNTAX
 
@@ -17,7 +17,7 @@ Invoke-OMEJobRun [-JobId] <Int32> [-Wait] [[-WaitTime] <Int32>] [<CommonParamete
 ```
 
 ## DESCRIPTION
-A baseline is used to compare configuration against a template
+Run an existing job by Id
 
 ## EXAMPLES
 

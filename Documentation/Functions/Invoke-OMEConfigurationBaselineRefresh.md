@@ -8,7 +8,7 @@ schema: 2.0.0
 # Invoke-OMEConfigurationBaselineRefresh
 
 ## SYNOPSIS
-Check or refresh configuration compliance for a baseline
+Check or refresh compliance for a configuration baseline
 
 ## SYNTAX
 
@@ -25,7 +25,7 @@ A baseline is used to compare configuration against a template
 ### EXAMPLE 1
 ```
 $("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationBaselineRefresh -Wait -Verbose
-Check configuration compliance for baseline
+Refresh compliance for configuration baseline
 ```
 
 ## PARAMETERS
