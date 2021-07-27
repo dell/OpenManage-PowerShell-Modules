@@ -16,4 +16,5 @@ Class Device {
     [String]$NetworkAddress
     [String]$MacAddress
     [String]$DnsName
+    [Int[]]$DeviceCapabilities
 }

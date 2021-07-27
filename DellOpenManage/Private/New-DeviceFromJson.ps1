@@ -42,5 +42,6 @@ function New-DeviceFromJson {
         DnsName = $DnsName
         NetworkAddress = $NetworkAddress
         MacAddress = $MacAddress
+        DeviceCapabilities = $Device.DeviceCapabilities
     }
 }
