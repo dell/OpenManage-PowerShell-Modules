@@ -1,5 +1,5 @@
 
-function New-OMEMcmGroup {
+function New-OMESupportAssistGroup {
 <#
 Copyright (c) 2021 Dell EMC Corporation
 
@@ -32,8 +32,14 @@ limitations under the License.
 #>
 [CmdletBinding()]
 param(
+    [Parameter(Mandatory = $false)]
+    [string]$AddGroup,
+
     [Parameter(Mandatory=$false)]
-    [String]$GenerateJson
+    [String]$GenerateJson,
+
+    [Parameter(Mandatory=$false)]
+    [String]$ExportExampleJson
 )
 
 function Read-Confirmation() {
@@ -68,9 +74,10 @@ function Read-Confirmation() {
   
     return $true
   }
-  
 
-function Get-GroupCreationPayload {
+
+
+function Get-PromptGroupCreationPayload {
     <#
       .SYNOPSIS
         Prompts the user for each field required to create the group
@@ -137,7 +144,7 @@ function Get-GroupCreationPayload {
         $CustomerDetails['PrimaryContact']['TimeFrame'] = Read-Host "Primary Contact time frame in the format: 10:00 AM-4:00 PM.  WARNING: There is no input validation on this. You must match caps and spacing"
     
         foreach ($Timezone in $Timezones) {
-          Write-Host "Name: $($Timezone.Name) Id: $($Timezone.Id)"
+          Write-Verbose "Name: $($Timezone.Name) Id: $($Timezone.Id)"
         }
         $CustomerDetails['PrimaryContact']['TimeZone'] = Read-Host "Primary contact timezone. Input timezone ID. (Make sure to match exactly)"
     
@@ -147,7 +154,7 @@ function Get-GroupCreationPayload {
         $CustomerDetails['SecondaryContact']['TimeFrame'] = Read-Host "Secondary Contact time frame in the format: 10:00 AM-4:00 PM.  WARNING: There is no input validation on this. You must match caps and spacing"
     
         foreach ($Timezone in $Timezones) {
-          Write-Host "Name: $($Timezone.Name) Id: $($Timezone.Id)"
+          Write-Verbose "Name: $($Timezone.Name) Id: $($Timezone.Id)"
         }
         $CustomerDetails['SecondaryContact']['TimeZone'] = Read-Host "Secondary contact timezone. Input timezone ID. (Make sure to match exactly)"
     
@@ -171,7 +178,7 @@ function Get-GroupCreationPayload {
         }
     
         foreach ($Timezone in $Timezones) {
-          Write-Host "Name: $($Timezone.Name) Id: $($Timezone.Id)"
+          Write-Verbose "Name: $($Timezone.Name) Id: $($Timezone.Id)"
         }
         $CustomerDetails['ShippingDetails']['PreferredContactTimeZone'] = Read-Host "Shipping contact timezone. Input timezone ID. (Make sure to match exactly)"
     
@@ -183,55 +190,6 @@ function Get-GroupCreationPayload {
     
       return $UserDataDictionary
     }
-
-function Create-McmGroup($BaseUri, $Headers, $ContentType, $GroupName) {
-    $CreateGroupURL = $BaseUri + "/api/ManagementDomainService"
-    $payload = '{
-        "GroupName": "",
-        "GroupDescription": "",
-        "JoinApproval": "AUTOMATIC",
-        "ConfigReplication": [{
-            "ConfigType": "Power",
-            "Enabled": "false"
-        }, {
-            "ConfigType": "UserAuthentication",
-            "Enabled": "false"
-        }, {
-            "ConfigType": "AlertDestinations",
-            "Enabled": "false"
-        }, {
-            "ConfigType": "TimeSettings",
-            "Enabled": "false"
-        }, {
-            "ConfigType": "ProxySettings",
-            "Enabled": "false"
-        }, {
-            "ConfigType": "SecuritySettings",
-            "Enabled": "false"
-        }, {
-            "ConfigType": "NetworkServices",
-            "Enabled": "false"
-        }, {
-            "ConfigType": "LocalAccessConfiguration",
-            "Enabled": "false"
-        }]
-    }' | ConvertFrom-Json
-
-    $JobId = 0
-    $Payload."GroupName" = $GroupName
-    $Body = $payload | ConvertTo-Json -Depth 6
-    $Response = Invoke-WebRequest -Uri $CreateGroupURL -Headers $Headers -ContentType $ContentType -Method PUT -Body $Body 
-    if ($Response.StatusCode -eq 200) {
-        $GroupData = $Response | ConvertFrom-Json
-        $JobId = $GroupData.'JobId'
-        Write-Host "MCM group created successfully...JobId is $($JobId)"
-    }
-    else {
-        Write-Warning "Failed to create MCM group"
-    }
-
-    return $JobId
-}
 
 ## Script that does the work
 if(!$SessionAuth.Token){
@@ -248,11 +206,39 @@ Try {
     $ContentType = "application/json"
 
     if ($PSBoundParameters.ContainsKey('GenerateJson')) {
-        CreateGroupCreationPayload | ConvertTo-Json -Depth 10 | Out-File $GenerateJson
-    }
+        Get-PromptGroupCreationPayload | ConvertTo-Json -Depth 10 | Out-File $GenerateJson
+    } elseif ($PSBoundParameters.ContainsKey('ExportExampleJson')) {
+        Get-SupportAssistGroupPayload | ConvertTo-Json -Depth 10 | Out-File $ExportExampleJson
+    } elseif ($PSBoundParameters.ContainsKey('AddGroup')) {
+        Write-Verbose "Creating new group..."
+
+        $AddGroupUrl = $BaseUri + "/api/SupportAssistService/Actions/SupportAssistService.CreateOrUpdateGroup"
+
+        if (-not $(Confirm-PathIsValid -InputFilePath $AddGroup)) {
+            Write-Error "File not found $($AddGroup)"
+            Exit
+        }
+
+        Try {
+            $GroupPayload = $(Get-Content -Path $AddGroup)
+            Write-Verbose $($GroupPayload | Out-String)
+            $Response = Invoke-WebRequest -Uri $AddGroupUrl -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupPayload
+            if ($Response.StatusCode -eq 202) {
+                Write-Verbose "Group created successfully."
+            }
+
+        }
+        Catch {
+            Write-Error "There was a problem with the group creation request. This usually means there is a problem with one of the fields."
+            Resolve-Error $_
+            Exit
+        }
+    
+        Write-Verbose "Group creation completed successfully!"
+      }
 
 }
-catch {
+Catch {
     Resolve-Error $_
 }
 

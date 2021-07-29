@@ -23,6 +23,7 @@ function Set-CertPolicy() {
         }
         catch {
             Write-Error "Unable to add type for cert policy"
+            Resolve-Error $_
         }
     } 
 }
