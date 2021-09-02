@@ -1,10 +1,10 @@
 $credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Global:OMEUsername, $(ConvertTo-SecureString -Force -AsPlainText $Global:OMEPassword)
 Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Device Tests" {
-    BeforeEach {
+    BeforeAll {
         $TestDeviceHosts = @("100.79.6.22", "100.79.6.27", "100.79.6.63")
         $TestDeviceHostsNew = @("100.79.6.64")
-        $TestDiscoveryJobName = "TestDiscovery01"
+        $TestDiscoveryJobName = "TestDiscovery_$((Get-Date).ToString('yyyyMMddHHmmss'))"
         $TestiDRACUsername = $Global:iDRACUsername
         $TestiDRACPassword = $Global:iDRACPassword
     }

@@ -80,8 +80,21 @@ Process {
                 }
             ]
         }' | ConvertFrom-Json
-
-        $payload."BaselineTargets" = $Baseline.BaselineTargets
+        $TargetPayload = '{
+            "Id":"target_id",
+            "Type": {
+                "Id": "target_type",
+                "Name": "target_name"
+            }
+        }' | ConvertFrom-Json
+        $Targets = @()
+        foreach ($Target in ,$Baseline.BaselineTargets) {
+            $TargetPayload.Id = $Target.Id
+            $TargetPayload.Type.Id = $Target.Type.Id
+            $TargetPayload.Type.Name = $Target.Type.Name
+            $Targets += $TargetPayload
+        }
+        $payload."BaselineTargets" = $Targets
         $payload."Name" = $Baseline.Name
         $payload."Description" = $Baseline.Description
         $payload."Id" = $Baseline.Id
@@ -99,7 +112,7 @@ Process {
                 $JobStatus = $($BaselineData.Id | Wait-OnConfigurationBaseline -WaitTime $WaitTime)
                 return $JobStatus
             } else {
-                return "Completed"
+                return $BaselineData.Id
             }
             Write-Verbose "Baseline check successful..."
         }

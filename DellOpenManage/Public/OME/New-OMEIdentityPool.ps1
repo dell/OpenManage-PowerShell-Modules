@@ -28,7 +28,24 @@ limitations under the License.
 .INPUTS
     None
 .EXAMPLE
-    New-OMEIdentityPool -Name "Test IdentityPool 01"
+    New-OMEIdentityPool `
+    -Name "TestPool01" `
+    -Description "Test Pool 01" `
+    -EthernetSettings_IdentityCount 5 `
+    -EthernetSettings_StartingMacAddress "AA:BB:CC:DD:F5:00" `
+    -IscsiSettings_IdentityCount 5 `
+    -IscsiSettings_StartingMacAddress "AA:BB:CC:DD:F6:00" `
+    -IscsiSettings_InitiatorConfig_IqnPrefix "iqn.2009-05.com.test:test" `
+    -IscsiSettings_InitiatorIpPoolSettings_IpRange "192.168.1.200-192.168.1.220" `
+    -IscsiSettings_InitiatorIpPoolSettings_SubnetMask "255.255.255.0" `
+    -IscsiSettings_InitiatorIpPoolSettings_Gateway "192.168.1.1" `
+    -IscsiSettings_InitiatorIpPoolSettings_PrimaryDnsServer "192.168.1.10" `
+    -IscsiSettings_InitiatorIpPoolSettings_SecondaryDnsServer "192.168.1.11" `
+    -FcoeSettings_IdentityCount 5 `
+    -FcoeSettings_StartingMacAddress "AA:BB:CC:DD:F7:00" `
+    -FcSettings_Wwnn_IdentityCount 5 `
+    -FcSettings_Wwnn_StartingAddress "AA:BB:CC:DD:F8:00" `
+    -Verbose
     Create a new static IdentityPool
 #>
 
@@ -36,6 +53,9 @@ limitations under the License.
 param(
     [Parameter(Mandatory)]
     [String]$Name,
+
+    [Parameter(Mandatory)]
+    [String]$Description,
 
     [Parameter(Mandatory=$false)]
     [Int]$EthernetSettings_IdentityCount,
@@ -98,6 +118,7 @@ Process {
 
         $IdentityPoolPayload = '{
             "Name": "IdentityPool 01",
+            "Description": "Identity Pool 01",
             "EthernetSettings": {"Mac": {"IdentityCount": "", "StartingMacAddress": "qrvM3eIA"}},
             "IscsiSettings": {"Mac": {"IdentityCount": "", "StartingMacAddress": "qrvM3eMA"},
                 "InitiatorConfig": {"IqnPrefix": ""},
@@ -115,6 +136,7 @@ Process {
             }
         }' | ConvertFrom-Json
         $IdentityPoolPayload.Name = $Name
+        $IdentityPoolPayload.Description = $Description
         if ($EthernetSettings_IdentityCount -gt 0) {
             $IdentityPoolPayload.EthernetSettings.Mac.IdentityCount = $EthernetSettings_IdentityCount
             $IdentityPoolPayload.EthernetSettings.Mac.StartingMacAddress = $EthernetSettings_StartingMacAddress | Convert-MacAddressToBase64

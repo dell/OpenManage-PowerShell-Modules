@@ -142,9 +142,11 @@ function Get-ApplicableComponents($BaseUri, $Headers, $ContentType, $DupReportPa
 }
 
 function Push-DupToOME($BaseUri, $Headers, $DupFile) {
+    if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
     $FileToken = $null
     $UploadActionUri = $BaseUri + "/api/UpdateService/Actions/UpdateService.UploadFile"
     Write-Verbose "Uploading $($DupFile) to $($BaseUri). This action may take some time to complete."
+    
     $UploadResponse = Invoke-WebRequest -Uri $UploadActionUri -Method Post -InFile $DupFile -ContentType "application/octet-stream" -Headers $Headers
     if ($UploadResponse.StatusCode -eq 200) {
         ## Successfully uploaded the DUP file . Get the file token
@@ -201,6 +203,7 @@ limitations under the License.
     Update firmware via DUP (EXE) on devices in OpenManage Enterprise
 .DESCRIPTION
     This will upload a DUP (EXE) file and submit a Job that updates firmware on a set of devices.
+    If you encounter the error "An existing connection was forcibly closed by the remote host" close and reopen the PowerShell console. Not sure what is causing this.
 .PARAMETER Name
     Name of the firmware update job
 .PARAMETER Device

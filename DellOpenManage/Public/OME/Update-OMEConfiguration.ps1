@@ -191,7 +191,7 @@ Process {
                     $JobInfo = $JobResp.Content | ConvertFrom-Json
                     $JobId = $JobInfo.Id
                     Write-Verbose "Created job $($JobId) to update configuration..."
-                    if ($Wait.IsPresent) {
+                    if ($Wait) {
                         $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
                         return $JobStatus
                     } else {

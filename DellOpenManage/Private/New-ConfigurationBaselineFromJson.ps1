@@ -7,6 +7,11 @@ function New-ConfigurationBaselineFromJson {
     foreach ($Target in $ConfigurationBaseline.BaselineTargets){
         $Targets += $Target.Id
     }
+    if ($ConfigurationBaseline.LastRun -eq "Unknown") {
+        $LastRun = $null
+    } else {
+        $LastRun = $ConfigurationBaseline.LastRun
+    }
     return [ConfigurationBaseline]@{
         Id = $ConfigurationBaseline.Id
         Name = $ConfigurationBaseline.Name
@@ -14,7 +19,7 @@ function New-ConfigurationBaselineFromJson {
         TemplateId = $ConfigurationBaseline.TemplateId
         TemplateName = $ConfigurationBaseline.TemplateName
         TemplateType = $ConfigurationBaseline.TemplateType
-        LastRun = $ConfigurationBaseline.LastRun
+        LastRun = $LastRun
         BaselineTargets = $ConfigurationBaseline.BaselineTargets
         Targets = $Targets
     }

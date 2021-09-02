@@ -29,5 +29,9 @@ Describe "Device Tests" {
         It "Should refresh device inventory" {
             $TestDeviceServiceTags | Get-OMEDevice | Invoke-OMEInventoryRefresh | Should -BeOfType System.Int64
         }
+
+        It "Should submit job to power on device" {
+            $TestDeviceServiceTags | Set-OMEPowerState -State "On" | Should -BeOfType System.Int64
+        }
     }
 }

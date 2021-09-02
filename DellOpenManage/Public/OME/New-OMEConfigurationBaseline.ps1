@@ -144,7 +144,7 @@ Process {
                 $JobStatus = $($BaselineData.Id | Wait-OnConfigurationBaseline -WaitTime $WaitTime)
                 return $JobStatus
             } else {
-                return
+                return $BaselineData.Id
             }
             Write-Verbose "Baseline creation successful..."
         }

@@ -1,4 +1,6 @@
-﻿$PowerControlStateMap = @{
+﻿using module ..\..\Classes\Device.psm1
+
+$PowerControlStateMap = @{
     "On" = "2";
     "Off" = "12";
     "ColdBoot" = "5";
@@ -164,6 +166,8 @@ Process {
                     if ($Wait) {
                         $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
                         return $JobStatus
+                    } else {
+                        return $JobId
                     }
                 }
                 else {
@@ -177,9 +181,7 @@ Process {
         }
     } 
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String) 
+        Resolve-Error $_
     }
 }
 

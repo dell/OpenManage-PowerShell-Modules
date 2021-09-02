@@ -4,13 +4,14 @@ param(
     [String]$Test,
 
     [Parameter(Mandatory=$false)]
+    [String]$Tag,
+
+    [Parameter(Mandatory=$false)]
     [String]$Server
 )
 
 . .\Credentials.ps1
 
-# Requires Pester 4.0+
-#Install-Module -Name Pester -Scope CurrentUser -Force
 Import-Module Pester
 Remove-Module DellOpenManage
 Import-Module DellOpenManage
@@ -25,14 +26,22 @@ $Global:OMEPassword = $OMEPassword
 $Global:iDRACUsername = $iDRACUsername
 $Global:iDRACPassword = $iDRACPassword
 
+$PesterPreference = [PesterConfiguration]::Default
+$PesterPreference.Output.Verbosity = 'Detailed'
+
 if ($Test -ne "") {
-    Invoke-Pester -Script ".\Tests\$($Test).Tests.ps1"
+    if ($Tag -ne "") {
+        Invoke-Pester ".\Tests\$($Test).Tests.ps1" -Tag "$($Tag)"
+    } else {
+        Invoke-Pester ".\Tests\$($Test).Tests.ps1"
+    }
 } else {
-    Invoke-Pester -Script .\Tests\Discovery.Tests.ps1
-    Invoke-Pester -Script .\Tests\Device.Tests.ps1
-    Invoke-Pester -Script .\Tests\Group.Tests.ps1
-    Invoke-Pester -Script .\Tests\Firmware.Tests.ps1
-    Invoke-Pester -Script .\Tests\Template.Tests.ps1
+    Invoke-Pester .\Tests\Discovery.Tests.ps1
+    Invoke-Pester .\Tests\Device.Tests.ps1
+    Invoke-Pester .\Tests\Group.Tests.ps1
+    Invoke-Pester .\Tests\Firmware.Tests.ps1
+    Invoke-Pester .\Tests\Template.Tests.ps1
+    Invoke-Pester .\Tests\User.Tests.ps1
 }
 
 

@@ -75,8 +75,6 @@ function Read-Confirmation() {
     return $true
   }
 
-
-
 function Get-PromptGroupCreationPayload {
     <#
       .SYNOPSIS
@@ -224,6 +222,7 @@ Try {
             Write-Verbose $($GroupPayload | Out-String)
             $Response = Invoke-WebRequest -Uri $AddGroupUrl -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupPayload
             if ($Response.StatusCode -eq 202) {
+                Write-Verbose $Response.Content
                 Write-Verbose "Group created successfully."
             }
 

@@ -34,3 +34,32 @@ Release 2.2.1 6/25/2021
 
 Release 2.2.2 6/25/2021
 * Invoke-OMEInventoryRefresh added -Wait parameter
+
+Release 2.3.0
+* Migrated scripts from https://github.com/dell/OpenManage-Enterprise/tree/master/PowerShell
+* New commandlets
+    * Get-OMEAuditLogs
+    * Get-OMEWarranty
+    * Get-OMEAlerts
+    * Get-OMEUser
+    * New-OMEUser
+    * Get-OMEIdentityPool
+    * Get-OMEIdentityPoolUsage
+    * New-OMEIdentityPool
+    * New-OMENetwork
+    * Get-OMENetwork
+    * Update-OMEFirmwareDUP
+    * Edit-OMESecurityBanner
+    * New-OMESupportAssistGroup
+    * Get-OMESupportAssistGroup
+    * Edit-OMESupportAssistGroup
+    * Remove-OMESupportAssistGroup
+
+* Write tests for 
+DellOpenManage/Private/Get-MXDomains.ps1
+DellOpenManage/Public/OME/Invoke-OMEMcmGroupAddMember.ps1
+DellOpenManage/Public/OME/Invoke-OMEMcmGroupAssignBackupLead.ps1
+DellOpenManage/Public/OME/Invoke-OMEMcmGroupRetireLead.ps1
+DellOpenManage/Public/OME/New-OMEMcmGroup.ps1
+
+DellOpenManage/Public/OME/Get-OMESupportAssistCases.ps1

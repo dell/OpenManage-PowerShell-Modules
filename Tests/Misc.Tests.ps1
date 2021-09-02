@@ -1,9 +1,10 @@
 $credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Global:OMEUsername, $(ConvertTo-SecureString -Force -AsPlainText $Global:OMEPassword)
 Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Misc Tests" {
-    BeforeEach {
+    BeforeAll {
+        $Script:TestIdentityPoolName = "TestPool01"
     }
-    Context "Alert Checks" {
+    Context "Alert" -Tag "Alert" {
         It "Should return ALL Alerts" {
             Get-OMEAlerts | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
         }
@@ -12,22 +13,22 @@ Describe "Misc Tests" {
             Get-OMEAlerts -SeverityType "CRITICAL" -Top 50 | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
         }
     }
-    Context "Audit Checks" {
+    Context "Audit" -Tag "Audit" {
         It "Should return ALL Audit Logs" {
             Get-OMEAuditLogs | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
         }
     }
-    Context "Warranty Checks" {
+    Context "Warranty" -Tag "Warranty" {
         It "Should return ALL Warranties" {
             Get-OMEWarranty | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
         }
     }
-    Context "Report Checks" {
+    Context "Report" -Tag "Report" {
         It "Should return ALL Reports" {
             Get-OMEReport | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
         }
     }
-    Context "Network Checks" {
+    Context "Network" -Tag "Network" {
         It "Should create new Network" {
             $TestNetwork = @{
                 Name = "TestNetwork1"
@@ -43,13 +44,31 @@ Describe "Misc Tests" {
             Get-OMENetwork | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
     }
-    Context "Identity Pool Checks" {
+    Context "Identity Pool" -Tag "IdentityPool" {
         It "Should create an Identity Pool" {
-            
-            11 | Get-OMEIdentityPool -FilterBy "Id" | Get-OMEIdentityPoolUsage -Verbose # | Export-Csv -Path "C:\Users\Trevor_Squillario\Downloads\Get-OMEIdentityPoolUsage.csv" -NoTypeInformation
-        }
+            New-OMEIdentityPool `
+                -Name $Script:TestIdentityPoolName `
+                -Description "Test Identity Pool" `
+                -EthernetSettings_IdentityCount 5 `
+                -EthernetSettings_StartingMacAddress "AA:BB:CC:DD:F5:00" `
+                -IscsiSettings_IdentityCount 5 `
+                -IscsiSettings_StartingMacAddress "AA:BB:CC:DD:F6:00" `
+                -IscsiSettings_InitiatorConfig_IqnPrefix "iqn.2009-05.com.test:test" `
+                -IscsiSettings_InitiatorIpPoolSettings_IpRange "192.168.1.200-192.168.1.220" `
+                -IscsiSettings_InitiatorIpPoolSettings_SubnetMask "255.255.255.0" `
+                -IscsiSettings_InitiatorIpPoolSettings_Gateway "192.168.1.1" `
+                -IscsiSettings_InitiatorIpPoolSettings_PrimaryDnsServer "192.168.1.10" `
+                -IscsiSettings_InitiatorIpPoolSettings_SecondaryDnsServer "192.168.1.11" `
+                -FcoeSettings_IdentityCount 5 `
+                -FcoeSettings_StartingMacAddress "AA:BB:CC:DD:F7:00" `
+                -FcSettings_Wwnn_IdentityCount 5 `
+                -FcSettings_Wwnn_StartingAddress "AA:BB:CC:DD:F8:00" `
+
+            $Script:TestIdentityPoolName | Get-OMEIdentityPool | Select-Object -ExpandProperty Name | Should -Be $Script:TestIdentityPoolName
+            }
         It "Should return Identity Pool Usage" {
-            Get-OMEIdentityPoolUsage | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
+            # Not implemented yet. Need to deploy a template with identity pool assigned
+            #$Script:TestIdentityPoolName | Get-OMEIdentityPool | Get-OMEIdentityPoolUsage | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
     }
 }
