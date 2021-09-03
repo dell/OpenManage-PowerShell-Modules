@@ -34,14 +34,16 @@ Connect-OMEServer -Name "ome.example.com" -Credentials $(New-Object -TypeName Sy
 ### EXAMPLE 2
 ```
 Connect-OMEServer -Name "ome.example.com" -Credentials $(Get-Credential) -IgnoreCertificateWarning
-Prompt for credentials
 ```
+
+Prompt for credentials
 
 ### EXAMPLE 3
 ```
 $env:OMEHost = '192.168.1.100'; $env:OMEUserName = 'admin'; $env:OMEPassword = 'calvin'; Connect-OMEServer -IgnoreCertificateWarning
-Credentials can be stored in Environment Variables
 ```
+
+Credentials can be stored in Environment Variables
 
 ## PARAMETERS
 

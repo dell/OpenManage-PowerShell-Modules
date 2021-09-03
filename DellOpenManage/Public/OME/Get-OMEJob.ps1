@@ -56,18 +56,23 @@ limitations under the License.
     String[]
 .EXAMPLE
     Get-OMEJOb | Format-Table
+
     List all jobs
 .EXAMPLE
     13852 | Get-OMEJob -Detail -Verbose
+
     Get job by Id
 .EXAMPLE
     5 | Get-OMEJob -FilterBy "Type" | Format-Table
+
     Get job by job type
 .EXAMPLE
     2060 | Get-OMEJob -FilterBy "LastRunStatus" | Format-Table
+
     Get job by last run status
 .EXAMPLE
     "Enabled" | Get-OMEJob -FilterBy "State" | Format-Table
+    
     Get job by state
 #>
 

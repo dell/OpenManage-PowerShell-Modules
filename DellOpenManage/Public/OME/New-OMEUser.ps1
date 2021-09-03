@@ -34,6 +34,7 @@ limitations under the License.
     None
 .EXAMPLE
     New-OMEUser -Name "tstest1" -Description "Test user 1" -Password $(ConvertTo-SecureString -Force -AsPlainText "calvin") -Role "ADMINISTRATOR"
+    
     Create a new user
 #>
 

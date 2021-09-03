@@ -37,15 +37,19 @@ limitations under the License.
     Group
 .EXAMPLE
     Get-OMEGroup "Test Group 01" | Edit-OMEGroup
+
     Force group update. This is a workaround that will trigger baselines to update devices in the associated group.
 .EXAMPLE
     Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Name "Test Group 001" -Description "This is a new group"
+
     Edit group name and description
 .EXAMPLE
     Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
+
     Add devices to group
 .EXAMPLE
     Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Mode "Remove" -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
+    
     Remove devices from group
 #>
 

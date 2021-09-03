@@ -36,6 +36,8 @@ Release 2.2.2 6/25/2021
 * Invoke-OMEInventoryRefresh added -Wait parameter
 
 Release 2.3.0
+* Fixed Set-CertPolicy to allow multiple Connect-OME within script (Issue #2)
+* Fixed Set-OMEPowerState (Issue #3)
 * Migrated scripts from https://github.com/dell/OpenManage-Enterprise/tree/master/PowerShell
 * New commandlets
     * Get-OMEAuditLogs
@@ -54,12 +56,9 @@ Release 2.3.0
     * Get-OMESupportAssistGroup
     * Edit-OMESupportAssistGroup
     * Remove-OMESupportAssistGroup
-
-* Write tests for 
-DellOpenManage/Private/Get-MXDomains.ps1
-DellOpenManage/Public/OME/Invoke-OMEMcmGroupAddMember.ps1
-DellOpenManage/Public/OME/Invoke-OMEMcmGroupAssignBackupLead.ps1
-DellOpenManage/Public/OME/Invoke-OMEMcmGroupRetireLead.ps1
-DellOpenManage/Public/OME/New-OMEMcmGroup.ps1
-
-DellOpenManage/Public/OME/Get-OMESupportAssistCases.ps1
+    * Get-OMESupportAssistCases
+    * New-OMEMcmGroup
+    * Invoke-OMEMcmGroupAddMember
+    * Invoke-OMEMcmGroupAssignBackupLead
+    * Invoke-OMEMcmGroupRetireLead
+    * Get-OMEMXDomains

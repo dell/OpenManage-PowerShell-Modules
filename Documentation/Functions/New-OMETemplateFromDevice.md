@@ -25,14 +25,16 @@ New-OMETemplateFromDevice [-Device] <Device> [[-Name] <String>] [[-Description] 
 ### EXAMPLE 1
 ```
 New-OMETemplateFromDevice -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
-Create new deployment template from device
 ```
+
+Create new deployment template from device
 
 ### EXAMPLE 2
 ```
 New-OMETemplateFromDevice -TemplateType "Configuration" -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
-Create new configuration template from device
 ```
+
+Create new configuration template from device
 
 ## PARAMETERS
 

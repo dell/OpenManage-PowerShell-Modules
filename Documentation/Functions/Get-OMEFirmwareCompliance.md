@@ -26,20 +26,23 @@ Then you can see the firmware that needs updated.
 ### EXAMPLE 1
 ```
 "AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance | Format-Table
-Get report for existing baseline
 ```
+
+Get report for existing baseline
 
 ### EXAMPLE 2
 ```
 "AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -DeviceFilter $("FVKGSWZ" | Get-OMEDevice -FilterBy "ServiceTag") | Format-Table
-Filter report by device in baseline
 ```
+
+Filter report by device in baseline
 
 ### EXAMPLE 3
 ```
 "AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -ComponentFilter "iDRAC" | Format-Table
-Filter report by component in baseline
 ```
+
+Filter report by component in baseline
 
 ## PARAMETERS
 

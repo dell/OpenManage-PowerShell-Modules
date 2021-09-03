@@ -26,14 +26,16 @@ This will use an existing configuration baseline to submit a Job that updates co
 ### EXAMPLE 1
 ```
 Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -Wait -Verbose
-Update configuration compliance on all devices in baseline ***This will force a reboot if necessary***
 ```
+
+Update configuration compliance on all devices in baseline ***This will force a reboot if necessary***
 
 ### EXAMPLE 2
 ```
 Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
-Update configuration compliance on filtered devices in baseline ***This will force a reboot if necessary***
 ```
+
+Update configuration compliance on filtered devices in baseline ***This will force a reboot if necessary***
 
 ## PARAMETERS
 

@@ -23,23 +23,46 @@ limitations under the License.
  .DESCRIPTION
    This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
 
- .PARAMETER GroupName
-   The Name of the MCM Group.
+ .PARAMETER AddGroup
+   JSON string containing group payload. Use -GenerateJson or -ExportExampleJson for examples
+
+ .PARAMETER GenerateJson
+    Prompt for values to necessary fields and generate JSON string
+
+ .PARAMETER ExportExampleJson
+    Print example JSON string
 
  .EXAMPLE
-   New-OMEMcmGroup -GroupName TestGroup -Wait
+    $TestSupportAssistGroup = '{
+        "MyAccountId": "",
+        "Name": "Support Assist Group 1",
+        "Description": "Support Assist Group",
+        "DispatchOptIn": false,
+        "CustomerDetails": null,
+        "ContactOptIn":  false
+    }'
+    New-OMESupportAssistGroup -AddGroup $TestSupportAssistGroup
 
+    Create new Support Assist group from json stored in variable
+ .EXAMPLE
+    New-OMESupportAssistGroup -AddGroup $(Get-Content "C:\Temp\Group.json" -Raw)
+    
+    Create new Support Assist group from file
+ .EXAMPLE
+    New-OMESupportAssistGroup -ExportExampleJson
+    
+    Export example json
 #>
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $false)]
-    [string]$AddGroup,
+    [Parameter(Mandatory=$false, ValueFromPipeline)]
+    [String]$AddGroup,
 
     [Parameter(Mandatory=$false)]
-    [String]$GenerateJson,
+    [Switch]$GenerateJson,
 
     [Parameter(Mandatory=$false)]
-    [String]$ExportExampleJson
+    [Switch]$ExportExampleJson
 )
 
 function Read-Confirmation() {
@@ -204,21 +227,28 @@ Try {
     $ContentType = "application/json"
 
     if ($PSBoundParameters.ContainsKey('GenerateJson')) {
-        Get-PromptGroupCreationPayload | ConvertTo-Json -Depth 10 | Out-File $GenerateJson
+        Get-PromptGroupCreationPayload | ConvertTo-Json -Depth 10 | Out-String
     } elseif ($PSBoundParameters.ContainsKey('ExportExampleJson')) {
-        Get-SupportAssistGroupPayload | ConvertTo-Json -Depth 10 | Out-File $ExportExampleJson
+        Get-SupportAssistGroupPayload | ConvertTo-Json -Depth 10 | Out-String
     } elseif ($PSBoundParameters.ContainsKey('AddGroup')) {
         Write-Verbose "Creating new group..."
 
         $AddGroupUrl = $BaseUri + "/api/SupportAssistService/Actions/SupportAssistService.CreateOrUpdateGroup"
 
-        if (-not $(Confirm-PathIsValid -InputFilePath $AddGroup)) {
-            Write-Error "File not found $($AddGroup)"
-            Exit
+        try {
+            $TestGroupJson = ConvertFrom-Json $AddGroup -ErrorAction Stop;
+            $validJson = $true;
+        } catch {
+            $validJson = $false;
+        }
+
+        if ($validJson) {
+            $GroupPayload = $AddGroup
+        } else {
+            Write-Error "Provided text is not a valid JSON string or file not found";
         }
 
         Try {
-            $GroupPayload = $(Get-Content -Path $AddGroup)
             Write-Verbose $($GroupPayload | Out-String)
             $Response = Invoke-WebRequest -Uri $AddGroupUrl -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupPayload
             if ($Response.StatusCode -eq 202) {
@@ -230,7 +260,6 @@ Try {
         Catch {
             Write-Error "There was a problem with the group creation request. This usually means there is a problem with one of the fields."
             Resolve-Error $_
-            Exit
         }
     
         Write-Verbose "Group creation completed successfully!"

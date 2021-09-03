@@ -33,6 +33,7 @@ limitations under the License.
     String[]
 .EXAMPLE
     Get-OMEDevice -Value 12016
+    
     Get device by Id
 #>
 

@@ -25,20 +25,23 @@ Perform an export of the System Configuration Profile (SCP) as an example
 ### EXAMPLE 1
 ```
 " -Wait
-Create new deployment template from string
 ```
+
+Create new deployment template from string
 
 ### EXAMPLE 2
 ```
 New-OMETemplateFromFile -Name "TestTemplate" -Content $(Get-Content -Path .\Data.xml | Out-String)
-Create new deployment template from file
 ```
+
+Create new deployment template from file
 
 ### EXAMPLE 3
 ```
 New-OMETemplateFromFile -Name "TestTemplate" -TemplateType "Configuration" -Content $(Get-Content -Path .\Data.xml | Out-String)
-Create new configuration template from file
 ```
+
+Create new configuration template from file
 
 ## PARAMETERS
 

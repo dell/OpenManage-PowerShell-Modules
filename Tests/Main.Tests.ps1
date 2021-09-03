@@ -42,11 +42,5 @@ if ($Test -ne "") {
     Invoke-Pester .\Tests\Firmware.Tests.ps1
     Invoke-Pester .\Tests\Template.Tests.ps1
     Invoke-Pester .\Tests\User.Tests.ps1
+    Invoke-Pester .\Tests\SupportAssist.Tests.ps1
 }
-
-
-
-#Invoke-Pester -Script @{Path='.\Tests\Device.Tests.ps1'}
-
-#Invoke-Pester -Script @{ Path = 'Device.Tests.ps1'; Parameters = @{ NamedParameter = 'Passed By Name' }; Arguments = @('Passed by position') }
-#Invoke-Pester -Script D:\MyModule, @{ Path = '.\Tests\Utility\ModuleUnit.Tests.ps1'; Parameters = @{ Name = 'User01' }; Arguments = srvNano16  }

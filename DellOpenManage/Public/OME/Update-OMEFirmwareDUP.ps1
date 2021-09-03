@@ -226,21 +226,27 @@ limitations under the License.
     None
 .EXAMPLE
     "C86C0ZZ" | Get-OMEDevice | Update-OMEFirmwareDUP -UpdateSchedule "Preview" -DupFile "C:\Temp\Network_Firmware_DK4G2_WN64_20.0.17_A00.EXE"
+
     Display device compliance report for device. No updates are installed by default.
 .EXAMPLE
     "C86C0ZZ" | Get-OMEDevice | Update-OMEFirmwareDUP -UpdateSchedule "RebootNow" -DupFile "C:\Temp\Network_Firmware_DK4G2_WN64_20.0.17_A00.EXE" -Wait
+
     Update firmware immediately and wait to job to complete ***Warning: This will force a reboot of all servers
 .EXAMPLE
     "C86C0ZZ" | Get-OMEDevice | Update-OMEFirmwareDUP -UpdateSchedule "StageForNextReboot" -DupFile "C:\Temp\Network_Firmware_DK4G2_WN64_20.0.17_A00.EXE"
+
     Update firmware on next reboot
 .EXAMPLE
     "C86C0ZZ" | Get-OMEDevice | Update-OMEFirmwareDUP -UpdateSchedule "ScheduleLater" -UpdateScheduleCron "0 0 0 1 11 ?" -DupFile "C:\Temp\Network_Firmware_DK4G2_WN64_20.0.17_A00.EXE"
+
     Update firmware on 11/1/2020 12:00AM UTC
 .EXAMPLE
     "C86C0ZZ" | Get-OMEDevice | Update-OMEFirmwareDUP -UpdateSchedule "StageForNextReboot" -ClearJobQueue -DupFile "C:\Temp\Network_Firmware_DK4G2_WN64_20.0.17_A00.EXE"
+
     Update firmware on next reboot and clear job queue before update
 .EXAMPLE
     "TestGroup" | Get-OMEGroup | Update-OMEFirmwareDUP -UpdateSchedule "RebootNow" -DupFile "C:\Temp\Network_Firmware_DK4G2_WN64_20.0.17_A00.EXE"
+    
     Update firmware on all devices in group immediately ***Warning: This will force a reboot of all servers
 #>
 

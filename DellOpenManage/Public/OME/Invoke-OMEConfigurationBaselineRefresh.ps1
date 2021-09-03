@@ -35,6 +35,7 @@ limitations under the License.
     ConfigurationBaseline
 .EXAMPLE
     $("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationBaselineRefresh -Wait -Verbose
+    
     Refresh compliance for configuration baseline
 #>
 

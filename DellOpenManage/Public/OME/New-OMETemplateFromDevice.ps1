@@ -41,9 +41,11 @@ limitations under the License.
     None
 .EXAMPLE
     New-OMETemplateFromDevice -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
+
     Create new deployment template from device
 .EXAMPLE
     New-OMETemplateFromDevice -TemplateType "Configuration" -Component "iDRAC", "BIOS" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
+    
     Create new configuration template from device
 #>
 

@@ -25,8 +25,9 @@ A baseline is used to compare configuration against a template
 ### EXAMPLE 1
 ```
 $("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OMEConfigurationBaselineRefresh -Wait -Verbose
-Refresh compliance for configuration baseline
 ```
+
+Refresh compliance for configuration baseline
 
 ## PARAMETERS
 

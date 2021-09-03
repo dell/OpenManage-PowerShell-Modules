@@ -31,9 +31,11 @@ limitations under the License.
     Device[]
 .EXAMPLE
     "C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail
+
     Get all inventory for devices
 .EXAMPLE
     "C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceDetail -InventoryType "deviceSoftware"
+    
     Get software inventory for devices
 #>
 [CmdletBinding()]

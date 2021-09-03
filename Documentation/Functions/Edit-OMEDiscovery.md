@@ -29,32 +29,37 @@ Wildcards are supported as well.
 ### EXAMPLE 1
 ```
 "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Replace host list and run now
 ```
+
+Replace host list and run now
 
 ### EXAMPLE 2
 ```
 "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server02-idrac.example.com') -Mode "Append" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Append host to host list and run now
 ```
+
+Append host to host list and run now
 
 ### EXAMPLE 3
 ```
 "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Hosts @('server02-idrac.example.com') -Mode "Remove" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Remove host from host list and run now
 ```
+
+Remove host from host list and run now
 
 ### EXAMPLE 4
 ```
 "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Schedule "RunNow" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Run discovery job now
 ```
+
+Run discovery job now
 
 ### EXAMPLE 5
 ```
 "TestDiscovery01" | Get-OMEDiscovery | Edit-OMEDiscovery -Schedule "RunLater" -ScheduleCron "0 0 0 ? * sun *" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Run discovery job every Sunday at 12:00AM UTC
 ```
+
+Run discovery job every Sunday at 12:00AM UTC
 
 ## PARAMETERS
 

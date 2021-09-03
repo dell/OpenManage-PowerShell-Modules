@@ -28,12 +28,15 @@ limitations under the License.
     String[]
 .EXAMPLE
     Get-OMEGroup | Format-Table
+
     Get all groups
 .EXAMPLE
     "Servers_Win" | Get-OMEGroup | Format-Table
+
     Get group by name
 .EXAMPLE
     "Servers_ESXi", "Servers_Win" | Get-OMEGroup | Format-Table
+    
     Get multiple groups
 #>
 [CmdletBinding()]

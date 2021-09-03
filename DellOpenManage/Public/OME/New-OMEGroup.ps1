@@ -29,6 +29,7 @@ limitations under the License.
     None
 .EXAMPLE
     New-OMEGroup -Name "Test Group 01"
+    
     Create a new static group
 #>
 

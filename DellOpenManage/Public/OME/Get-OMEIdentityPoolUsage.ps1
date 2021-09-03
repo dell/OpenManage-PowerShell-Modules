@@ -30,28 +30,19 @@ limitations under the License.
 
  .PARAMETER IpAddress
    This is the IP address of the OME Appliance
- .PARAMETER Credentials
-   Credentials used to talk to the OME Appliance
  .PARAMETER Id
    This is the Identity Pool Id
  .PARAMETER OutFile
    This is the full path to output the CSV file
 
  .EXAMPLE
-   $cred = Get-Credential
-   .\Get-IdentityPoolUsage.ps1 -IpAddress "10.xx.xx.xx" -Credentials $cred
+   11 | Get-OMEIdentityPool -FilterBy "Id" | Get-OMEIdentityPoolUsage -Verbose
 
+   Get identity pool by Id
  .EXAMPLE
-   .\Get-IdentityPoolUsage.ps1 -IpAddress "10.xx.xx.xx"
-   In this instance you will be prompted for credentials to use
+   "Pool01" | Get-OMEIdentityPool | Get-OMEIdentityPoolUsage -Verbose
 
- .EXAMPLE
-   .\Get-IdentityPoolUsage.ps1 -IpAddress "10.xx.xx.xx" -Id 3
-   In this instance you will be prompted for credentials to use
-
- .EXAMPLE
-   .\Get-IdentityPoolUsage.ps1 -IpAddress "10.xx.xx.xx" -Id 3 -OutFile C:\Temp\export.csv
-   In this instance you will be prompted for credentials to use
+   Get identity pool by name
 #>
     [CmdletBinding()]
     param(

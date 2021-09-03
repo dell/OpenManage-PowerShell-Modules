@@ -24,8 +24,9 @@ Remove group from OpenManage Enterprise
 ### EXAMPLE 1
 ```
 Get-OMEGroup "Test Group 01" | Remove-OMEGroup
-Remove group
 ```
+
+Remove group
 
 ## PARAMETERS
 

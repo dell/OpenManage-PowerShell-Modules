@@ -92,13 +92,13 @@ function Invoke-OMEMcmGroupAddMember {
             $Payload = $StandaloneDomains
             $ManagementDomainURL = $BaseUri + "/api/ManagementDomainService/Actions/ManagementDomainService.Domains"
             $Body = $Payload 
-            Write-Host "Adding members to the group..."
-            Write-Host "Invoking URL $($ManagementDomainURL)"
+            Write-Verbose "Adding members to the group..."
+            Write-Verbose "Invoking URL $($ManagementDomainURL)"
             $Response = Invoke-WebRequest -Uri $ManagementDomainURL -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
             if ($Response.StatusCode -eq 200) {
                 $ManagementData = $Response | ConvertFrom-Json
                 $JobId = $ManagementData.'JobId'
-                Write-Host "Added members to the created group...Job ID is $($JobId)"
+                Write-Verbose "Added members to the created group...Job ID is $($JobId)"
             }
             else {
                 Write-Warning "Failed to add members to the group"
@@ -124,16 +124,16 @@ function Invoke-OMEMcmGroupAddMember {
         $Headers."X-Auth-Token" = $SessionAuth.Token
         $ContentType = "application/json"
     
-        ## Sending in non-existent targets throws an exception with a "bad request"
-        ## error. Doing some pre-req error checking as a result to validate input
-        ## This is a Powershell quirk on Invoke-WebRequest failing with an error
         # Create mcm group
         $JobId = 0
         $JobId = Add-AllMembersViaLead -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType
         if ($JobId) {
-            Write-Host "Polling addition of members to group ..."
+            Write-Verbose "Polling addition of members to group ..."
             if ($Wait) {
-                $JobId | Wait-OnJob -WaitTime $WaitTime
+                $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
+                return $JobStatus
+            } else {
+                return $JobId
             }
         }
     

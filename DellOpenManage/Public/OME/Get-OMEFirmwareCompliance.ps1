@@ -39,12 +39,15 @@ limitations under the License.
     Baseline[]
 .EXAMPLE
     "AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance | Format-Table
+
     Get report for existing baseline
 .EXAMPLE
     "AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -DeviceFilter $("FVKGSWZ" | Get-OMEDevice -FilterBy "ServiceTag") | Format-Table
+
     Filter report by device in baseline
 .EXAMPLE
     "AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -ComponentFilter "iDRAC" | Format-Table
+    
     Filter report by component in baseline
 #>
 

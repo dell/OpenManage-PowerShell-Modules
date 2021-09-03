@@ -20,7 +20,7 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Create an MCM group and add all possible members to the created group
+   Create an MCM group 
 
  .DESCRIPTION
    This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
@@ -43,7 +43,6 @@ param(
     [Parameter(Mandatory=$false)]
     [int]$WaitTime = 3600
 )
-
 function Create-McmGroup($BaseUri, $Headers, $ContentType, $GroupName) {
     $CreateGroupURL = $BaseUri + "/api/ManagementDomainService"
     $payload = '{
@@ -52,28 +51,28 @@ function Create-McmGroup($BaseUri, $Headers, $ContentType, $GroupName) {
         "JoinApproval": "AUTOMATIC",
         "ConfigReplication": [{
             "ConfigType": "Power",
-            "Enabled": "false"
+            "Enabled": "true"
         }, {
             "ConfigType": "UserAuthentication",
-            "Enabled": "false"
+            "Enabled": "true"
         }, {
             "ConfigType": "AlertDestinations",
-            "Enabled": "false"
+            "Enabled": "true"
         }, {
             "ConfigType": "TimeSettings",
-            "Enabled": "false"
+            "Enabled": "true"
         }, {
             "ConfigType": "ProxySettings",
-            "Enabled": "false"
+            "Enabled": "true"
         }, {
             "ConfigType": "SecuritySettings",
-            "Enabled": "false"
+            "Enabled": "true"
         }, {
             "ConfigType": "NetworkServices",
-            "Enabled": "false"
+            "Enabled": "true"
         }, {
             "ConfigType": "LocalAccessConfiguration",
-            "Enabled": "false"
+            "Enabled": "true"
         }]
     }' | ConvertFrom-Json
 
@@ -84,7 +83,7 @@ function Create-McmGroup($BaseUri, $Headers, $ContentType, $GroupName) {
     if ($Response.StatusCode -eq 200) {
         $GroupData = $Response | ConvertFrom-Json
         $JobId = $GroupData.'JobId'
-        Write-Host "MCM group created successfully...JobId is $($JobId)"
+        Write-Verbose "MCM group created successfully...JobId is $($JobId)"
     }
     else {
         Write-Warning "Failed to create MCM group"
@@ -107,17 +106,17 @@ Try {
     $Headers."X-Auth-Token" = $SessionAuth.Token
     $ContentType = "application/json"
 
-    ## Sending in non-existent targets throws an exception with a "bad request"
-    ## error. Doing some pre-req error checking as a result to validate input
-    ## This is a Powershell quirk on Invoke-WebRequest failing with an error
     # Create mcm group
     $JobId = 0
-    Write-Host "Creating mcm group"
+    Write-Verbose "Creating mcm group"
     $JobId = Create-McmGroup -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -GroupName $GroupName
     if ($JobId) {
-        Write-Host "Created job $($JobId) to create mcm group ... Polling status now"
+        Write-Verbose "Created job $($JobId) to create mcm group ... Polling status now"
         if ($Wait) {
-            $JobId | Wait-OnJob -WaitTime $WaitTime
+            $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
+            return $JobStatus
+        } else {
+            return $JobId
         }
     }
     else {

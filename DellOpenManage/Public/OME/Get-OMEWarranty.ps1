@@ -29,9 +29,11 @@ function Get-OMEWarranty {
         String[]
     .EXAMPLE
         Get-OMEUser | Format-Table
+
         List all users
     .EXAMPLE
         "admin" | Get-OMEUser
+        
         Get user by name
     #>
     

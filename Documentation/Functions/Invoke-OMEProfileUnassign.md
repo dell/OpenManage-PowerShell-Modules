@@ -28,26 +28,30 @@ However, you can deploy a template to multiple devices.
 ### EXAMPLE 1
 ```
 Invoke-OMEProfileUnassign -Device $("37KP0ZZ" | Get-OMEDevice) -Wait -Verbose
-Unassign profile by device
 ```
+
+Unassign profile by device
 
 ### EXAMPLE 2
 ```
 $("37KP0ZZ", "37KT0ZZ" | Get-OMEDevice) | Invoke-OMEProfileUnassign -Wait -Verbose
-Unassign profile on multiple device
 ```
+
+Unassign profile on multiple device
 
 ### EXAMPLE 3
 ```
 Invoke-OMEProfileUnassign -Template $("TestTemplate01" | Get-OMETemplate) -Wait -Verbose
-Unassign profile by template
 ```
+
+Unassign profile by template
 
 ### EXAMPLE 4
 ```
 Invoke-OMEProfileUnassign -ProfileName "Profile from template 'TestTemplate01' 00001" -Wait -Verbose
-Unassign profile by profile name
 ```
+
+Unassign profile by profile name
 
 ## PARAMETERS
 

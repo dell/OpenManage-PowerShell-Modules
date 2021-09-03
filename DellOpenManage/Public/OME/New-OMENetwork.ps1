@@ -29,6 +29,7 @@ limitations under the License.
     None
 .EXAMPLE
     New-OMENetwork -Name "Test Network 01"
+    
     Create a new static Network
 #>
 

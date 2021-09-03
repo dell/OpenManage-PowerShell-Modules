@@ -1,3 +1,4 @@
+using module ..\DellOpenManage\Classes\Account.psm1
 using module ..\DellOpenManage\Classes\Catalog.psm1
 using module ..\DellOpenManage\Classes\Repository.psm1
 using module ..\DellOpenManage\Classes\Schedule.psm1
@@ -16,8 +17,10 @@ using module ..\DellOpenManage\Classes\Job.psm1
 using module ..\DellOpenManage\Classes\JobDetail.psm1
 using module ..\DellOpenManage\Classes\Discovery.psm1
 using module ..\DellOpenManage\Classes\DiscoveryTarget.psm1
+using module ..\DellOpenManage\Classes\IdentityPool.psm1
+using module ..\DellOpenManage\Classes\Network.psm1
+using module ..\DellOpenManage\Classes\SupportAssistGroup.psm1
 
-#Install-Module -Name platyPS -Scope CurrentUser -Force
 Import-Module platyPS
 $module = "DellOpenManage"
 Remove-Module $module

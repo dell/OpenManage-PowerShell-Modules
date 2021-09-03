@@ -30,9 +30,11 @@ limitations under the License.
     String[]
 .EXAMPLE
     Get-OMEDiscovery | Format-Table
+
     Get all discovery jobs
 .EXAMPLE
     "DRM" | Get-OMEDiscovery | Format-Table
+    
     Get job by name by name
 #>
 

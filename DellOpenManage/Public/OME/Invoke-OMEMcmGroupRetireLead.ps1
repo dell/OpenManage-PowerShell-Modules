@@ -59,7 +59,7 @@ function Invoke-OMEMcmGroupRetireLead {
        
     function Invoke-RetireLead($BaseUri, $Headers) {
         $BackupLead = $null
-        Write-Host "Checking for Backup Lead"
+        Write-Verbose "Checking for Backup Lead"
         $BackupLead = Get-BackupLead -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType
         $JobId = 0
         # Need to implemented -Force 
@@ -68,11 +68,11 @@ function Invoke-OMEMcmGroupRetireLead {
             Break
             Return
         } else {
-            Write-Host "Checking Backup lead health"
+            Write-Verbose "Checking Backup lead health"
             $BackupLeadHealth = $BackupLead.'BackupLeadHealth'
             if ($BackupLeadHealth -ne 1000) {
-                Write-Host "Backup lead health is CRITICAL or WARNING."
-                Write-Host "Please ensure backup lead is healty before retiring the lead"
+                Write-Verbose "Backup lead health is CRITICAL or WARNING."
+                Write-Verbose "Please ensure backup lead is healty before retiring the lead"
                 Break
                 Return
             }
@@ -90,7 +90,7 @@ function Invoke-OMEMcmGroupRetireLead {
             $RetireLeadResp = $Response | ConvertFrom-Json
             $JobId = $RetireLeadResp.'JobId'
             if ($JobId) {
-                Write-Host "Created job to retire lead with job id $($JobId)"
+                Write-Verbose "Created job to retire lead with job id $($JobId)"
             }
         }
         else {
@@ -121,8 +121,13 @@ function Invoke-OMEMcmGroupRetireLead {
         $JobId = 0
         $JobId = Invoke-RetireLead -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType
         if ($JobId) {
-            Write-Host "Polling for retire lead job status ..."
-            $JobId | Wait-OnJob -WaitTime $WaitTime
+            Write-Verbose "Polling for retire lead job status ..."
+            if ($Wait) {
+                $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
+                return $JobStatus
+            } else {
+                return $JobId
+            }
         } else {
             Write-Warning "Unable to track backup lead assignment ..."
         }

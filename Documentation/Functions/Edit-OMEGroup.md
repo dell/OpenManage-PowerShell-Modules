@@ -25,26 +25,31 @@ Edit-OMEGroup [-Group] <Group> [[-Name] <String>] [[-Description] <String>] [[-D
 ### EXAMPLE 1
 ```
 Get-OMEGroup "Test Group 01" | Edit-OMEGroup
-Force group update. This is a workaround that will trigger baselines to update devices in the associated group.
 ```
+
+Force group update.
+This is a workaround that will trigger baselines to update devices in the associated group.
 
 ### EXAMPLE 2
 ```
 Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Name "Test Group 001" -Description "This is a new group"
-Edit group name and description
 ```
+
+Edit group name and description
 
 ### EXAMPLE 3
 ```
 Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
-Add devices to group
 ```
+
+Add devices to group
 
 ### EXAMPLE 4
 ```
 Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Mode "Remove" -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
-Remove devices from group
 ```
+
+Remove devices from group
 
 ## PARAMETERS
 

@@ -25,14 +25,16 @@ To get the configuration compliance for a device you need to create a Configurat
 ### EXAMPLE 1
 ```
 "TestBaseline01" | Get-OMEConfigurationBaseline | Get-OMEConfigurationCompliance | Format-Table
-Get configuration compliance report for all devices in baseline
 ```
+
+Get configuration compliance report for all devices in baseline
 
 ### EXAMPLE 2
 ```
 "TestBaseline01" | Get-OMEConfigurationBaseline | Get-OMEConfigurationCompliance -DeviceFilter $("FVKGSWZ" | Get-OMEDevice -FilterBy "ServiceTag") | Format-Table
-Get configuration compliance report for specific devices in baseline
 ```
+
+Get configuration compliance report for specific devices in baseline
 
 ## PARAMETERS
 

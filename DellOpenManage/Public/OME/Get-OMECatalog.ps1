@@ -30,9 +30,11 @@ limitations under the License.
     String[]
 .EXAMPLE
     Get-OMECatalog | Format-Table
+
     Get all catalogs
 .EXAMPLE
     "DRM" | Get-OMECatalog | Format-Table
+    
     Get catalog by name
 #>
 

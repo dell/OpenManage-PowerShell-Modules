@@ -31,26 +31,30 @@ Submit an Issue on Github to request additional features.
 ### EXAMPLE 1
 ```
 New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('server01-idrac.example.com') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Discover servers by hostname
 ```
+
+Discover servers by hostname
 
 ### EXAMPLE 2
 ```
 New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('10.35.0.0', '10.35.0.1') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Discover servers by IP Address
 ```
+
+Discover servers by IP Address
 
 ### EXAMPLE 3
 ```
 New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('10.37.0.0/24') -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Discover servers by Subnet
 ```
+
+Discover servers by Subnet
 
 ### EXAMPLE 4
 ```
 New-OMEDiscovery -Name "TestDiscovery01" -Hosts @('10.37.0.0/24') -Schedule "RunLater" -ScheduleCron "0 0 0 ? * sun *" -DiscoveryUserName "root" -DiscoveryPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Wait -Verbose
-Discover servers by Subnet every Sunday at 12:00AM UTC
 ```
+
+Discover servers by Subnet every Sunday at 12:00AM UTC
 
 ## PARAMETERS
 

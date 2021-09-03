@@ -26,38 +26,45 @@ This will use an existing firmware baseline to submit a Job that updates firmwar
 ### EXAMPLE 1
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) | Format-Table
-Display device compliance report for all devices in baseline. No updates are installed by default.
 ```
+
+Display device compliance report for all devices in baseline.
+No updates are installed by default.
 
 ### EXAMPLE 2
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "RebootNow"
-Update firmware on all devices in baseline immediately ***Warning: This will force a reboot of all servers
 ```
+
+Update firmware on all devices in baseline immediately ***Warning: This will force a reboot of all servers
 
 ### EXAMPLE 3
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "StageForNextReboot"
-Update firmware on all devices in baseline on next reboot
 ```
+
+Update firmware on all devices in baseline on next reboot
 
 ### EXAMPLE 4
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "ScheduleLater" -UpdateScheduleCron "0 0 0 1 11 ?"
-Update firmware on 11/1/2020 12:00AM UTC
 ```
+
+Update firmware on 11/1/2020 12:00AM UTC
 
 ### EXAMPLE 5
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow"
-Update firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
 ```
+
+Update firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
 
 ### EXAMPLE 6
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue
-Update firmware on specific components in baseline on next reboot and clear job queue before update
 ```
+
+Update firmware on specific components in baseline on next reboot and clear job queue before update
 
 ## PARAMETERS
 

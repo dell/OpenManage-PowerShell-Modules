@@ -127,9 +127,11 @@ limitations under the License.
     None
 .EXAMPLE
     Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -Wait -Verbose
+
     Update configuration compliance on all devices in baseline ***This will force a reboot if necessary***
 .EXAMPLE
     Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
+    
     Update configuration compliance on filtered devices in baseline ***This will force a reboot if necessary***
 #>
 

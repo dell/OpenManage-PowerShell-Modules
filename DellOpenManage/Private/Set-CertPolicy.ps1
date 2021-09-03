@@ -7,6 +7,7 @@ function Set-CertPolicy() {
     } else {
         ## Trust all certs - for sample usage only
         try {
+            if ("TrustAllCertsPolicy" -as [type]) {} else { # Only add the class if it doesn't already exist
             Add-Type @"
             using System.Net;
             using System.Security.Cryptography.X509Certificates;
@@ -18,8 +19,9 @@ function Set-CertPolicy() {
                 }
             }
 "@
-        [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            }
+            [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         }
         catch {
             Write-Error "Unable to add type for cert policy"

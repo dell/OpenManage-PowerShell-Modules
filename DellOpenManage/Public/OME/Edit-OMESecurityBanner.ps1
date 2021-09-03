@@ -27,6 +27,7 @@ limitations under the License.
     None
 .EXAMPLE
     "This is the new banner text" | Edit-OMESecurityBanner
+    
     Edit Security Banner
 #>
 

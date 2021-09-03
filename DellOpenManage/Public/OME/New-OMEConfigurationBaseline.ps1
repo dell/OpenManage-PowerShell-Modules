@@ -43,6 +43,7 @@ limitations under the License.
     None
 .EXAMPLE
     New-OMEConfigurationBaseline -Name "TestBaseline01" -Template $("Template01" | Get-OMETemplate -FilterBy "Name") -Devices $("37KPZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
+    
     Create new configuration compliance baseline
 #>
 

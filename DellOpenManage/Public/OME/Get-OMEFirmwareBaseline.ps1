@@ -31,9 +31,11 @@ limitations under the License.
     String[]
 .EXAMPLE
     Get-OMEFirmwareBaseline | Format-Table
+
     Get all baselines
 .EXAMPLE
     "AllLatest" | Get-OMEFirmwareBaseline | Format-Table
+    
     Get baseline by name
 #>
 

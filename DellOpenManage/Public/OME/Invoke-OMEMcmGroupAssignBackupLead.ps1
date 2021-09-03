@@ -48,6 +48,8 @@ function Invoke-OMEMcmGroupAssignBackupLead {
         $URL = $BaseUri + "/api/ManagementDomainService/Actions/ManagementDomainService.AssignBackupLead"
         $ListOfMembers = @()
         $ListOfMembers = Get-MXDomains -BaseUri $BaseUri -Headers $Headers -RoleType "MEMBER"
+        Write-Verbose "Management domains found..."
+        Write-Verbose $($ListOfMembers | Format-Table | Out-String)
         $JobId = 0
         if ($ListOfMembers.Length -gt 0) {
             if ($ServiceTag -ne "") {
@@ -55,20 +57,21 @@ function Invoke-OMEMcmGroupAssignBackupLead {
             } else {
                 $Member = Get-Random -InputObject $ListOfMembers -Count 1
             }
+            Write-Verbose "Assigning backup lead..."
+            Write-Verbose $($Member | Format-Table | Out-String)
             $MemberId = $Member."Id"
             $TargetArray = @()
             $TargetTempHash = @{}
             $TargetTempHash."Id" = $MemberId
             $TargetArray += $TargetTempHash
             $Body = ConvertTo-Json $TargetArray
-            Write-Host "Assigning backup lead..."
-            Write-Host "Invoking URL $($URL)"
-            Write-Host "Payload $($Body)"
+            Write-Verbose "Invoking URL $($URL)"
+            Write-Verbose "Payload $($Body)"
             $Response = Invoke-WebRequest -Uri $URL -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
             if ($Response.StatusCode -eq 200) {
                 $BackupLeadData = $Response | ConvertFrom-Json
                 $JobId = $BackupLeadData.'JobId'
-                Write-Host "Successfully assigned backup lead"
+                Write-Verbose "Successfully assigned backup lead"
             }
             else {
                 Write-Warning "Failed to assign backup lead"
@@ -92,16 +95,15 @@ function Invoke-OMEMcmGroupAssignBackupLead {
         $Headers."X-Auth-Token" = $SessionAuth.Token
         $ContentType = "application/json"
     
-        ## Sending in non-existent targets throws an exception with a "bad request"
-        ## error. Doing some pre-req error checking as a result to validate input
-        ## This is a Powershell quirk on Invoke-WebRequest failing with an error
         # Create mcm group
-        $JobId = 0
         $JobId = Invoke-AssignBackupLead -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -ServiceTag $ServiceTag
-        if ($JobId) {
-            Write-Host "Polling backup lead assignment ..."
+        if ($JobId -ne 0) {
+            Write-Verbose "Polling backup lead assignment ..."
             if ($Wait) {
-                $JobId | Wait-OnJob -WaitTime $WaitTime
+                $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
+                return $JobStatus
+            } else {
+                return $JobId
             }
         }
         else {

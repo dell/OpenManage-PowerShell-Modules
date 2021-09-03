@@ -24,8 +24,9 @@ Run an existing job by Id
 ### EXAMPLE 1
 ```
 28991 | Invoke-OMEJobRun -Wait -Verbose
-Run job
 ```
+
+Run job
 
 ## PARAMETERS
 

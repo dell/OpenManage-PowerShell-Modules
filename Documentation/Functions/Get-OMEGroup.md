@@ -24,20 +24,23 @@ Returns all groups if no input received
 ### EXAMPLE 1
 ```
 Get-OMEGroup | Format-Table
-Get all groups
 ```
+
+Get all groups
 
 ### EXAMPLE 2
 ```
 "Servers_Win" | Get-OMEGroup | Format-Table
-Get group by name
 ```
+
+Get group by name
 
 ### EXAMPLE 3
 ```
 "Servers_ESXi", "Servers_Win" | Get-OMEGroup | Format-Table
-Get multiple groups
 ```
+
+Get multiple groups
 
 ## PARAMETERS
 

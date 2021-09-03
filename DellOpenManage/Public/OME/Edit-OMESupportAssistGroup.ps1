@@ -25,10 +25,8 @@ limitations under the License.
 
 .PARAMETER Group
     Object of type Group returned from Get-OMEGroup function
-.PARAMETER Name
-    Name of group
-.PARAMETER Description
-    Description of group
+.PARAMETER EditGroup
+    JSON string containing group payload
 .PARAMETER Devices
     Array of type Device returned from Get-OMEDevice function.
 .PARAMETER Mode
@@ -37,15 +35,31 @@ limitations under the License.
     Group
 .EXAMPLE
     Get-OMEGroup "Test Group 01" | Edit-OMEGroup
+
     Force group update. This is a workaround that will trigger baselines to update devices in the associated group.
 .EXAMPLE
-    Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Name "Test Group 001" -Description "This is a new group"
-    Edit group name and description
+    $TestSupportAssistGroup = '{
+        "MyAccountId": "",
+        "Name": "Support Assist Group 2",
+        "Description": "Support Assist Group",
+        "DispatchOptIn": false,
+        "CustomerDetails": null,
+        "ContactOptIn":  false
+    }' 
+    "Support Assist Group 1" | Get-OMEGroup | Edit-OMESupportAssistGroup -EditGroup $TestSupportAssistGroup -Verbose
+
+    Edit Support Assist group from json stored in variable
+.EXAMPLE
+    Get-OMEGroup "Test Group 01" | Edit-OMEGroup -EditGroup $(Get-Content "C:\Temp\Group.json" -Raw)
+
+    Edit Support Assist group from json stored in file
 .EXAMPLE
     Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
+
     Add devices to group
 .EXAMPLE
     Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Mode "Remove" -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
+    
     Remove devices from group
 #>
 
@@ -115,7 +129,7 @@ Process {
             $GroupDevicePayload = $GroupDevicePayload | ConvertTo-Json -Depth 6
             Write-Verbose $GroupDevicePayload
             if ($DeviceIds.Length -gt 0) {
-                $GroupDeviceResponse = Invoke-WebRequest -Uri $GroupDeviceURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupDevicePayload
+                $GroupDeviceResponse = Invoke-WebRequest -Uri $GroupDeviceURL -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupDevicePayload
                 Write-Verbose "Updating group devices..."
                 if ($GroupDeviceResponse.StatusCode -eq 200 -or $GroupDeviceResponse.StatusCode -eq 202) {
                     Write-Verbose "Group device update successful..."
@@ -130,17 +144,24 @@ Process {
 
         # Update group
         if ($PSBoundParameters.ContainsKey('EditGroup')) {
-            if (-not $(Confirm-PathIsValid -InputFilePath $EditGroup)) {
-                Write-Error "File not found $($EditGroup)"
-                Exit
+            try {
+                $TestGroupJson = ConvertFrom-Json $EditGroup -ErrorAction Stop;
+                $validJson = $true;
+            } catch {
+                $validJson = $false;
+            }
+    
+            if ($validJson) {
+                $GroupPayload = $EditGroup | ConvertFrom-Json
+            } else {
+                Write-Error "Provided text is not a valid JSON string or file not found";
             }
 
-            $GroupPayload = $(Get-Content -Path $EditGroup) | ConvertFrom-Json
-            $GroupPayload.Id = $Group.Id
+            $GroupPayload | Add-Member -NotePropertyName Id -NotePropertyValue $Group.Id
             $GroupPayload = $GroupPayload | ConvertTo-Json -Depth 6
             Write-Verbose $GroupPayload
 
-            $GroupResponse = Invoke-WebRequest -Uri $GroupURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupPayload
+            $GroupResponse = Invoke-WebRequest -Uri $GroupURL -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupPayload
             Write-Verbose "Updating group..."
             if ($GroupResponse.StatusCode -eq 200 -or $GroupResponse.StatusCode -eq 202) {
                 Write-Verbose "Group update successful!"

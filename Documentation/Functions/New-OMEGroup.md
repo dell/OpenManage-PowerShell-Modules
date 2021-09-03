@@ -25,8 +25,9 @@ Raise an issue on Github for query group support.
 ### EXAMPLE 1
 ```
 New-OMEGroup -Name "Test Group 01"
-Create a new static group
 ```
+
+Create a new static group
 
 ## PARAMETERS
 

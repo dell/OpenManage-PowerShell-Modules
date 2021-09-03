@@ -36,12 +36,15 @@ limitations under the License.
     [String]Content
 .EXAMPLE
     New-OMETemplateFromFile -Name "TestTemplate" -Content "<XML>" -Wait
+
     Create new deployment template from string
 .EXAMPLE
     New-OMETemplateFromFile -Name "TestTemplate" -Content $(Get-Content -Path .\Data.xml | Out-String)
+
     Create new deployment template from file
 .EXAMPLE
     New-OMETemplateFromFile -Name "TestTemplate" -TemplateType "Configuration" -Content $(Get-Content -Path .\Data.xml | Out-String)
+    
     Create new configuration template from file
 #>
 

@@ -24,14 +24,16 @@ Returns all baselines if no input received
 ### EXAMPLE 1
 ```
 Get-OMEConfigurationBaseline | Format-Table
-Get all baselines
 ```
+
+Get all baselines
 
 ### EXAMPLE 2
 ```
 "AllLatest" | Get-OMEConfigurationBaseline | Format-Table
-Get baseline by name
 ```
+
+Get baseline by name
 
 ## PARAMETERS
 

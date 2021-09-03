@@ -25,8 +25,9 @@ A baseline is used to compare firmware versions against a catalog
 ### EXAMPLE 1
 ```
 "TestBaseline01"  | Get-OMEFirmwareBaseline | Invoke-OMEFirmwareBaselineRefresh -Wait
-Refresh compliance for firmware baseline
 ```
+
+Refresh compliance for firmware baseline
 
 ## PARAMETERS
 

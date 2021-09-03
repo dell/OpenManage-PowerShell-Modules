@@ -28,6 +28,7 @@ limitations under the License.
     None
 .EXAMPLE
     Get-OMEGroup "Test Group 01" | Remove-OMEGroup
+    
     Remove group
 #>
 

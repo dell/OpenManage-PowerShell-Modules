@@ -52,7 +52,7 @@ Describe "Template Tests" {
         It "Should deploy template to device" {
             $template = $($Script:DeploymentTemplateNameFromString | Get-OMETemplate)
             $devices = $Script:DeviceServiceTag1, $Script:DeviceServiceTag2, $Script:DeviceServiceTag3 | Get-OMEDevice
-            Invoke-OMETemplateDeploy -Template $template -Devices $devices -Wait | Should -Match "Completed.*"
+            Invoke-OMETemplateDeploy -Template $template -Devices $devices -Wait | Should -BeIn @("Completed", "Warning")
         }
     }
     Context "Configuration" -Tag "Configuration" {
@@ -89,7 +89,7 @@ Describe "Template Tests" {
         It "Should create configuration compliance baseline" {
             $devices = $Script:DeviceServiceTag3 | Get-OMEDevice -FilterBy "ServiceTag"
             $template = $Script:ConfigurationTemplateNameFromString | Get-OMETemplate
-            New-OMEConfigurationBaseline -Name $Script:ConfigurationBaselineName -Template $template -Devices $devices -Wait | Should -Match "Completed.*"
+            New-OMEConfigurationBaseline -Name $Script:ConfigurationBaselineName -Template $template -Devices $devices -Wait | Should -BeIn @("Completed", "Warning")
         }
 
         It "Should return configuration compliance baseline" {
@@ -99,27 +99,27 @@ Describe "Template Tests" {
         It "Should update configuration compliance on device" {
             $baseline = $Script:ConfigurationBaselineName | Get-OMEConfigurationBaseline
             $devices = $Script:DeviceServiceTag3 | Get-OMEDevice -FilterBy "ServiceTag"
-            Update-OMEConfiguration -Name "Make Compliant $((Get-Date).ToString('yyyyMMddHHmmss'))" -Baseline $baseline -DeviceFilter $devices -Wait | Should -Match "Completed.*"
+            Update-OMEConfiguration -Name "Make Compliant $((Get-Date).ToString('yyyyMMddHHmmss'))" -Baseline $baseline -DeviceFilter $devices -Wait | Should -BeIn @("Completed", "Warning")
         }
 
         It "Should check configuration compliance for baseline" -Tag "CheckConfigurationCompliance" {
             $baseline = $Script:ConfigurationBaselineName | Get-OMEConfigurationBaseline
-            $baseline  | Invoke-OMEConfigurationBaselineRefresh | Should -BeOfType [int]
+            $baseline  | Invoke-OMEConfigurationBaselineRefresh | Should -BeGreaterThan 0
         }
     }
     Context "Profile" -Tag "Profile" {
         It "Should unassign profile by device" {
             $devices = $Script:DeviceServiceTag1 | Get-OMEDevice
-            Invoke-OMEProfileUnassign -Device $devices | Should -BeOfType [int]
+            Invoke-OMEProfileUnassign -Device $devices | Should -BeGreaterThan 0
         }
 
         It "Should unassign profile by profile name" {
-            Invoke-OMEProfileUnassign -ProfileName "00002" | Should -BeOfType [int]
+            Invoke-OMEProfileUnassign -ProfileName "00002" | Should -BeGreaterThan 0
         }
 
         It "Should unassign profile by template" {
             $template = $Script:DeploymentTemplateNameFromString | Get-OMETemplate
-            Invoke-OMEProfileUnassign -Template $template | Should -BeOfType [int]
+            Invoke-OMEProfileUnassign -Template $template | Should -BeGreaterThan 0
         }
     }
 }

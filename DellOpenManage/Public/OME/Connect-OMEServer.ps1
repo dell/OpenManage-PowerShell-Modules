@@ -36,9 +36,11 @@ limitations under the License.
     Connect-OMEServer -Name "ome.example.com" -Credentials $(New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "admin", $(ConvertTo-SecureString -Force -AsPlainText "password")) -IgnoreCertificateWarning
 .EXAMPLE
     Connect-OMEServer -Name "ome.example.com" -Credentials $(Get-Credential) -IgnoreCertificateWarning
+
     Prompt for credentials
 .EXAMPLE
     $env:OMEHost = '192.168.1.100'; $env:OMEUserName = 'admin'; $env:OMEPassword = 'calvin'; Connect-OMEServer -IgnoreCertificateWarning
+    
     Credentials can be stored in Environment Variables
 #>
 [CmdletBinding()]

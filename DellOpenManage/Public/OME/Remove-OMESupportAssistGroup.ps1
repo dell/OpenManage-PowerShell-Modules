@@ -28,6 +28,7 @@ limitations under the License.
     None
 .EXAMPLE
     Get-OMEGroup "Test Group 01" | Remove-OMESupportAssistGroup
+    
     Remove group
 #>
 
@@ -56,9 +57,10 @@ Process {
         $Payload = @{
             GroupId = $Group.Id
         } | ConvertTo-Json -Depth 10
-        $GroupResponse = Invoke-WebRequest -Uri $GroupURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $Payload
+        Write-Verbose $Payload
+        $GroupResponse = Invoke-WebRequest -Uri $GroupURL -Headers $Headers -ContentType $ContentType -Method POST -Body $Payload
         Write-Verbose "Removing group..."
-        if ($GroupResponse.StatusCode -eq 202) {
+        if ($GroupResponse.StatusCode -eq 200 -or $GroupResponse.StatusCode -eq 202) {
             Write-Verbose "Remove group successful..."
         }
         else {

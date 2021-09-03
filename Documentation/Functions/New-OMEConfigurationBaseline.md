@@ -25,8 +25,9 @@ A baseline is used to compare configuration against a template
 ### EXAMPLE 1
 ```
 New-OMEConfigurationBaseline -Name "TestBaseline01" -Template $("Template01" | Get-OMETemplate -FilterBy "Name") -Devices $("37KPZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
-Create new configuration compliance baseline
 ```
+
+Create new configuration compliance baseline
 
 ## PARAMETERS
 

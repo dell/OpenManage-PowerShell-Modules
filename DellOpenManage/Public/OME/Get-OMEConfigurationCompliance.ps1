@@ -34,9 +34,11 @@ limitations under the License.
     Baseline[]
 .EXAMPLE
     "TestBaseline01" | Get-OMEConfigurationBaseline | Get-OMEConfigurationCompliance | Format-Table
+
     Get configuration compliance report for all devices in baseline
 .EXAMPLE
     "TestBaseline01" | Get-OMEConfigurationBaseline | Get-OMEConfigurationCompliance -DeviceFilter $("FVKGSWZ" | Get-OMEDevice -FilterBy "ServiceTag") | Format-Table
+
     Get configuration compliance report for specific devices in baseline
 #>
 

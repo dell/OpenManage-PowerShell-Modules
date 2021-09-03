@@ -28,14 +28,13 @@ limitations under the License.
 .INPUTS
     String[]
 .EXAMPLE
-    Get-OMESupportAssistGroup | Format-Table
-    Get all groups
-.EXAMPLE
-    "Servers_Win" | Get-OMESupportAssistGroup | Format-Table
+    "Support Assist Group 1" | Get-OMEGroup | Get-OMESupportAssistGroup | Format-Table
+
     Get group by name
 .EXAMPLE
-    "Servers_ESXi", "Servers_Win" | Get-OMESupportAssistGroup | Format-Table
-    Get multiple groups
+    "Support Assist Group 1" | Get-OMEGroup | Get-OMESupportAssistGroup | ConvertTo-Json | Set-Content "C:\Temp\export.json"
+
+    Get group by name to file
 #>
 [CmdletBinding()]
 param(

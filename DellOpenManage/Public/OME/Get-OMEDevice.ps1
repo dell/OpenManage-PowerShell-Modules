@@ -33,30 +33,39 @@ limitations under the License.
     String[]
 .EXAMPLE
     Get-OMEDevice -Value 12016
+
     Get device by Id
 .EXAMPLE
     "FVKGSWZ" | Get-OMEDevice -FilterBy "ServiceTag" | Format-Table
+
     Get device by Service Tag
 .EXAMPLE
     10097, 10100 | Get-OMEDevice -FilterBy "Id" | Format-Table
+
     Get multiple devices by Id
 .EXAMPLE
     "C86F0Q2", "3XMHHL2" | Get-OMEDevice | Format-Table
+
     Get multiple devices by Service Tag
 .EXAMPLE
     "R620-FVKGSW2.example.com" | Get-OMEDevice -FilterBy "Name" | Format-Table
+
     Get device by name
 .EXAMPLE
     "PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Format-Table
+
     Get device by model
 .EXAMPLE
     "Servers_Win" | Get-OMEGroup | Get-OMEDevice | Format-Table
+
     Get devices by group
 .EXAMPLE
     Get-OMEDevice -Group $(Get-OMEGroup "Servers_Win") | Format-Table
+
     Get devices by group inline
 .EXAMPLE
     "Servers_ESXi", "Servers_Win" | Get-OMEGroup | Get-OMEDevice | Format-Table
+    
     Get devices from multiple groups
 #>
 

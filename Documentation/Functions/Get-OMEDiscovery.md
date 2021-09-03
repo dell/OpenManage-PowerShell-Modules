@@ -24,14 +24,16 @@ Returns all catalogs if no input received
 ### EXAMPLE 1
 ```
 Get-OMEDiscovery | Format-Table
-Get all discovery jobs
 ```
+
+Get all discovery jobs
 
 ### EXAMPLE 2
 ```
 "DRM" | Get-OMEDiscovery | Format-Table
-Get job by name by name
 ```
+
+Get job by name by name
 
 ## PARAMETERS
 

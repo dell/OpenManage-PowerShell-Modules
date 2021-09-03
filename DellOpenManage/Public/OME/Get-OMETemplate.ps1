@@ -30,12 +30,15 @@ limitations under the License.
     String[]
 .EXAMPLE
     Get-OMETemplate | Format-Table
+
     Get all templates
 .EXAMPLE
     "DRM" | Get-OMETemplate | Format-Table
+
     Get template by name
 .EXAMPLE
     "Configuration" | Get-OMETemplate -FilterBy "Type" | Format-Table
+    
     Get template by type
 #>
 

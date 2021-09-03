@@ -28,6 +28,7 @@ limitations under the License.
     Device[]
 .EXAMPLE
     "C86F000", "3XMHHHH" | Get-OMEDevice -FilterBy "ServiceTag" | Get-OMEDeviceNetworkDetail
+    
     Get network device detail
 #>
     [CmdletBinding()]
