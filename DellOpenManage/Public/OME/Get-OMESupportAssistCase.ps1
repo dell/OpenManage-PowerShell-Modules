@@ -1,5 +1,5 @@
 
-function Get-OMESupportAssistCases {
+function Get-OMESupportAssistCase {
 <#
 Copyright (c) 2021 Dell EMC Corporation
 
@@ -28,24 +28,27 @@ limitations under the License.
 .PARAMETER FilterBy
     Filter the results by ("EventSource", "Id", "ServiceContract", Default="ServiceTag")
  .EXAMPLE
-   Get-OMESupportAssistCases | Format-Table
+   Get-OMESupportAssistCase | Format-Table
 #>   
 
-    [CmdletBinding()]
-    param(
-      [Parameter(Mandatory=$false, ValueFromPipeline)]
-      $Value,
-  
-      [Parameter(Mandatory=$false)]
-      [ValidateSet("EventSource", "Id", "ServiceContract", "ServiceTag")]
-      [String]$FilterBy = "ServiceTag"
-    )
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false, ValueFromPipeline)]
+    $Value,
 
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("EventSource", "Id", "ServiceContract", "ServiceTag")]
+    [String]$FilterBy = "ServiceTag"
+)
+
+Begin {
     if(!$SessionAuth.Token){
         Write-Error "Please use Connect-OMEServer first"
         Break
         Return
     }
+}
+Process {
 
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
@@ -55,7 +58,7 @@ limitations under the License.
 
         $SupportAssistCasesUrl = $BaseUri  + "/api/SupportAssistService/Cases"
         $SupportAssistCasesData = @()
-        $SupportAssistCasesResponse = Get-ApiDataAllPages -BaseUri $BaseUri -Url $SupportAssistCasesUrl -Headers $Headers
+        $SupportAssistCasesResponse = Get-ApiAllData -BaseUri $BaseUri -Url $SupportAssistCasesUrl -Headers $Headers
         foreach ($SupportAssistCases in $SupportAssistCasesResponse) {
             $SupportAssistCasesData += $SupportAssistCases
         }
@@ -69,5 +72,8 @@ limitations under the License.
     Catch {
         Resolve-Error $_
     }
+}
+
+End {}
 
 }

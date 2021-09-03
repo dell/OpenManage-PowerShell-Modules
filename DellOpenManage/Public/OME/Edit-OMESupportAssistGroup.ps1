@@ -145,7 +145,7 @@ Process {
         # Update group
         if ($PSBoundParameters.ContainsKey('EditGroup')) {
             try {
-                $TestGroupJson = ConvertFrom-Json $EditGroup -ErrorAction Stop;
+                ConvertFrom-Json $EditGroup -ErrorAction Stop
                 $validJson = $true;
             } catch {
                 $validJson = $false;

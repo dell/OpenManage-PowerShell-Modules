@@ -41,7 +41,7 @@ function Invoke-OMEMcmGroupAddMember {
         [int]$WaitTime = 3600
     )
     
-    function Get-DiscoveredDomains($BaseUri, $Headers, $ContentType, $Role) {
+    function Get-DiscoveredDomain($BaseUri, $Headers, $ContentType, $Role) {
         $DiscoveredDomains = @()
         $FilteredDiscoveredDomains = @()
         $TargetArray = @()
@@ -85,7 +85,7 @@ function Invoke-OMEMcmGroupAddMember {
         # Add standalone domains to the group
         $Role = "STANDALONE"
         $StandaloneDomains = @()
-        $StandaloneDomains = Get-DiscoveredDomains -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -Role $Role
+        $StandaloneDomains = Get-DiscoveredDomain -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -Role $Role
         $JobId = 0
         $Payload = @()
         if ($StandaloneDomains.Length -gt 0) {

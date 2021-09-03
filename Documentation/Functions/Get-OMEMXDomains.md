@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-OMEMXDomains
+# Get-OMEMXDomain
 
 ## SYNOPSIS
 Get MX domains (chassis) from OpenManage Enterprise
@@ -13,7 +13,7 @@ Get MX domains (chassis) from OpenManage Enterprise
 ## SYNTAX
 
 ```
-Get-OMEMXDomains [[-RoleType] <String>] [<CommonParameters>]
+Get-OMEMXDomain [[-RoleType] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -23,20 +23,20 @@ Get-OMEMXDomains [[-RoleType] <String>] [<CommonParameters>]
 
 ### EXAMPLE 1
 ```
-Get-OMEMXDomains | Format-List
+Get-OMEMXDomain | Format-List
 List all domains
 ```
 
 ### EXAMPLE 2
 ```
-"LEAD" | Get-OMEMXDomains | Format-List
+"LEAD" | Get-OMEMXDomain | Format-List
 ```
 
 List lead chassis
 
 ### EXAMPLE 3
 ```
-"BACKUPLEAD" | Get-OMEMXDomains | Format-List
+"BACKUPLEAD" | Get-OMEMXDomain | Format-List
 ```
 
 List backup lead chassis

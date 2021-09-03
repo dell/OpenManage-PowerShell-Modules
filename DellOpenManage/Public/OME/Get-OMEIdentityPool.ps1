@@ -31,21 +31,25 @@ limitations under the License.
    Get-OMEIdentityPool | Format-Table
 #>   
 
-    [CmdletBinding()]
-    param(
-      [Parameter(Mandatory=$false, ValueFromPipeline)]
-      $Value,
-  
-      [Parameter(Mandatory=$false)]
-      [ValidateSet("Name", "Id")]
-      [String]$FilterBy = "Name"
-    )
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false, ValueFromPipeline)]
+    $Value,
 
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Name", "Id")]
+    [String]$FilterBy = "Name"
+)
+
+Begin {
     if(!$SessionAuth.Token){
         Write-Error "Please use Connect-OMEServer first"
         Break
         Return
     }
+}
+
+Process {
 
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
@@ -55,7 +59,7 @@ limitations under the License.
 
         $IdentityPoolUrl = $BaseUri  + "/api/IdentityPoolService/IdentityPools"
         $IdentityPoolData = @()
-        $IdentityPoolResponse = Get-ApiDataAllPages -BaseUri $BaseUri -Url $IdentityPoolUrl -Headers $Headers
+        $IdentityPoolResponse = Get-ApiAllData -BaseUri $BaseUri -Url $IdentityPoolUrl -Headers $Headers
         foreach ($IdentityPool in $IdentityPoolResponse) {
             $IdentityPoolData += New-IdentityPoolFromJson -IdentityPool $IdentityPool
         }
@@ -69,5 +73,9 @@ limitations under the License.
     Catch {
         Resolve-Error $_
     }
+
+}
+
+End {}
 
 }

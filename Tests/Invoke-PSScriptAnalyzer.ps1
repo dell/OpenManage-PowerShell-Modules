@@ -17,7 +17,7 @@ Import-Module -Name PSScriptAnalyzer
 if ($ExportCsv) {
     $fields = @("Line", "Column", "ScriptName", "Severity", "Message", "RuleName", "ScriptPath")
     # -Severity Error,Warning
-    Invoke-ScriptAnalyzer -Path .\DellOpenManage\ -Recurse -ExcludeRule PSAvoidUsingWriteHost,PSUseShouldProcessForStateChangingFunctions | Select-Object -Property $fields | Export-Csv -Path .\Tests\Invoke-PSScriptAnalyzer.csv -NoTypeInformation
+    Invoke-ScriptAnalyzer -Path .\DellOpenManage\ -Recurse -ExcludeRule PSAvoidUsingWriteHost,PSUseShouldProcessForStateChangingFunctions,PSUseToExportFieldsInManifest | Select-Object -Property $fields | Export-Csv -Path .\Tests\Invoke-PSScriptAnalyzer.csv -NoTypeInformation
 } else {
-    Invoke-ScriptAnalyzer -Path .\DellOpenManage\ -Recurse -ExcludeRule PSAvoidUsingWriteHost,PSUseShouldProcessForStateChangingFunctions
+    Invoke-ScriptAnalyzer -Path .\DellOpenManage\ -Recurse -ExcludeRule PSAvoidUsingWriteHost,PSUseShouldProcessForStateChangingFunctions,PSUseToExportFieldsInManifest
 }

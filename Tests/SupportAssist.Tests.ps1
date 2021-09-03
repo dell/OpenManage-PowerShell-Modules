@@ -37,7 +37,7 @@ Describe "Support Assist Tests" {
         }
 
         It "Should return support assist cases by device" {
-            $Script:DeviceServiceTag | Get-OMESupportAssistCases | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+            $Script:DeviceServiceTag | Get-OMESupportAssistCase | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
         }
 
         It "Should remove support assist group" {

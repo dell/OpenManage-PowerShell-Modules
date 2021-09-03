@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-OMESupportAssistCases
+# Get-OMESupportAssistCase
 
 ## SYNOPSIS
 Get list of Identity Pools from OME
@@ -13,7 +13,7 @@ Get list of Identity Pools from OME
 ## SYNTAX
 
 ```
-Get-OMESupportAssistCases [[-Value] <Object>] [[-FilterBy] <String>] [<CommonParameters>]
+Get-OMESupportAssistCase [[-Value] <Object>] [[-FilterBy] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -24,7 +24,7 @@ Note that the credentials entered are not stored to disk.
 
 ### EXAMPLE 1
 ```
-Get-OMESupportAssistCases | Format-Table
+Get-OMESupportAssistCase | Format-Table
 ```
 
 ## PARAMETERS

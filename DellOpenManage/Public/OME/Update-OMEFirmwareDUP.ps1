@@ -1,7 +1,7 @@
 ﻿using module ..\..\Classes\Group.psm1
 using module ..\..\Classes\Device.psm1
 
-function Get-ApplicableComponents($BaseUri, $Headers, $ContentType, $DupReportPayload, $JobName, $UpdateSchedule, $UpdateScheduleCron, $ResetiDRAC, $ClearJobQueue) {
+function Get-ApplicableComponent($BaseUri, $Headers, $ContentType, $DupReportPayload, $JobName, $UpdateSchedule, $UpdateScheduleCron, $ResetiDRAC, $ClearJobQueue) {
     $componentMap = @{"ComponentCurrentVersion" = "Current Ver";
         "ComponentUpdateAction"                 = "Action";
         "ComponentVersion"                      = "Avail Ver";
@@ -64,6 +64,7 @@ function Get-ApplicableComponents($BaseUri, $Headers, $ContentType, $DupReportPa
     } elseif ($UpdateSchedule -eq "StageForNextReboot") {
         $StageUpdate = $true
     }
+    $DupUpdatePayload.Schedule = $Schedule
     $ParamsHashValMap = @{
         "stagingValue" = if ($StageUpdate) { "true" } else { "false"}
         "clearJobQueue" = if ($ClearJobQueue) { "true" } else { "false"}
@@ -83,7 +84,6 @@ function Get-ApplicableComponents($BaseUri, $Headers, $ContentType, $DupReportPa
         if ($DupResponse.StatusCode -eq 200) {
             $DupResponseInfo = $DupResponse.Content | ConvertFrom-Json
             if ($DupResponse.Length -gt 0) {
-                $RetVal = $true
                 if ($DupResponseInfo.Length -gt 0) {
                     $TargetArray = @()                    
                     $OutputArray = @()
@@ -322,7 +322,7 @@ Process {
                     $DupReportPayload = Set-DupApplicabilityPayload -FileTokenInfo $FileTokenInfo -ParamHash @{"DeviceId" = $Device.Id }
                 }
                 Write-Verbose "Determining if any devices and components are applicable for $($DupFile)"
-                $DupUpdatePayload = Get-ApplicableComponents -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -DupReportPayload $DupReportPayload -JobName $Name -UpdateSchedule $UpdateSchedule -UpdateScheduleCron $UpdateScheduleCron -ResetiDRAC $ResetiDRAC.IsPresent -ClearJobQueue $ClearJobQueue.IsPresent 
+                $DupUpdatePayload = Get-ApplicableComponent -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -DupReportPayload $DupReportPayload -JobName $Name -UpdateSchedule $UpdateSchedule -UpdateScheduleCron $UpdateScheduleCron -ResetiDRAC $ResetiDRAC.IsPresent -ClearJobQueue $ClearJobQueue.IsPresent 
                 if ($UpdateSchedule -eq "Preview") { # Only show report, do not perform any updates
                     return $DupUpdatePayload
                 } else { # Submit update job

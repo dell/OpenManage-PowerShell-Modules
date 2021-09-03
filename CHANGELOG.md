@@ -12,15 +12,11 @@ All notable changes to this project will be documented in this file.
 * **Security** in case of vulnerabilities.
 
 ## [2.3.0]()
-### Fixed
-* Fixed Set-CertPolicy to allow multiple Connect-OME within script ([Issue #2](https://github.com/dell/OpenManage-PowerShell-Modules/issues/2))
-* Fixed Set-OMEPowerState ([Issue #3](https://github.com/dell/OpenManage-PowerShell-Modules/issues/3))
-
 ### Added
 * Migrated scripts from https://github.com/dell/OpenManage-Enterprise/tree/master/PowerShell
-* Get-OMEAuditLogs
+* Get-OMEAuditLog
 * Get-OMEWarranty
-* Get-OMEAlerts
+* Get-OMEAlert
 * Get-OMEUser
 * New-OMEUser
 * Get-OMEIdentityPool
@@ -34,12 +30,19 @@ All notable changes to this project will be documented in this file.
 * Get-OMESupportAssistGroup
 * Edit-OMESupportAssistGroup
 * Remove-OMESupportAssistGroup
-* Get-OMESupportAssistCases
+* Get-OMESupportAssistCase
 * New-OMEMcmGroup
 * Invoke-OMEMcmGroupAddMember
 * Invoke-OMEMcmGroupAssignBackupLead
 * Invoke-OMEMcmGroupRetireLead
-* Get-OMEMXDomains
+* Get-OMEMXDomain
+
+### Changed
+* Changed Invoke-OMETemplateDeploy to use SecureString for -NetworkBootSharePassword
+
+### Fixed
+* Fixed Set-CertPolicy to allow multiple Connect-OME within script ([Issue #2](https://github.com/dell/OpenManage-PowerShell-Modules/issues/2))
+* Fixed Set-OMEPowerState ([Issue #3](https://github.com/dell/OpenManage-PowerShell-Modules/issues/3))
 
 ## [2.2.2]() - 6/25/2021
 ### Fixed

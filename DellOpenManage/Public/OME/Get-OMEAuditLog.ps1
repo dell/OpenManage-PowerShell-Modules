@@ -1,6 +1,7 @@
-function Get-OMEReport {
+function Get-OMEAuditLog {
+
 <#
-_author_ = Raajeev Kalyanaraman <raajeev.kalyanaraman@Dell.com>
+_author_ = Grant Curell <grant_curell@dell.com>
 
 Copyright (c) 2021 Dell EMC Corporation
 
@@ -18,17 +19,15 @@ limitations under the License.
 #>
 
 <#
- .SYNOPSIS
-   Script to retrieve the list of pre-defined reports 
+  .SYNOPSIS
+    Retrieves the audit logs from a target OME instance
 
- .DESCRIPTION
-   This script uses the OME REST API.
-   Note that the credentials entered are not stored to disk.
+  .DESCRIPTION
+    It performs X-Auth with basic authentication. Note: Credentials are not stored on disk.
 
- .EXAMPLE
-   Get-OMEReport | Format-Table
-#>   
-
+  .EXAMPLE
+    Get-OMEAuditLog | Format-Table
+#>
     [CmdletBinding()]
     param(
     )
@@ -45,13 +44,13 @@ limitations under the License.
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
-        $ReportUrl = $BaseUri  + "/api/ReportService/ReportDefs"
-        $ReportData = @()
-        $ReportResponse = Get-ApiAllData -BaseUri $BaseUri -Url $ReportUrl -Headers $Headers
-        foreach ($Report in $ReportResponse) {
-            $ReportData += $Report
+        $AuditLogUrl = $BaseUri  + "/api/ApplicationService/AuditLogs"
+        $AuditLogData = @()
+        $AuditLogResponse = Get-ApiAllData -BaseUri $BaseUri -Url $AuditLogUrl -Headers $Headers
+        foreach ($AuditLog in $AuditLogResponse) {
+            $AuditLogData += $AuditLog
         }
-        return $ReportData
+        return $AuditLogData
     }
     Catch {
         Resolve-Error $_

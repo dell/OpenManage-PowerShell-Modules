@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-OMEAlerts
+# Get-OMEAlert
 
 ## SYNOPSIS
 Retrieves alerts from a target OME Instance.
@@ -13,7 +13,7 @@ Retrieves alerts from a target OME Instance.
 ## SYNTAX
 
 ```
-Get-OMEAlerts [[-Top] <String>] [[-Pages] <Int32>] [[-Skip] <String>] [[-Orderby] <String>] [[-Id] <String>]
+Get-OMEAlert [[-Top] <String>] [[-Pages] <Int32>] [[-Skip] <String>] [[-Orderby] <String>] [[-Id] <String>]
  [[-AlertDeviceId] <String>] [[-AlertDeviceIdentifier] <String>] [[-AlertDeviceType] <String>]
  [[-SeverityType] <String>] [[-StatusType] <String>] [[-CategoryName] <String>] [-GetSubcategories]
  [[-SubcategoryId] <String>] [[-SubcategoryName] <String>] [[-Message] <String>] [[-TimeStampBegin] <String>]

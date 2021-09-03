@@ -43,7 +43,7 @@ param(
     [Parameter(Mandatory=$false)]
     [int]$WaitTime = 3600
 )
-function Create-McmGroup($BaseUri, $Headers, $ContentType, $GroupName) {
+function New-McmGroup($BaseUri, $Headers, $ContentType, $GroupName) {
     $CreateGroupURL = $BaseUri + "/api/ManagementDomainService"
     $payload = '{
         "GroupName": "",
@@ -109,7 +109,7 @@ Try {
     # Create mcm group
     $JobId = 0
     Write-Verbose "Creating mcm group"
-    $JobId = Create-McmGroup -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -GroupName $GroupName
+    $JobId = New-McmGroup -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -GroupName $GroupName
     if ($JobId) {
         Write-Verbose "Created job $($JobId) to create mcm group ... Polling status now"
         if ($Wait) {

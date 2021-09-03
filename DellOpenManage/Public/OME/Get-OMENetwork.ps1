@@ -31,21 +31,24 @@ limitations under the License.
    Get-OMENetwork | Format-Table
 #>   
 
-    [CmdletBinding()]
-    param(
-      [Parameter(Mandatory=$false, ValueFromPipeline)]
-      $Value,
-  
-      [Parameter(Mandatory=$false)]
-      [ValidateSet("Name", "Id", "VlanMaximum", "VlanMinimum", "Type")]
-      [String]$FilterBy = "Name"
-    )
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false, ValueFromPipeline)]
+    $Value,
 
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Name", "Id", "VlanMaximum", "VlanMinimum", "Type")]
+    [String]$FilterBy = "Name"
+)
+
+Begin {
     if(!$SessionAuth.Token){
         Write-Error "Please use Connect-OMEServer first"
         Break
         Return
     }
+}
+Process {
 
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
@@ -55,7 +58,7 @@ limitations under the License.
 
         $NetworkUrl = $BaseUri  + "/api/NetworkConfigurationService/Networks"
         $NetworkData = @()
-        $NetworkResponse = Get-ApiDataAllPages -BaseUri $BaseUri -Url $NetworkUrl -Headers $Headers
+        $NetworkResponse = Get-ApiAllData -BaseUri $BaseUri -Url $NetworkUrl -Headers $Headers
         foreach ($Network in $NetworkResponse) {
             $NetworkData += New-NetworkFromJson -Network $Network
         }
@@ -69,5 +72,9 @@ limitations under the License.
     Catch {
         Resolve-Error $_
     }
+
+}
+
+End {}
 
 }

@@ -1,6 +1,6 @@
 ﻿using module ..\..\Classes\Discovery.psm1
 
-function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $DiscoveryUserName, $DiscoveryPassword, $Email, $Schedule, $ScheduleCron) {
+function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $Schedule, $ScheduleCron) {
     $DiscoveryConfigPayload = '{
             "DiscoveryConfigGroupId":11,
             "DiscoveryConfigGroupName":"Server Discovery",
@@ -57,6 +57,7 @@ function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $Discover
             "CommunityString": false
     }' | ConvertFrom-Json
 
+    $DiscoveryPasswordText = (New-Object PSCredential "user", $DiscoveryPassword).GetNetworkCredential().Password
     $DiscoveryConfigPayload.DiscoveryConfigGroupId = $DiscoveryJob.Id
     $DiscoveryConfigPayload.DiscoveryConfigGroupName = $DiscoveryJob.Name
     if ($Email) {
@@ -73,9 +74,9 @@ function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $Discover
     # Update credentials
     $ConnectionProfile = $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile | ConvertFrom-Json
     $ConnectionProfile.credentials[0].credentials.'username' = $DiscoveryUserName
-    $ConnectionProfile.credentials[0].credentials.'password' = $DiscoveryPassword
+    $ConnectionProfile.credentials[0].credentials.'password' = $DiscoveryPasswordText
     $ConnectionProfile.credentials[1].credentials.'username' = $DiscoveryUserName
-    $ConnectionProfile.credentials[1].credentials.'password' = $DiscoveryPassword
+    $ConnectionProfile.credentials[1].credentials.'password' = $DiscoveryPasswordText
     $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile = $ConnectionProfile | ConvertTo-Json -Depth 6
 
     # Update target hosts
@@ -279,8 +280,7 @@ Process {
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
-        $DiscoveryPasswordText = (New-Object PSCredential "user", $DiscoveryPassword).GetNetworkCredential().Password
-        $Payload = Update-DiscoverDevicePayload -Name $Name -HostList $Hosts -Mode $Mode -DiscoveryJob $Discovery -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPasswordText -Email $Email -Schedule $Schedule -ScheduleCron $ScheduleCron
+        $Payload = Update-DiscoverDevicePayload -Name $Name -HostList $Hosts -Mode $Mode -DiscoveryJob $Discovery -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -Schedule $Schedule -ScheduleCron $ScheduleCron
         $Payload = $Payload | ConvertTo-Json -Depth 6
         $DiscoveryId = $Discovery.Id
         $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups(" + $DiscoveryId + ")"

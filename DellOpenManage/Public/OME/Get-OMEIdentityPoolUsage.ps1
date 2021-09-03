@@ -44,18 +44,20 @@ limitations under the License.
 
    Get identity pool by name
 #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, ValueFromPipeline)]
-        [IdentityPool] $IdentityPool
-    )
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory, ValueFromPipeline)]
+    [IdentityPool] $IdentityPool
+)
 
+Begin {
     if(!$SessionAuth.Token){
         Write-Error "Please use Connect-OMEServer first"
         Break
         Return
     }
-
+}
+Process {
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
         $BaseUri = "https://$($SessionAuth.Host)"
@@ -145,5 +147,8 @@ limitations under the License.
     Catch {
         Resolve-Error $_
     }
+}
+
+End {}
 
 }

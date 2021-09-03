@@ -1,9 +1,7 @@
-function Get-OMEAuditLogs {
-
+﻿
+function Get-OMEMXDomain {
 <#
-_author_ = Grant Curell <grant_curell@dell.com>
-
-Copyright (c) 2021 Dell EMC Corporation
+Copyright (c) 2018 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,24 +17,42 @@ limitations under the License.
 #>
 
 <#
-  .SYNOPSIS
-    Retrieves the audit logs from a target OME instance
+.SYNOPSIS
+    Get MX domains (chassis) from OpenManage Enterprise
+.DESCRIPTION
 
-  .DESCRIPTION
-    It performs X-Auth with basic authentication. Note: Credentials are not stored on disk.
+.PARAMETER RoleType
+    Filter the results by role type (Default="ALL", "LEAD", "BACKUPLEAD", "MEMBER")
+.INPUTS
+    String
+.EXAMPLE
+    Get-OMEMXDomain | Format-List
+    List all domains
+.EXAMPLE
+    "LEAD" | Get-OMEMXDomain | Format-List
 
-  .EXAMPLE
-    Get-OMEAuditLogs | Format-Table
+    List lead chassis
+.EXAMPLE
+    "BACKUPLEAD" | Get-OMEMXDomain | Format-List
+    
+    List backup lead chassis
 #>
-    [CmdletBinding()]
-    param(
-    )
 
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false, ValueFromPipeline)]
+    [ValidateSet("LEAD", "BACKUPLEAD", "MEMBER", "ALL")]
+    [String]$RoleType = "ALL"
+)
+
+Begin {
     if(!$SessionAuth.Token){
         Write-Error "Please use Connect-OMEServer first"
         Break
         Return
     }
+}
+Process {
 
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
@@ -44,16 +60,14 @@ limitations under the License.
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
-        $AuditLogUrl = $BaseUri  + "/api/ApplicationService/AuditLogs"
-        $AuditLogData = @()
-        $AuditLogResponse = Get-ApiDataAllPages -BaseUri $BaseUri -Url $AuditLogUrl -Headers $Headers
-        foreach ($AuditLog in $AuditLogResponse) {
-            $AuditLogData += $AuditLog
-        }
-        return $AuditLogData
+        return Get-MXDomain -BaseUri $BaseUri -Headers $Headers -RoleType $RoleType
     }
     Catch {
         Resolve-Error $_
     }
+}
+
+End {}
 
 }
+

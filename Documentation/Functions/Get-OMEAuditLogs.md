@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-OMEAuditLogs
+# Get-OMEAuditLog
 
 ## SYNOPSIS
 Retrieves the audit logs from a target OME instance
@@ -13,7 +13,7 @@ Retrieves the audit logs from a target OME instance
 ## SYNTAX
 
 ```
-Get-OMEAuditLogs [<CommonParameters>]
+Get-OMEAuditLog [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -24,7 +24,7 @@ Note: Credentials are not stored on disk.
 
 ### EXAMPLE 1
 ```
-Get-OMEAuditLogs | Format-Table
+Get-OMEAuditLog | Format-Table
 ```
 
 ## PARAMETERS

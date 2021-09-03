@@ -48,11 +48,12 @@ param(
     [ConfigurationBaseline]$Baseline,
 
     [Parameter(Mandatory=$false)]
-    [Device[]]$DeviceFilter,
+    [Device[]]$DeviceFilter
 
-    [Parameter(Mandatory=$false)]
-    [ValidateSet("Report", "Data")]
-    [String]$Output = "Report"
+    # Not implemented yet
+    #[Parameter(Mandatory=$false)]
+    #[ValidateSet("Report", "Data")]
+    #[String]$Output = "Report"
 )
 
 Begin {
@@ -79,10 +80,10 @@ Process {
         $Response = Invoke-WebRequest -Uri $ComplURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method GET
         $DeviceComplianceReport = @()
 
-        $CONFIG_STATUS_MAP = @{
-            1 = "Compliant";
-            2 = "Not Compliant"
-        }
+        #$CONFIG_STATUS_MAP = @{
+        #    1 = "Compliant";
+        #    2 = "Not Compliant"
+        #}
 
         if ($Response.StatusCode -eq 200) {
             $ComplData = $Response | ConvertFrom-Json

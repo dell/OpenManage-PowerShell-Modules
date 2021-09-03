@@ -1,5 +1,5 @@
 ﻿
-function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUserName, $DiscoveryPassword, $Email, $SetTrapDestination, $Schedule, $ScheduleCron) {
+function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $SetTrapDestination, $Schedule, $ScheduleCron) {
     $DiscoveryConfigPayload = '{
             "DiscoveryConfigGroupName":"Server Discovery",
             "DiscoveryStatusEmailRecipient":"",
@@ -61,6 +61,8 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
         'storage' = 5000
         'network' = 6000
     }
+
+    $DiscoveryPasswordText = (New-Object PSCredential "user", $DiscoveryPassword).GetNetworkCredential().Password
     $DiscoveryConfigPayload.DiscoveryConfigGroupName = $Name
     if ($Email) {
         $DiscoveryConfigPayload.DiscoveryStatusEmailRecipient = $Email
@@ -81,9 +83,9 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
         $DiscoveryConfigPayload.DiscoveryConfigModels[0].DeviceType = @($DeviceMap[$DeviceType.ToLower()])
         $ConnectionProfile = $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile | ConvertFrom-Json
         $ConnectionProfile.credentials[0].credentials.'username' = $DiscoveryUserName
-        $ConnectionProfile.credentials[0].credentials.'password' = $DiscoveryPassword
+        $ConnectionProfile.credentials[0].credentials.'password' = $DiscoveryPasswordText
         $ConnectionProfile.credentials[1].credentials.'username' = $DiscoveryUserName
-        $ConnectionProfile.credentials[1].credentials.'password' = $DiscoveryPassword
+        $ConnectionProfile.credentials[1].credentials.'password' = $DiscoveryPasswordText
         $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile = $ConnectionProfile | ConvertTo-Json -Depth 6
     }
     if ($Schedule.ToLower() -eq "runlater") {
@@ -254,8 +256,7 @@ Process {
 
         $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups"
         if ($Hosts.Count -gt 0) {
-            $DiscoveryPasswordText = (New-Object PSCredential "user", $DiscoveryPassword).GetNetworkCredential().Password
-            $Payload = Get-DiscoverDevicePayload -Name $Name -HostList $Hosts -DeviceType $DeviceType -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPasswordText -Email $Email -SetTrapDestination $SetTrapDestination.IsPresent -Schedule $Schedule -ScheduleCron $ScheduleCron
+            $Payload = Get-DiscoverDevicePayload -Name $Name -HostList $Hosts -DeviceType $DeviceType -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -SetTrapDestination $SetTrapDestination.IsPresent -Schedule $Schedule -ScheduleCron $ScheduleCron
             $Payload = $Payload | ConvertTo-Json -Depth 6
             $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Post  -Body $Payload -Headers $Headers -ContentType $Type
             if ($DiscoverResponse.StatusCode -eq 201) {

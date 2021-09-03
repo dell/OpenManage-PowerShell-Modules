@@ -55,7 +55,7 @@ function Get-OMEWarranty {
 
         $WarrantyUrl = $BaseUri  + "/api/WarrantyService/Warranties"
         $WarrantyData = @()
-        $WarrantyResponse = Get-ApiDataAllPages -BaseUri $BaseUri -Url $WarrantyUrl -Headers $Headers
+        $WarrantyResponse = Get-ApiAllData -BaseUri $BaseUri -Url $WarrantyUrl -Headers $Headers
         foreach ($Warranty in $WarrantyResponse) {
             $WarrantyData += $Warranty
         }

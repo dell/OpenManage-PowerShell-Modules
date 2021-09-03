@@ -1,4 +1,4 @@
-function Get-ApiDataAllPages {
+function Get-ApiAllData {
 <#
     .SYNOPSIS
 

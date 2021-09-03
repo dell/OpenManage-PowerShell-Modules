@@ -104,6 +104,7 @@ Process {
         }'
         $TemplatePayload = $TemplatePayload | ConvertFrom-Json
         $TemplatePayload.Name = $Name
+        $TemplatePayload.Description = $Description
         $TemplatePayload.SourceDeviceId = $Device.Id
         $TemplatePayload.ViewTypeId = $TEMPLATE_TYPE_MAP[$TemplateType]
         $TemplatePayload.Fqdds = $Component -join ","

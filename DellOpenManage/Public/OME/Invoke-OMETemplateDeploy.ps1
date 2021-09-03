@@ -1,7 +1,7 @@
 ﻿using module ..\..\Classes\Template.psm1
 using module ..\..\Classes\Device.psm1
 
-function Set-AssignedIdentities($BaseUri, $Type, $Headers, $TemplateId, $TargetIds) {
+function Set-AssignedIdentity($BaseUri, $Type, $Headers, $TemplateId, $TargetIds) {
     $Payload = '{
         "TemplateId" : 13,
         "BaseEntityIds" : []
@@ -84,7 +84,7 @@ limitations under the License.
 
     Deploy template and boot to network ISO over NFS
 .EXAMPLE
-    "TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "CIFS" -NetworkBootShareIpAddress "192.168.1.101" -NetworkBootIsoPath "/Share/ISO/CentOS7-Unattended.iso" -NetworkBootShareUser "Administrator" -NetworkBootSharePassword "Password" -NetworkBootShareName "Share" -Wait -Verbose
+    "TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "CIFS" -NetworkBootShareIpAddress "192.168.1.101" -NetworkBootIsoPath "/Share/ISO/CentOS7-Unattended.iso" -NetworkBootShareUser "Administrator" -NetworkBootSharePassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -NetworkBootShareName "Share" -Wait -Verbose
     
     Deploy template and boot to network ISO over CIFS
 #>
@@ -123,7 +123,7 @@ param(
     [String]$NetworkBootShareWorkGroup,
 
     [Parameter(Mandatory=$false)]
-    [String]$NetworkBootSharePassword,
+    [SecureString]$NetworkBootSharePassword,
 
     [Parameter(Mandatory=$false)]
     [Switch]$Wait,
@@ -203,7 +203,8 @@ Process {
             $TemplateDeployPayload.NetworkBootIsoModel.ShareDetail.ShareName = $NetworkBootShareName
             $TemplateDeployPayload.NetworkBootIsoModel.ShareDetail.User = $NetworkBootShareUser
             $TemplateDeployPayload.NetworkBootIsoModel.ShareDetail.WorkGroup = $NetworkBootShareWorkGroup
-            $TemplateDeployPayload.NetworkBootIsoModel.ShareDetail.Password = $NetworkBootSharePassword
+            $NetworkBootSharePasswordText = (New-Object PSCredential "user", $NetworkBootSharePassword).GetNetworkCredential().Password
+            $TemplateDeployPayload.NetworkBootIsoModel.ShareDetail.Password = $NetworkBootSharePasswordText
         }
         # Build TargetIds array from Devices
         $DeviceIds = @()
@@ -232,7 +233,7 @@ Process {
                     # Reserve virtual identities
                     Write-Verbose "Checking assigned identities........."
                     Start-Sleep -Seconds 30
-                    Set-AssignedIdentities -BaseUri $BaseUri -Type $Type -Headers $Headers -TemplateId $Template.Id -TargetIds $DeviceIds
+                    Set-AssignedIdentity -BaseUri $BaseUri -Type $Type -Headers $Headers -TemplateId $Template.Id -TargetIds $DeviceIds
                 }
             } else {
                 Write-Warning "Failed to deploy template. Only 1 template can be associated to a device at a time. Check Audit Log and Configuration > Profiles"

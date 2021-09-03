@@ -61,8 +61,6 @@ Begin {
 Process {
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
-        $BaseUri = "https://$($SessionAuth.Host)"
-        $Type = "application/json"
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
