@@ -1,9 +1,8 @@
 name: Create Github Release
 
+# Only trigger on tagged commits which are only used for official releases
 on:
   push:
-    branches: [ "gitaction" ]
-    # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
@@ -66,8 +65,7 @@ jobs:
           name: Release ${{ steps.changelog_reader.outputs.version }}
           body: ${{ steps.changelog_reader.outputs.changes }}
           prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
-          #draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
-          draft: true
+          draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -84,19 +82,3 @@ jobs:
           asset_path: ${{ steps.tag_name.outputs.current_version }}.zip
           asset_name: ${{ steps.tag_name.outputs.current_version }}.zip
           asset_content_type: application/zip
-
-  publish-to-gallery:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Trust PSGallery
-      if: success()
-      shell: pwsh
-      run: |
-            Set-PSRepository PSGallery -InstallationPolicy Trusted
-    - name: Build and publish
-      env:
-        NUGET_KEY: ${{ secrets.NUGET_KEY }}
-      shell: pwsh
-      run: |
-        Publish-Module -Path .\DellOpenManage -NuGetApiKey $env:NUGET_KEY -Verbose

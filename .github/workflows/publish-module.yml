@@ -1,0 +1,24 @@
+name: Publish Module to PowerShell Gallery
+
+# Only trigger on published releases
+on:
+  push:
+    release:
+      types: [published]
+
+jobs:
+  publish-to-gallery:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Trust PSGallery
+      if: success()
+      shell: pwsh
+      run: |
+            Set-PSRepository PSGallery -InstallationPolicy Trusted
+    - name: Build and publish
+      env:
+        NUGET_KEY: ${{ secrets.NUGET_KEY }}
+      shell: pwsh
+      run: |
+        Publish-Module -Path .\DellOpenManage -NuGetApiKey $env:NUGET_KEY -Verbose
