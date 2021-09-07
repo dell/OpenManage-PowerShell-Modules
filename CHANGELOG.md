@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.0]()
 ### Added
 - Migrated scripts from https://github.com/dell/OpenManage-Enterprise/tree/master/PowerShell
-- Get-OMEAuditLog
+- Get-OMEAuditLog 
 - Get-OMEWarranty
 - Get-OMEAlert
 - Get-OMEUser
