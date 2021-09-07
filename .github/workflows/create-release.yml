@@ -1,0 +1,102 @@
+name: Create Github Release
+
+on:
+  push:
+    branches: [ "gitaction" ]
+    # Sequence of patterns matched against refs/tags
+    #tags:
+    #  - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  tests:
+    name: Pester test and ScriptAnalyzer
+    runs-on: windows-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+
+    - name: Install PSScriptAnalyzer module
+      if: success()
+      shell: pwsh
+      run: |
+            Set-PSRepository PSGallery -InstallationPolicy Trusted
+            Install-Module PSScriptAnalyzer -ErrorAction Stop
+
+    - name: Lint with PSScriptAnalyzer
+      if: success()
+      shell: pwsh
+      run: |
+            Invoke-ScriptAnalyzer -Path .\DellOpenManage\ -Recurse -Outvariable issues -Severity Error,Warning -ExcludeRule PSAvoidUsingWriteHost,PSUseShouldProcessForStateChangingFunctions,PSUseToExportFieldsInManifest 
+            $errors   = $issues.Where({$_.Severity -eq 'Error'})
+            $warnings = $issues.Where({$_.Severity -eq 'Warning'})
+            if ($errors) {
+                Write-Error "There were $($errors.Count) errors and $($warnings.Count) warnings total." -ErrorAction Stop
+            } else {
+                Write-Output "There were $($errors.Count) errors and $($warnings.Count) warnings total."
+            }
+
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version from tag
+        id: tag_name
+        run: |
+          echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
+        shell: bash
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get Changelog Entry
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          validation_depth: 10
+          version: ${{ steps.tag_name.outputs.current_version }}
+          path: ./CHANGELOG.md
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        id: create_release
+        with:
+          # This pulls from the "Get Changelog Entry" step above, referencing it's ID to get its outputs object.
+          # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          tag: ${{ steps.changelog_reader.outputs.version }}
+          name: Release ${{ steps.changelog_reader.outputs.version }}
+          body: ${{ steps.changelog_reader.outputs.changes }}
+          prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
+          #draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
+          draft: true
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create zip for release
+        run: |
+          zip -r ${{ steps.tag_name.outputs.current_version }}.zip ./DellOpenManage
+
+      - name: Upload windows release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.tag_name.outputs.current_version }}.zip
+          asset_name: ${{ steps.tag_name.outputs.current_version }}.zip
+          asset_content_type: application/zip
+
+  publish-to-gallery:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Trust PSGallery
+      if: success()
+      shell: pwsh
+      run: |
+            Set-PSRepository PSGallery -InstallationPolicy Trusted
+    - name: Build and publish
+      env:
+        NUGET_KEY: ${{ secrets.NUGET_KEY }}
+      shell: pwsh
+      run: |
+        Publish-Module -Path .\DellOpenManage -NuGetApiKey $env:NUGET_KEY -Verbose
