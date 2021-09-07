@@ -30,7 +30,7 @@ CompanyName = 'Dell EMC'
 Copyright = '(c) 2020 Dell EMC. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'Dell OpenManage Enterprise PowerShell Module'
 
 # Minimum version of the PowerShell engine required by this module
 # PowerShellVersion = ''
