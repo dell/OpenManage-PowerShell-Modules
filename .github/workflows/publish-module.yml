@@ -2,9 +2,8 @@ name: Publish Module to PowerShell Gallery
 
 # Only trigger on published releases
 on:
-  push:
-    release:
-      types: [published]
+  release:
+    types: [published]
 
 jobs:
   publish-to-gallery:
