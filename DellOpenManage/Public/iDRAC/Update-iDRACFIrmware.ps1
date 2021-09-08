@@ -10,7 +10,7 @@ function Get-iDRACFirmwarePayload($UpdateSchedule, $Source, $SourcePath, $Catalo
         "Mountpoint": "",
         "RebootNeeded": false,
         "ShareName": "",
-        "ShareType": "",
+        "ShareType": ""
     }' | ConvertFrom-Json
 
     if ($UpdateSchedule -eq "RebootNow") {
@@ -35,12 +35,13 @@ function Get-iDRACFirmwarePayload($UpdateSchedule, $Source, $SourcePath, $Catalo
     $Payload.IPAddress = $Source
     $Payload.ShareName = $SourcePath
     if ($RepositoryType -eq "CIFS") {
-        #$Payload.Mountpoint = $SourcePath # CIFS
+        #$Payload.Mountpoint = $SourcePath # CIFS, I don't think this is required
         $Payload | Add-Member -NotePropertyName UserName -NotePropertyValue $RepositoryUserName
         $RepositoryPasswordText = (New-Object PSCredential "user", $RepositoryPassword).GetNetworkCredential().Password
         $Payload | Add-Member -NotePropertyName Password -NotePropertyValue $RepositoryPasswordText
         $Payload | Add-Member -NotePropertyName Workgroup -NotePropertyValue $DomainName
     }
+    # Proxy support not implemented yet
     #$Payload.ProxyPasswd = "",
     #$Payload.ProxyPort = "Off", #DefaultProxy|Off|ParametersProxy
     #$Payload.ProxyServer = "",
@@ -51,41 +52,42 @@ function Get-iDRACFirmwarePayload($UpdateSchedule, $Source, $SourcePath, $Catalo
     return $payload
 }
 
-function Get-iDRACFirmwareCompliance () {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [String]$BaseUri,
-
-        [Parameter(Mandatory)]
-        [pscredential]$Credentials
-    )
-
-    $Payload = @{} | ConvertTo-Json -Compress
-    $ComplianceURL = $BaseUri + "/Dell/Systems/System.Embedded.1/DellSoftwareInstallationService/Actions/DellSoftwareInstallationService.GetRepoBasedUpdateList"
-    $ComplianceResp = Invoke-WebRequest -Uri $ComplianceURL -Credential $Credentials -Method POST -Body $Payload -ContentType 'application/json' -Headers @{"Accept"="application/json"}
-    if ($ComplianceResp.StatusCode -eq 200 -or $ComplianceResp.StatusCode -eq 202) {
-        $ComplianceInfo = $ComplianceResp.Content | ConvertFrom-Json
-        [xml]$xmlAttr = $ComplianceInfo.PackageList
-        $props = @()
-        $xmlAttr.CIM.MESSAGE.SIMPLEREQ."VALUE.NAMEDINSTANCE" | ForEach-Object {
-            $_.INSTANCENAME | ForEach-Object {
-                $instance = @()
-                $_.PROPERTY | ForEach-Object {
-                    $Name = $_ | Select-Object -ExpandProperty NAME
-                    $Value = $_.VALUE
-                    $instance += @{
-                        $Name = $Value
+function Get-iDRACFirmwareCompliance ($BaseUri, [pscredential]$Credentials) {
+    $props = @()
+    try {
+        $Payload = @{} | ConvertTo-Json -Compress
+        $ComplianceURL = $BaseUri + "/Dell/Systems/System.Embedded.1/DellSoftwareInstallationService/Actions/DellSoftwareInstallationService.GetRepoBasedUpdateList"
+        $ComplianceResp = Invoke-WebRequest -Uri $ComplianceURL -Credential $Credentials -Method POST -Body $Payload -ContentType 'application/json' -Headers @{"Accept"="application/json"}  -ErrorVariable RespErr
+        if ($ComplianceResp.StatusCode -eq 200 -or $ComplianceResp.StatusCode -eq 202) {
+            $ComplianceInfo = $ComplianceResp.Content | ConvertFrom-Json
+            # The package list is in XML. We need to parse it and extract the properties.
+            # The iDRAC doesn't compare versions against the repository catalog. It will upgrade or downgrade to whatever is in the catalog. 
+            [xml]$xmlAttr = $ComplianceInfo.PackageList 
+            $xmlAttr.CIM.MESSAGE.SIMPLEREQ."VALUE.NAMEDINSTANCE" | ForEach-Object {
+                $_.INSTANCENAME | ForEach-Object {
+                    $instance = @{}
+                    $_.PROPERTY | ForEach-Object {
+                        $Name = $_ | Select-Object -ExpandProperty NAME
+                        $Value = $_.VALUE
+                        $instance.Add($Name, $Value)
                     }
+                    $_."PROPERTY.ARRAY" | ForEach-Object {
+                        $Name = $_ | Select-Object -ExpandProperty NAME
+                        $Value = $_."VALUE.ARRAY".VALUE
+                        $instance.Add($Name, $Value)
+                    }
+                    $props += $instance
                 }
-                $props += $instance
             }
+            return $props
         }
-        #Write-Host $($props | Format-Table | Out-String)
+        else {
+            Write-Error "Update job creation failed"
+        }
+    } catch {
+        $response = $_.ErrorDetails.Message | ConvertFrom-Json
+        Write-Verbose -Message $response.error."@Message.ExtendedInfo"[0].Message
         return $props
-    }
-    else {
-        Write-Error "Update job creation failed"
     }
 }
 
@@ -113,17 +115,27 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Update firmware on devices in OpenManage Enterprise
+    Update firmware on iDRAC
 .DESCRIPTION
-    This will use an existing firmware baseline to submit a Job that updates firmware on a set of devices.
-.PARAMETER Name
-    Name of the firmware update job
-.PARAMETER Baseline
-    Array of type Baseline returned from Get-Baseline function
+    ***Warning*** The iDRAC does not compare firmware versions against the catalog. It will just upgrade or downgrade to whatever version is in the catalog.
+.PARAMETER Source
+    Hostname or IP Address of server
+.PARAMETER SourcePath
+    Directory or share path of server
+.PARAMETER CatalogFile
+    Filename of catalog (Default=Catalog.xml)
+.PARAMETER RepositoryType
+    Type of repository ("CIFS", "FTP", "HTTP", "HTTPS", "NFS", "TFTP")
+.PARAMETER DomainName
+    Domain name *Only used for CIFS
+.PARAMETER RepositoryUserName
+    Share Username *Only used for CIFS
+.PARAMETER RepositoryPassword
+    Share Password *Only used for CIFS
+.PARAMETER CheckCertificate
+    Enable certificate check *Only used for HTTPS
 .PARAMETER UpdateSchedule
-    Determines when the updates will be performed. (Default="Preview", "RebootNow", "ScheduleLater", "StageForNextReboot")
-.PARAMETER UpdateAction
-    Determines what type of updates will be performed. (Default="Upgrade", "Downgrade", "All")
+    Determines when the updates will be performed. (Default="Preview", "RebootNow", "StageForNextReboot")
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -131,29 +143,35 @@ limitations under the License.
 .INPUTS
     None
 .EXAMPLE
-    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) | Format-Table
+    $Password = $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)
+    Update-iDRACFirmware -iDRAC 192.168.1.100 -UserName root -Password $Password `
+        -RepositoryType "NFS" `
+        -Source "192.168.1.200" `
+        -SourcePath "/mnt/data/drm/R640" `
+        -CatalogFile "R640_1.00_Catalog.xml" `
+        -UpdateSchedule "Preview" -Verbose 
 
-    Display device compliance report for all devices in baseline. No updates are installed by default.
+    Display component update list. No updates are installed by default.
 .EXAMPLE
-    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "RebootNow"
+    $Password = $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)
+    Update-iDRACFirmware -iDRAC 192.168.1.100 -UserName root -Password $Password `
+        -RepositoryType "NFS" `
+        -Source "192.168.1.200" `
+        -SourcePath "/mnt/data/drm/R640" `
+        -CatalogFile "R640_1.00_Catalog.xml" `
+        -UpdateSchedule "RebootNow" -Verbose
 
-    Update firmware on all devices in baseline immediately ***Warning: This will force a reboot of all servers
+    Update firmware immediately ***Warning: This will force a reboot of all servers
 .EXAMPLE
-    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "StageForNextReboot"
+    $Password = $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)
+    Update-iDRACFirmware -iDRAC 192.168.1.100 -UserName root -Password $Password `
+        -RepositoryType "NFS" `
+        -Source "192.168.1.200" `
+        -SourcePath "/mnt/data/drm/R640" `
+        -CatalogFile "R640_1.00_Catalog.xml" `
+        -UpdateSchedule "StageForNextReboot" -Verbose
 
-    Update firmware on all devices in baseline on next reboot
-.EXAMPLE
-    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "ScheduleLater" -UpdateScheduleCron "0 0 0 1 11 ?"
-
-    Update firmware on 11/1/2020 12:00AM UTC
-.EXAMPLE
-    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -DeviceFilter $("C86C0Q2" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "RebootNow"
-
-    Update firmware on specific devices in baseline immediately ***Warning: This will force a reboot of all servers
-.EXAMPLE
-    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue
-    
-    Update firmware on specific components in baseline on next reboot and clear job queue before update
+    Stage update firmware for next reboot
 #>
 
 [CmdletBinding()]
@@ -168,13 +186,13 @@ param(
     [SecureString]$Password,
 
     [Parameter(Mandatory)]
-    [String]$Source = "downloads.dell.com",
+    [String]$Source,
 
     [Parameter(Mandatory)]
-    [String]$SourcePath = "catalog/catalog.gz",
+    [String]$SourcePath,
 
-    [Parameter(Mandatory)]
-    [String]$CatalogFile = "catalog.xml",
+    [Parameter(Mandatory=$false)]
+    [String]$CatalogFile = "Catalog.xml",
 
     [Parameter(Mandatory)]
     [ValidateSet("CIFS", "FTP", "HTTP", "HTTPS", "NFS", "TFTP")]
@@ -211,7 +229,6 @@ Process {
         $BaseUri = "https://$($iDRAC)/redfish/v1"
         $ContentType  = "application/json"
         $Headers = @{}
-        $Headers."X-Auth-Token" = $SessionAuth.Token
         $Credentials =  Get-iDRACCredential -UserName $UserName -Password $Password
 
         $UpdateURL = $BaseUri + "/Dell/Systems/System.Embedded.1/DellSoftwareInstallationService/Actions/DellSoftwareInstallationService.InstallFromRepository"
@@ -227,7 +244,7 @@ Process {
             #$JobInfo = $JobResp.Content | ConvertFrom-Json
             $JobId = $JobResp.Headers["Location"].Split("/")[-1]
             Write-Verbose "Created job $($JobId) to update firmware..."
-            if ($UpdateSchedule -eq "Preview") { # Only show report, do not perform any updates
+            if ($UpdateSchedule -eq "Preview" -or $UpdateSchedule -eq "StageForNextReboot") { 
                 return Get-iDRACFirmwareCompliance -BaseUri $BaseUri -Credentials $Credentials
             }
             if ($Wait) {
@@ -243,9 +260,7 @@ Process {
 
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String)
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 
