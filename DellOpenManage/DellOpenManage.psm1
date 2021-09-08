@@ -1,7 +1,7 @@
 using module .\Classes\SessionAuth.psm1
 
 # Get public and private function definition files.
-$Public  = @( Get-ChildItem -Path $PSScriptRoot\Public\OME\*.ps1 -ErrorAction SilentlyContinue )
+$Public  = @( Get-ChildItem -Path $PSScriptRoot\Public\*\*.ps1 -ErrorAction SilentlyContinue )
 $Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction SilentlyContinue )
 
 # Declare module scoped variables to store session info
