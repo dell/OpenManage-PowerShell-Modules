@@ -241,11 +241,18 @@ Process {
         $JobResp = Invoke-WebRequest -Uri $UpdateURL -Credential $Credentials -Headers $Headers -ContentType $ContentType -Method POST -Body $UpdatePayload
         if ($JobResp.StatusCode -eq 200 -or $JobResp.StatusCode -eq 202) {
             Write-Verbose "Update job creation successful"
-            #$JobInfo = $JobResp.Content | ConvertFrom-Json
             $JobId = $JobResp.Headers["Location"].Split("/")[-1]
             Write-Verbose "Created job $($JobId) to update firmware..."
             if ($UpdateSchedule -eq "Preview" -or $UpdateSchedule -eq "StageForNextReboot") { 
-                return Get-iDRACFirmwareCompliance -BaseUri $BaseUri -Credentials $Credentials
+                # We need to wait for the initial job to be status Downloaded before running GetRepoUpdateList to see the JID
+                $ComplianceData = Get-iDRACFirmwareCompliance -BaseUri $BaseUri -Credentials $Credentials
+                if ($Wait) {
+                    Write-Verbose $($ComplianceData | Where-Object {$_.JobId -ne ""} | Format-Table | Out-String)
+                    #$ComplianceData | Select-Object {$_.JobId} | Wait-iDRACOnJob -BaseUri $BaseUri -Credentials $Credentials -WaitTime $WaitTime
+                    return $ComplianceData
+                } else {
+                    return $ComplianceData
+                }
             }
             if ($Wait) {
                 $JobStatus = $($JobId | Wait-iDRACOnJob -BaseUri $BaseUri -Credentials $Credentials -WaitTime $WaitTime)
