@@ -218,6 +218,9 @@ param(
     [Switch]$Wait,
 
     [Parameter(Mandatory=$false)]
+    [Switch]$WaitForAll,
+
+    [Parameter(Mandatory=$false)]
     [int]$WaitTime = 3600
 )
 
@@ -243,10 +246,23 @@ Process {
             Write-Verbose "Update job creation successful"
             $JobId = $JobResp.Headers["Location"].Split("/")[-1]
             Write-Verbose "Created job $($JobId) to update firmware..."
+            if ($Wait -or $WaitForAll) {
+                $WaitForStatus = "Completed"
+                if ($WaitForAll) {
+                    $WaitForStatus = "Downloaded" 
+                }
+                $JobStatus = $($JobId | Wait-iDRACOnJob -BaseUri $BaseUri -Credentials $Credentials -WaitTime $WaitTime -WaitForStatus $WaitForStatus)
+                if (-not $WaitForAll) { # If we're waiting for all jobs to complete we don't want to exit here
+                    return $JobStatus
+                }
+            } else {
+                return $JobId
+            }
             if ($UpdateSchedule -eq "Preview" -or $UpdateSchedule -eq "StageForNextReboot") { 
                 # We need to wait for the initial job to be status Downloaded before running GetRepoUpdateList to see the JID
+                Start-Sleep -s 60 # This is dirty but there is no other way to get the JID. The parent job will be status Downloaded before the component jobs are created
                 $ComplianceData = Get-iDRACFirmwareCompliance -BaseUri $BaseUri -Credentials $Credentials
-                if ($Wait) {
+                if ($WaitForAll) {
                     Write-Verbose $($ComplianceData | Where-Object {$_.JobId -ne ""} | Format-Table | Out-String)
                     #$ComplianceData | Select-Object {$_.JobId} | Wait-iDRACOnJob -BaseUri $BaseUri -Credentials $Credentials -WaitTime $WaitTime
                     return $ComplianceData
@@ -254,12 +270,7 @@ Process {
                     return $ComplianceData
                 }
             }
-            if ($Wait) {
-                $JobStatus = $($JobId | Wait-iDRACOnJob -BaseUri $BaseUri -Credentials $Credentials -WaitTime $WaitTime)
-                return $JobStatus
-            } else {
-                return $JobId
-            }
+            
         }
         else {
             Write-Error "Update job creation failed"
