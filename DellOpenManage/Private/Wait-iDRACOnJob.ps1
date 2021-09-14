@@ -46,6 +46,9 @@ param(
     
     [Parameter(Mandatory)]
     [pscredential]$Credentials,
+    
+    [Parameter(Mandatory=$false)]
+    [String]$WaitForStatus = "Completed",
 
     [Parameter(Mandatory=$false)]
     [int]$WaitTime = 3600
@@ -76,8 +79,8 @@ Process {
             if ($JobResp) {
                 $JobStatus = $JobData.JobState
                 Write-Verbose "Iteration $($Ctr), Wait $($Ctr * $SLEEP_INTERVAL)s: Status of $($JobId) is $($JobStatus)"
-                if ($JobStatus -eq "Completed") { 
-                    Write-Verbose "Job completed successfully..."
+                if ($JobStatus -eq $WaitForStatus) { 
+                    Write-Verbose "Job status $($WaitForStatus)..."
                     return $JobStatus
                 }
                 elseif ($JobStatus -eq "Running") { 
