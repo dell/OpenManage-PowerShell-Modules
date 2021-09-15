@@ -60,13 +60,12 @@ Process {
     Set-CertPolicy
     $ContentType  = "application/json"
     $Headers = @{}
+    $Headers."Accept" = "application/json"
 
     $MAX_RETRIES = $WaitTime / 10
     $SLEEP_INTERVAL = 30
 
-    #New,Starting,Running,Suspended,Interrupted,Pending,Stopping,Completed,Cancelled,Exception,Service,UserIntervention,Continue
-
-    $FailedJobStatuses = @("Suspended", "Interrupted", "Stopping", "Cancelled", "Exception")
+    $EndJobStatuses = @("Suspended", "Interrupted", "Stopping", "Cancelled", "Exception", "Failed")
 
     $Ctr = 0
     if ($JobId) {
@@ -87,7 +86,7 @@ Process {
                     $JobData | Format-List | Out-String | Write-Verbose
                     continue
                 }
-                elseif ($FailedJobStatuses -contains $JobStatus) { # Failed, Warning, Aborted, Paused, Stopped, Cancelled
+                elseif ($EndJobStatuses -contains $JobStatus) { 
                     $JobData | Format-List | Out-String | Write-Verbose
                     return $JobStatus
                 }

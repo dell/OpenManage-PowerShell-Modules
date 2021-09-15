@@ -232,6 +232,7 @@ Process {
         $BaseUri = "https://$($iDRAC)/redfish/v1"
         $ContentType  = "application/json"
         $Headers = @{}
+        $Headers."Accept" = "application/json"
         $Credentials =  Get-iDRACCredential -UserName $UserName -Password $Password
 
         $UpdateURL = $BaseUri + "/Dell/Systems/System.Embedded.1/DellSoftwareInstallationService/Actions/DellSoftwareInstallationService.InstallFromRepository"
@@ -248,9 +249,11 @@ Process {
             Write-Verbose "Created job $($JobId) to update firmware..."
             if ($Wait -or $WaitForAll) {
                 $WaitForStatus = "Completed"
-                if ($WaitForAll) {
+                if ($WaitForAll -and $UpdateSchedule -eq "StageForNextReboot") {
+                    # We need to wait for the initial job to be status Downloaded before running GetRepoUpdateList to see the JID
                     $WaitForStatus = "Downloaded" 
                 }
+                # Wait for job to reach desired status before continuing
                 $JobStatus = $($JobId | Wait-iDRACOnJob -BaseUri $BaseUri -Credentials $Credentials -WaitTime $WaitTime -WaitForStatus $WaitForStatus)
                 if (-not $WaitForAll) { # If we're waiting for all jobs to complete we don't want to exit here
                     return $JobStatus
@@ -258,17 +261,38 @@ Process {
             } else {
                 return $JobId
             }
-            if ($UpdateSchedule -eq "Preview" -or $UpdateSchedule -eq "StageForNextReboot") { 
-                # We need to wait for the initial job to be status Downloaded before running GetRepoUpdateList to see the JID
-                Start-Sleep -s 60 # This is dirty but there is no other way to get the JID. The parent job will be status Downloaded before the component jobs are created
-                $ComplianceData = Get-iDRACFirmwareCompliance -BaseUri $BaseUri -Credentials $Credentials
-                if ($WaitForAll) {
-                    Write-Verbose $($ComplianceData | Where-Object {$_.JobId -ne ""} | Format-Table | Out-String)
-                    #$ComplianceData | Select-Object {$_.JobId} | Wait-iDRACOnJob -BaseUri $BaseUri -Credentials $Credentials -WaitTime $WaitTime
-                    return $ComplianceData
+            if ($WaitForAll -and $UpdateSchedule -ne "Preview" -and $JobStatus -ne "Failed") {
+                $MAX_RETRIES = $WaitTime / 10
+                $SLEEP_INTERVAL = 30
+                $Ctr = 0
+                # Run GetRepoBasedUpdateList until the JID is filled in for each component update job
+                do {
+                    $Ctr++
+                    Start-Sleep -s $SLEEP_INTERVAL
+                    
+                    $ComplianceData = Get-iDRACFirmwareCompliance -BaseUri $BaseUri -Credentials $Credentials
+                    Write-Verbose $($ComplianceData | Format-Table | Out-String)
+                    # Get a count of component updates that require a host reboot. This excludes iDRAC updates that don't require a reboot.
+                    $UpdateCount = $ComplianceData | Where-Object {$_.RebootType -eq "HOST"} | Measure-Object | Select-Object -ExpandProperty Count
+                    $JobCount = $ComplianceData | Where-Object {$_.RebootType -eq "HOST" -and $_.JobId -ne ""} | Measure-Object | Select-Object -ExpandProperty Count
+                    if ($UpdateCount -eq $JobCount) {
+                        break # Exit loop once all components have a JID
+                    }
+                } until ($Ctr -ge $MAX_RETRIES)
+                
+                $JobIds = $ComplianceData | Where-Object {$_.RebootType -eq "HOST"} | Select-Object -ExpandProperty JobId
+                if ($JobIds.Length -gt 0) { # It could be possible that no component updates require a reboot but there are still components to update like the iDRAC.
+                    $WaitForStatus2 = "Completed"
+                    if ($UpdateSchedule -eq "StageForNextReboot") {
+                        $WaitForStatus2 = "Scheduled" 
+                    }
+                    return $($JobIds | Wait-iDRACOnJob -BaseUri $BaseUri -Credentials $Credentials -WaitTime $WaitTime -WaitForStatus $WaitForStatus2)
                 } else {
                     return $ComplianceData
                 }
+            } else {
+                $ComplianceData = Get-iDRACFirmwareCompliance -BaseUri $BaseUri -Credentials $Credentials
+                return $ComplianceData
             }
             
         }
