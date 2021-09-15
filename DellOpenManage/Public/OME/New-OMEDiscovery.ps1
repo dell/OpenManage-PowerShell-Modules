@@ -1,5 +1,5 @@
 ﻿
-function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $SetTrapDestination, $Schedule, $ScheduleCron) {
+function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $SetTrapDestination, $UseAllProtocols, $Schedule, $ScheduleCron) {
     $DiscoveryConfigPayload = '{
             "DiscoveryConfigGroupName":"Server Discovery",
             "DiscoveryStatusEmailRecipient":"",
@@ -70,6 +70,10 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
         $DiscoveryConfigPayload.DiscoveryStatusEmailRecipient.PSObject.Properties.Remove("DiscoveryConfigTargets")
     }
     $DiscoveryConfigPayload.TrapDestination = $SetTrapDestination
+    # Add version check for UseAllProfiles
+    if ($SessionAuth.Version -ge [System.Version]"3.7.0") {
+        $DiscoveryConfigPayload | Add-Member -NotePropertyName UseAllProfiles -NotePropertyValue $UseAllProtocols
+    }
     $DiscoveryConfigPayload.DiscoveryConfigModels[0].PSObject.Properties.Remove("DiscoveryConfigTargets")
     $DiscoveryConfigPayload.DiscoveryConfigModels[0]| Add-Member -MemberType NoteProperty -Name 'DiscoveryConfigTargets' -Value @()
     foreach ($DiscoveryHost in $HostList) {
@@ -166,6 +170,8 @@ limitations under the License.
     Email upon completion
 .PARAMETER SetTrapDestination
     Set trap destination of iDRAC to OpenManage Enterprise upon discovery
+.PARAMETER UseAllProtocols
+    Execute all selected protocols when discovering devices. This will increase this discovery task's execution time.
 .PARAMETER Schedule
     Determines when the discovery job will be executed. (Default="RunNow", "RunLater")
 .PARAMETER ScheduleCron
@@ -233,6 +239,9 @@ param(
     #>
 
     [Parameter(Mandatory=$false)]
+    [Switch]$UseAllProtocols,
+
+    [Parameter(Mandatory=$false)]
     [Switch]$Wait,
 
     [Parameter(Mandatory=$false)]
@@ -256,9 +265,9 @@ Process {
 
         $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups"
         if ($Hosts.Count -gt 0) {
-            $Payload = Get-DiscoverDevicePayload -Name $Name -HostList $Hosts -DeviceType $DeviceType -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -SetTrapDestination $SetTrapDestination.IsPresent -Schedule $Schedule -ScheduleCron $ScheduleCron
+            $Payload = Get-DiscoverDevicePayload -Name $Name -HostList $Hosts -DeviceType $DeviceType -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -SetTrapDestination $SetTrapDestination -UseAllProtocols $UseAllProtocols -Schedule $Schedule -ScheduleCron $ScheduleCron
             $Payload = $Payload | ConvertTo-Json -Depth 6
-            $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Post  -Body $Payload -Headers $Headers -ContentType $Type
+            $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Post -Body $Payload -Headers $Headers -ContentType $Type
             if ($DiscoverResponse.StatusCode -eq 201) {
                 Write-Verbose "Discovering devices...."
                 Start-Sleep -Seconds 10
@@ -280,9 +289,7 @@ Process {
         }
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String)
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

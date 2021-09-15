@@ -85,6 +85,12 @@ Begin {
         Break
         Return
     }
+    # Add version check for SupportAssist commandlets
+    if ($SessionAuth.Version -lt [System.Version]"3.5.0") {
+        Write-Error "SupportAssist API not supported in version $($SessionAuth.Version) of OpenManage Enterprise"
+        Break
+        Return
+    }
 }
 Process {
     Try {

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.0]()
+## [2.3.1]() - 2021-09-14
 ### Added
 - Migrated scripts from https://github.com/dell/OpenManage-Enterprise/tree/master/PowerShell
 - Get-OMEAuditLog 
@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Changed Invoke-OMETemplateDeploy to use SecureString for -NetworkBootSharePassword
+- Added -UseAllProtocols parameter to New-OMEDiscovery ([Issue #4](https://github.com/dell/OpenManage-PowerShell-Modules/issues/4))
 
 ### Fixed
 - Fixed Set-CertPolicy to allow multiple Connect-OME within script ([Issue #2](https://github.com/dell/OpenManage-PowerShell-Modules/issues/2))

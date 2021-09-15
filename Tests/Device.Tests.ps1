@@ -31,7 +31,7 @@ Describe "Device Tests" {
         }
 
         It "Should submit job to power on device" {
-            $TestDeviceServiceTags | Set-OMEPowerState -State "On" | Should -BeOfType System.Int64
+            $TestDeviceServiceTags | Set-OMEPowerState -State "On" | Should -Be "Completed"
         }
     }
 }

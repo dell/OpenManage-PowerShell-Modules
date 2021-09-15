@@ -83,12 +83,29 @@ param(
         $SessResponse = Invoke-WebRequest -Uri $SessionUrl -Method Post -Body $UserDetails -ContentType $Type
         if ($SessResponse.StatusCode -eq 200 -or $SessResponse.StatusCode -eq 201) {
             $SessResponseData = $SessResponse.Content | ConvertFrom-Json
+            
+            $Token = [String]$SessResponse.Headers["X-Auth-Token"]
+            $Headers = @{}
+            $Headers."X-Auth-Token" = $Token
+
+            # Get Appliance Version
+            $AppInfoUrl = "https://$($OMEHost)/api/ApplicationService/Info"
+            $AppInfoResponse = Invoke-WebRequest -Uri $AppInfoUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
+            $AppVersion = [System.Version]"1.0.0"
+            if ($AppInfoResponse.StatusCode -eq 200 -or $AppInfoResponse.StatusCode -eq 201) {
+                $AppInfoResponseData = $AppInfoResponse.Content | ConvertFrom-Json
+                Write-Verbose $($AppInfoResponseData)
+                $AppVersion = [System.Version]$AppInfoResponseData.Version
+            }
+
             $Script:SessionAuth = [SessionAuth]@{
                 Host = $OMEHost
-                Token = $SessResponse.Headers["X-Auth-Token"]
+                Token = $Token
                 Id = $SessResponseData.Id
+                Version = $AppVersion
                 IgnoreCertificateWarning = $IgnoreCertificateWarning
             }
+            
         } else {
             Write-Error "Unable to create a session with appliance $($OMEHost)"
         }

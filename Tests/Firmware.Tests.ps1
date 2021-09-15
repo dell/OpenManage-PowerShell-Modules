@@ -49,7 +49,7 @@ Describe "Firmware Tests" {
         
         It "Should try to update firmware from DUP with preview only" -Tag "DUP" {
             $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
-            Update-OMEFirmwareDUP -Device $devices -UpdateSchedule "Preview" -DupFile "C:\Temp\BIOS_92RFG_WN64_2.11.2.EXE" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
+            Update-OMEFirmwareDUP -Device $devices -UpdateSchedule "Preview" -DupFile "C:\Temp\BIOS_92RFG_WN64_2.11.2.EXE" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterOrEqual 0
         }
 
         #It ("Should try to update firmware from DUP") {

@@ -25,7 +25,7 @@ Describe "Support Assist Tests" {
         It "Should add devices to support assist group" {
             $devices = $($Script:DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
             $Script:TestSupportAssistGroupName | Get-OMEGroup | Edit-OMESupportAssistGroup -Devices $devices
-            Get-OMEDevice -Group $("Support Assist Group 1" | Get-OMEGroup) | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
+            Get-OMEDevice -Group $($Script:TestSupportAssistGroupName | Get-OMEGroup) | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
 
         It "Should edit support assist group" {

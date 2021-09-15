@@ -147,11 +147,14 @@ Process {
         if($PowerState){
             if($PowerControlStateMap[$State] -eq $PowerState ){
                 Write-Verbose "Device is already in the desired state."
+                return "Completed"
             }elseif(($State -eq "On") -and ($PowerState -eq $PowerStateMap["PoweringOn"])){
                 Write-Verbose "Device is already in the desired state."
+                return "Completed"
             }
             elseif(($State -eq "Off") -and ($PowerState -eq $PowerStateMap["PoweringOff"])){
                 Write-Verbose "Device is already in the desired state. "
+                return "Completed"
             }
             else{
                 $JobServicePayload = Get-JobServicePayload
@@ -173,6 +176,7 @@ Process {
                 else {
                     Write-Error "Unable to $($State) device..."
                     Write-Error $JobResponse
+                    return "Failed"
                 }
             }
         } 

@@ -21,13 +21,13 @@ Describe "Group Tests" {
         }
 
         It "Should create new Group" {
-            New-OMEGroup -Name $TestNewGroup -Verbose
-            $TestNewGroup | Get-OMEGroup -Verbose | Select-Object -ExpandProperty Name | Should -Be $TestNewGroup
+            New-OMEGroup -Name $TestNewGroup
+            $TestNewGroup | Get-OMEGroup | Select-Object -ExpandProperty Name | Should -Be $TestNewGroup
         }
 
         It "Should edit Group name" {
-            $TestNewGroup | Get-OMEGroup | Edit-OMEGroup -Name $TestNewGroupEdit -Description "This is a test" -Verbose
-            $TestNewGroupEdit | Get-OMEGroup -Verbose | Select-Object -ExpandProperty Name | Should -Be $TestNewGroupEdit
+            $TestNewGroup | Get-OMEGroup | Edit-OMEGroup -Name $TestNewGroupEdit -Description "This is a test"
+            $TestNewGroupEdit | Get-OMEGroup | Select-Object -ExpandProperty Name | Should -Be $TestNewGroupEdit
         }
 
         It "Should added Devices to Group" {
