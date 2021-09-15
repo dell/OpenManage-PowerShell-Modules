@@ -36,6 +36,7 @@ jobs:
 
   build:
     name: Create Release
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - name: Get version from tag
@@ -51,7 +52,6 @@ jobs:
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2
         with:
-          validation_depth: 10
           version: ${{ steps.tag_name.outputs.current_version }}
           path: ./CHANGELOG.md
 
@@ -82,3 +82,21 @@ jobs:
           asset_path: ${{ steps.tag_name.outputs.current_version }}.zip
           asset_name: ${{ steps.tag_name.outputs.current_version }}.zip
           asset_content_type: application/zip
+
+  publish:
+    name: Publish to PowerShell Gallery
+    needs: tests
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Trust PSGallery
+      if: success()
+      shell: pwsh
+      run: |
+            Set-PSRepository PSGallery -InstallationPolicy Trusted
+    - name: Build and publish
+      env:
+        NUGET_KEY: ${{ secrets.NUGET_KEY }}
+      shell: pwsh
+      run: |
+        Publish-Module -Path .\DellOpenManage -NuGetApiKey $env:NUGET_KEY -Verbose
