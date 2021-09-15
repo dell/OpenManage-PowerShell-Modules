@@ -15,7 +15,7 @@ Create new device discovery job in OpenManage Enterprise
 ```
 New-OMEDiscovery [[-Name] <String>] [[-DeviceType] <String>] [-Hosts] <String[]> [-DiscoveryUserName] <String>
  [-DiscoveryPassword] <SecureString> [[-Email] <String>] [-SetTrapDestination] [[-Schedule] <String>]
- [[-ScheduleCron] <String>] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
+ [[-ScheduleCron] <String>] [-UseAllProtocols] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -209,6 +209,22 @@ Aliases:
 Required: False
 Position: 8
 Default value: 0 0 0 ? * sun *
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UseAllProtocols
+Execute all selected protocols when discovering devices.
+This will increase this discovery task's execution time.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

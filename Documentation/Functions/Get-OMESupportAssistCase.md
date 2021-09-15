@@ -5,32 +5,49 @@ online version:
 schema: 2.0.0
 ---
 
-# Invoke-OMEMcmGroupRetireLead
+# Get-OMESupportAssistCase
 
 ## SYNOPSIS
-Assign backup lead chassis to MCM Group
+Get list of Identity Pools from OME
 
 ## SYNTAX
 
 ```
-Invoke-OMEMcmGroupRetireLead [[-PostRetirementRoleType] <String>] [-Wait] [[-WaitTime] <Int32>]
- [<CommonParameters>]
+Get-OMESupportAssistCase [[-Value] <Object>] [[-FilterBy] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
+This script uses the OME REST API.
+Note that the credentials entered are not stored to disk.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Invoke-OMEMcmGroupRetireLead -Wait
+Get-OMESupportAssistCase | Format-Table
 ```
 
 ## PARAMETERS
 
-### -PostRetirementRoleType
-Role to assign to retired chassis (Default="Member", "Standalone")
+### -Value
+String containing search value.
+Use with -FilterBy parameter.
+Supports regex based matching.
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -FilterBy
+Filter the results by ("EventSource", "Id", "ServiceContract", Default="ServiceTag")
 
 ```yaml
 Type: String
@@ -38,38 +55,8 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
-Default value: Member
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Wait
-{{ Fill Wait Description }}
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WaitTime
-{{ Fill WaitTime Description }}
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
 Position: 2
-Default value: 3600
+Default value: ServiceTag
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

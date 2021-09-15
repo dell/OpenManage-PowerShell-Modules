@@ -5,8 +5,8 @@
 - [Edit-OMEGroup](Functions/Edit-OMEGroup.md)
 - [Edit-OMESecurityBanner](Functions/Edit-OMESecurityBanner.md)
 - [Edit-OMESupportAssistGroup](Functions/Edit-OMESupportAssistGroup.md)
-- [Get-OMEAlertDefinition](Functions/Get-OMEAlertDefinition.md)
 - [Get-OMEAlert](Functions/Get-OMEAlert.md)
+- [Get-OMEAlertDefinition](Functions/Get-OMEAlertDefinition.md)
 - [Get-OMEAuditLog](Functions/Get-OMEAuditLog.md)
 - [Get-OMECatalog](Functions/Get-OMECatalog.md)
 - [Get-OMEConfigurationBaseline](Functions/Get-OMEConfigurationBaseline.md)
@@ -285,6 +285,7 @@
 - Id (string Id {get;set;})
 - IgnoreCertificateWarning (bool IgnoreCertificateWarning {get;set;})
 - Token (string Token {get;set;})
+- Version (version Version {get;set;})
 ## SupportAssistGroup
 - ContactOptIn (bool ContactOptIn {get;set;})
 - CustomerDetails (psobject CustomerDetails {get;set;})

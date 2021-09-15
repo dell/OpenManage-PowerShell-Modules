@@ -28,13 +28,9 @@ function Get-OMEWarranty {
     .INPUTS
         String[]
     .EXAMPLE
-        Get-OMEUser | Format-Table
+        Get-OMEWarranty | Format-Table
 
-        List all users
-    .EXAMPLE
-        "admin" | Get-OMEUser
-        
-        Get user by name
+        List all warranty details
     #>
     
     [CmdletBinding()]

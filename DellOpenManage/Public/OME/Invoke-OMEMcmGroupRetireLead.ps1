@@ -66,10 +66,10 @@ function Invoke-OMEMcmGroupRetireLead {
     
     <#
      .SYNOPSIS
-       Assign backup lead chassis to MCM Group
+       Retire lead chassis in MCM Group
     
      .DESCRIPTION
-       This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
+       This script uses the OME REST API to reture lead chassis
     
      .PARAMETER Force
        Not implemented

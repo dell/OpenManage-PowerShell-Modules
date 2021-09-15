@@ -10,6 +10,11 @@
 .\Tests\Invoke-PSScriptAnalyzer.ps1
 ```
 
+## Generate Documentation
+```
+.\Documentation\GenerateMD.ps1
+```
+
 ## Bump Version
 ```
 .\Build-Module.ps1 -Version 2.3.1

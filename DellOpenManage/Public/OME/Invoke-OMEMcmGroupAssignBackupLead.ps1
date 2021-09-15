@@ -23,14 +23,20 @@ function Invoke-OMEMcmGroupAssignBackupLead {
        Assign backup lead chassis to MCM Group
     
      .DESCRIPTION
-       This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
+       This script uses the OME REST API to add a backup lead chassis
     
      .PARAMETER ServiceTag
        Service Tag of chassis to assign as backup lead
     
      .EXAMPLE
        Invoke-OMEMcmGroupAssignBackupLead -Wait
+
+       Assign backup lead to random chassis
     
+     .EXAMPLE
+       Invoke-OMEMcmGroupAssignBackupLead -ServiceTag "XYZ1234" -Wait
+
+       Assign backup lead to specific chassis
     #>
     [CmdletBinding()]
     param(

@@ -32,9 +32,7 @@ limitations under the License.
     Group[]
     String[]
 .EXAMPLE
-    Get-OMEDevice -Value 12016
-    
-    Get device by Id
+    Get-OMEAlertDefinition
 #>
 
 [CmdletBinding()]

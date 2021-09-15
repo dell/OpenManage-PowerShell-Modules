@@ -14,7 +14,7 @@ Get device configuration compliance report from OpenManage Enterprise
 
 ```
 Get-OMEConfigurationCompliance [[-Baseline] <ConfigurationBaseline>] [[-DeviceFilter] <Device[]>]
- [[-Output] <String>] [<CommonParameters>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -65,21 +65,6 @@ Aliases:
 Required: False
 Position: 2
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Output
-{{ Fill Output Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: Report
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

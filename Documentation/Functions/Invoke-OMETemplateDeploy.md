@@ -16,8 +16,8 @@ Deploy template to device in OpenManage Enterprise
 Invoke-OMETemplateDeploy [-Template] <Template> [-Devices] <Device[]> [-ForceHostReboot]
  [[-NetworkBootShareType] <String>] [[-NetworkBootShareIpAddress] <String>] [[-NetworkBootIsoPath] <String>]
  [[-NetworkBootIsoTimeout] <String>] [[-NetworkBootShareName] <String>] [[-NetworkBootShareUser] <String>]
- [[-NetworkBootShareWorkGroup] <String>] [[-NetworkBootSharePassword] <String>] [-Wait] [[-WaitTime] <Int32>]
- [<CommonParameters>]
+ [[-NetworkBootShareWorkGroup] <String>] [[-NetworkBootSharePassword] <SecureString>] [-Wait]
+ [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -44,7 +44,7 @@ Deploy template and boot to network ISO over NFS
 
 ### EXAMPLE 3
 ```
-"TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "CIFS" -NetworkBootShareIpAddress "192.168.1.101" -NetworkBootIsoPath "/Share/ISO/CentOS7-Unattended.iso" -NetworkBootShareUser "Administrator" -NetworkBootSharePassword "Password" -NetworkBootShareName "Share" -Wait -Verbose
+"TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "CIFS" -NetworkBootShareIpAddress "192.168.1.101" -NetworkBootIsoPath "/Share/ISO/CentOS7-Unattended.iso" -NetworkBootShareUser "Administrator" -NetworkBootSharePassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -NetworkBootShareName "Share" -Wait -Verbose
 ```
 
 Deploy template and boot to network ISO over CIFS
@@ -207,7 +207,7 @@ Accept wildcard characters: False
 Share password (CIFS Only)
 
 ```yaml
-Type: String
+Type: SecureString
 Parameter Sets: (All)
 Aliases:
 
