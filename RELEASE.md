@@ -22,9 +22,9 @@
 
 ## Commit Changes
 ```
+git commit -m 'Release 2.3.1'
 git checkout main
 git merge devel
-git commit -m 'Release 2.3.1'
 
 # Only tag releases as this triggers a git workflow (.github/workflows/create-release.yml)
 git tag v2.3.1

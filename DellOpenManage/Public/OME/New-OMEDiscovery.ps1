@@ -69,10 +69,14 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
     } else {
         $DiscoveryConfigPayload.DiscoveryStatusEmailRecipient.PSObject.Properties.Remove("DiscoveryConfigTargets")
     }
-    $DiscoveryConfigPayload.TrapDestination = $SetTrapDestination
+    if ($SetTrapDestination) {
+        $DiscoveryConfigPayload.TrapDestination = $true
+    }
     # Add version check for UseAllProfiles
     if ($SessionAuth.Version -ge [System.Version]"3.7.0") {
-        $DiscoveryConfigPayload | Add-Member -NotePropertyName UseAllProfiles -NotePropertyValue $UseAllProtocols
+        if ($UseAllProtocols) {
+            $DiscoveryConfigPayload | Add-Member -NotePropertyName UseAllProfiles -NotePropertyValue $true
+        }
     }
     $DiscoveryConfigPayload.DiscoveryConfigModels[0].PSObject.Properties.Remove("DiscoveryConfigTargets")
     $DiscoveryConfigPayload.DiscoveryConfigModels[0]| Add-Member -MemberType NoteProperty -Name 'DiscoveryConfigTargets' -Value @()

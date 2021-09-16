@@ -8,7 +8,7 @@ schema: 2.0.0
 # Invoke-OMEMcmGroupRetireLead
 
 ## SYNOPSIS
-Assign backup lead chassis to MCM Group
+Retire lead chassis in MCM Group
 
 ## SYNTAX
 
@@ -18,7 +18,7 @@ Invoke-OMEMcmGroupRetireLead [[-PostRetirementRoleType] <String>] [-Wait] [[-Wai
 ```
 
 ## DESCRIPTION
-This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
+This script uses the OME REST API to reture lead chassis
 
 ## EXAMPLES
 

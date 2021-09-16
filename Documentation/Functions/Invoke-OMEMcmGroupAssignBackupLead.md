@@ -17,7 +17,7 @@ Invoke-OMEMcmGroupAssignBackupLead [[-ServiceTag] <String>] [-Wait] [[-WaitTime]
 ```
 
 ## DESCRIPTION
-This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
+This script uses the OME REST API to add a backup lead chassis
 
 ## EXAMPLES
 
@@ -25,6 +25,15 @@ This script uses the OME REST API to create mcm group, find memebers and add the
 ```
 Invoke-OMEMcmGroupAssignBackupLead -Wait
 ```
+
+Assign backup lead to random chassis
+
+### EXAMPLE 2
+```
+Invoke-OMEMcmGroupAssignBackupLead -ServiceTag "XYZ1234" -Wait
+```
+
+Assign backup lead to specific chassis
 
 ## PARAMETERS
 

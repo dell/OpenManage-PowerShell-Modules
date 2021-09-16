@@ -24,10 +24,8 @@ Returns all devices if no input received.
 
 ### EXAMPLE 1
 ```
-Get-OMEDevice -Value 12016
+Get-OMEAlertDefinition
 ```
-
-Get device by Id
 
 ## PARAMETERS
 

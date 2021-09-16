@@ -23,17 +23,10 @@ Get-OMEWarranty [<CommonParameters>]
 
 ### EXAMPLE 1
 ```
-Get-OMEUser | Format-Table
+Get-OMEWarranty | Format-Table
 ```
 
-List all users
-
-### EXAMPLE 2
-```
-"admin" | Get-OMEUser
-```
-
-Get user by name
+List all warranty details
 
 ## PARAMETERS
 

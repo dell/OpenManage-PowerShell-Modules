@@ -47,21 +47,21 @@ Edit Support Assist group from json stored in variable
 
 ### EXAMPLE 3
 ```
-Get-OMEGroup "Test Group 01" | Edit-OMEGroup -EditGroup $(Get-Content "C:\Temp\Group.json" -Raw)
+Get-OMEGroup "Test Group 01" | Edit-OMESupportAssistGroup -EditGroup $(Get-Content "C:\Temp\Group.json" -Raw)
 ```
 
 Edit Support Assist group from json stored in file
 
 ### EXAMPLE 4
 ```
-Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
+Get-OMEGroup "Test Group 01" | Edit-OMESupportAssistGroup -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
 ```
 
 Add devices to group
 
 ### EXAMPLE 5
 ```
-Get-OMEGroup "Test Group 01" | Edit-OMEGroup -Mode "Remove" -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
+Get-OMEGroup "Test Group 01" | Edit-OMESupportAssistGroup -Mode "Remove" -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model")
 ```
 
 Remove devices from group

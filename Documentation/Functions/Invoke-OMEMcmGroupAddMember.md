@@ -17,7 +17,7 @@ Invoke-OMEMcmGroupAddMember [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
+This script uses the OME REST API to add all available chassis to the MCM Group
 
 ## EXAMPLES
 
