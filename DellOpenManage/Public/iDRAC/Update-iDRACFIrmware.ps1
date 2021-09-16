@@ -255,9 +255,6 @@ Process {
                 }
                 # Wait for job to reach desired status before continuing
                 $JobStatus = $($JobId | Wait-iDRACOnJob -BaseUri $BaseUri -Credentials $Credentials -WaitTime $WaitTime -WaitForStatus $WaitForStatus)
-                if (-not $WaitForAll) { # If we're waiting for all jobs to complete we don't want to exit here
-                    return $JobStatus
-                }
             } else {
                 return $JobId
             }
