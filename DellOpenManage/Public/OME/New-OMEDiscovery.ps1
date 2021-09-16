@@ -73,7 +73,7 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
         $DiscoveryConfigPayload.TrapDestination = $true
     }
     # Add version check for UseAllProfiles
-    if ($SessionAuth.Version -ge [System.Version]"3.7.0") {
+    if ($SessionAuth.Version -ge [System.Version]"3.5.0") {
         if ($UseAllProtocols) {
             $DiscoveryConfigPayload | Add-Member -NotePropertyName UseAllProfiles -NotePropertyValue $true
         }
