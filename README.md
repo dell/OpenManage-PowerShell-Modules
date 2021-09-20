@@ -21,6 +21,17 @@
 3. List available Modules `Get-Module Dell* -ListAvailable`
 4. Import module `Import-Module DellOpenManage`
 
+## Contributing
+
+Integration tests will be performed against all pull requests before merging
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+
 # Command Reference
 See [Command Reference](Documentation/CommandReference.md)
 

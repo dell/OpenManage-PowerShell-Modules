@@ -1,5 +1,5 @@
 ﻿
-function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $SetTrapDestination, $UseAllProtocols, $Schedule, $ScheduleCron) {
+function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $SetTrapDestination, $SetCommunityString, $UseAllProtocols, $Schedule, $ScheduleCron) {
     $DiscoveryConfigPayload = '{
             "DiscoveryConfigGroupName":"Server Discovery",
             "DiscoveryStatusEmailRecipient":"",
@@ -71,6 +71,9 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
     }
     if ($SetTrapDestination) {
         $DiscoveryConfigPayload.TrapDestination = $true
+    }
+    if ($SetCommunityString) {
+        $DiscoveryConfigPayload.CommunityString = $true
     }
     # Add version check for UseAllProfiles
     if ($SessionAuth.Version -ge [System.Version]"3.5.0") {
@@ -174,6 +177,8 @@ limitations under the License.
     Email upon completion
 .PARAMETER SetTrapDestination
     Set trap destination of iDRAC to OpenManage Enterprise upon discovery
+.PARAMETER SetCommunityString
+    Set Community String for trap destination from Application Settings > Incoming Alerts > SNMP Listener
 .PARAMETER UseAllProtocols
     Execute all selected protocols when discovering devices. This will increase this discovery task's execution time.
 .PARAMETER Schedule
@@ -230,6 +235,9 @@ param(
     [Switch]$SetTrapDestination,
 
     [Parameter(Mandatory=$false)]
+    [Switch]$SetCommunityString,
+
+    [Parameter(Mandatory=$false)]
     [ValidateSet("RunNow", "RunLater")]
     [String]$Schedule = "RunNow",
 
@@ -269,7 +277,7 @@ Process {
 
         $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups"
         if ($Hosts.Count -gt 0) {
-            $Payload = Get-DiscoverDevicePayload -Name $Name -HostList $Hosts -DeviceType $DeviceType -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -SetTrapDestination $SetTrapDestination -UseAllProtocols $UseAllProtocols -Schedule $Schedule -ScheduleCron $ScheduleCron
+            $Payload = Get-DiscoverDevicePayload -Name $Name -HostList $Hosts -DeviceType $DeviceType -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -SetTrapDestination $SetTrapDestination -SetCommunityString $SetCommunityString -UseAllProtocols $UseAllProtocols -Schedule $Schedule -ScheduleCron $ScheduleCron
             $Payload = $Payload | ConvertTo-Json -Depth 6
             $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Post -Body $Payload -Headers $Headers -ContentType $Type
             if ($DiscoverResponse.StatusCode -eq 201) {
