@@ -14,8 +14,9 @@ Create new device discovery job in OpenManage Enterprise
 
 ```
 New-OMEDiscovery [[-Name] <String>] [[-DeviceType] <String>] [-Hosts] <String[]> [-DiscoveryUserName] <String>
- [-DiscoveryPassword] <SecureString> [[-Email] <String>] [-SetTrapDestination] [[-Schedule] <String>]
- [[-ScheduleCron] <String>] [-UseAllProtocols] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
+ [-DiscoveryPassword] <SecureString> [[-Email] <String>] [-SetTrapDestination] [-SetCommunityString]
+ [[-Schedule] <String>] [[-ScheduleCron] <String>] [-UseAllProtocols] [-Wait] [[-WaitTime] <Int32>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -165,6 +166,21 @@ Accept wildcard characters: False
 
 ### -SetTrapDestination
 Set trap destination of iDRAC to OpenManage Enterprise upon discovery
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SetCommunityString
+Set Community String for trap destination from Application Settings \> Incoming Alerts \> SNMP Listener
 
 ```yaml
 Type: SwitchParameter

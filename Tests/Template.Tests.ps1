@@ -54,6 +54,12 @@ Describe "Template Tests" {
             $devices = $Script:DeviceServiceTag1, $Script:DeviceServiceTag2, $Script:DeviceServiceTag3 | Get-OMEDevice
             Invoke-OMETemplateDeploy -Template $template -Devices $devices -Wait | Should -BeIn @("Completed", "Warning")
         }
+
+        It "Should remove deploy template" {
+            $template = $($Script:DeploymentTemplateNameFromString | Get-OMETemplate)
+            $template | Remove-OMETemplate
+            $Script:DeploymentTemplateNameFromString | Get-OMETemplate | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+        }
     }
     Context "Configuration" -Tag "Configuration" {
         It ("Should create a compliance template from source device and return JobId"){
@@ -105,6 +111,11 @@ Describe "Template Tests" {
         It "Should check configuration compliance for baseline" -Tag "CheckConfigurationCompliance" {
             $baseline = $Script:ConfigurationBaselineName | Get-OMEConfigurationBaseline
             $baseline  | Invoke-OMEConfigurationBaselineRefresh | Should -BeGreaterThan 0
+        }
+        It "Should remove configuration template" {
+            $template = $($Script:ConfigurationTemplateNameFromString | Get-OMETemplate)
+            $template | Remove-OMETemplate
+            $Script:ConfigurationTemplateNameFromString | Get-OMETemplate | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
         }
     }
     Context "Profile" -Tag "Profile" {

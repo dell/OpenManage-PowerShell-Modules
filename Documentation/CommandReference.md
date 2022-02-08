@@ -53,6 +53,7 @@
 - [New-OMEUser](Functions/New-OMEUser.md)
 - [Remove-OMEGroup](Functions/Remove-OMEGroup.md)
 - [Remove-OMESupportAssistGroup](Functions/Remove-OMESupportAssistGroup.md)
+- [Remove-OMETemplate](Functions/Remove-OMETemplate.md)
 - [Set-OMEPowerState](Functions/Set-OMEPowerState.md)
 - [Update-OMEConfiguration](Functions/Update-OMEConfiguration.md)
 - [Update-OMEFirmware](Functions/Update-OMEFirmware.md)

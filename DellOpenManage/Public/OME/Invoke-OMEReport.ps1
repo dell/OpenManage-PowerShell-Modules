@@ -46,7 +46,7 @@
                     }
                     $outputArray += , $tempHash
                 }
-                $outputArray.Foreach({[PSCustomObject]$_}) | Format-Table -AutoSize
+                return $outputArray.Foreach({[PSCustomObject]$_})
             }
             else {
                 Write-Warning "No result data retrieved for report ($($ReportId))"
@@ -125,16 +125,14 @@ Process {
             $JobId = $ReportResp.Content
             $JobStatus = $($JobId | Wait-OnJob)
             if ($JobStatus -eq 'Completed') {
-                Format-OutputInfo -IpAddres $IpAddress -Headers $Headers -Type $Type -ReportId $ReportId      
+                return Format-OutputInfo -IpAddres $IpAddress -Headers $Headers -Type $Type -ReportId $ReportId      
             }
         } else {
             Write-Error "Unable to retrieve reports from $($IpAddress)"
         }
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

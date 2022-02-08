@@ -27,6 +27,10 @@ Describe "Misc Tests" {
         It "Should return ALL Reports" {
             Get-OMEReport | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
         }
+        It "Should return report rows" {
+            $ReportId = Get-OMEReport | Where-Object 'Name' -EQ "Physical Disk Report" | Select-Object -ExpandProperty Id
+            Invoke-OMEReport -ReportId $ReportId | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
+        }
     }
     Context "Network" -Tag "Network" {
         It "Should create new Network" {
