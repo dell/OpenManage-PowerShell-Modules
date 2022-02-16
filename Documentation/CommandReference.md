@@ -1,5 +1,6 @@
 # Functions
 - [Connect-OMEServer](Functions/Connect-OMEServer.md)
+- [Copy-OMETemplate](Functions/Copy-OMETemplate.md)
 - [Disconnect-OMEServer](Functions/Disconnect-OMEServer.md)
 - [Edit-OMEDiscovery](Functions/Edit-OMEDiscovery.md)
 - [Edit-OMEGroup](Functions/Edit-OMEGroup.md)

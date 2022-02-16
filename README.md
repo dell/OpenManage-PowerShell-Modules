@@ -322,6 +322,10 @@ Get template by type
 ```
 "Deployment" | Get-OMETemplate -FilterBy "Type" | Format-Table
 ```
+Get template when templates with similar names exist
+```
+Get-OMETemplate | Where-Object -Property "Name" -EQ "Test Template "
+```
 Create new deployment template from source device
 ```
 New-OMETemplateFromDevice -Name "TestTemplate" -Device $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait
@@ -357,6 +361,22 @@ Deploy template and boot to network ISO over CIFS
 ```
 "TestTemplate" | Get-OMETemplate | Invoke-OMETemplateDeploy -Devices $("37KP0ZZ" | Get-OMEDevice) -NetworkBootShareType "CIFS" -NetworkBootShareIpAddress "192.168.1.101" -NetworkBootIsoPath "/Share/ISO/CentOS7-Unattended.iso" -NetworkBootShareUser "Administrator" -NetworkBootSharePassword "Password" -NetworkBootShareName "Share" -Wait
 ```
+Clone template using default name "TestTemplate01 - Clone"
+```
+"TestTemplate01" | Get-OMETemplate | Copy-OMETemplate
+```
+Clone template using default name "TestTemplate01 - Clone" when multiple templates with similar names exist
+```
+$(Get-OMETemplate | Where-Object -Property "Name" -EQ "TestTemplate") | Copy-OMETemplate
+```
+Clone template and specify new name
+```
+"TestTemplate01" | Get-OMETemplate | Copy-OMETemplate -Name "TestTemplate02"
+```
+Clone template including Identity Pool, VLANs and Teaming
+```
+"TestTemplate01" | Get-OMETemplate | Copy-OMETemplate -All
+``` 
 
 ## Configuration Compliance
 Get template by type

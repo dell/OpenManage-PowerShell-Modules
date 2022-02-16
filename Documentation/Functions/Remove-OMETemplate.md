@@ -23,7 +23,7 @@ Remove a configuration or deployment template from OpenManage Enterprise
 
 ### EXAMPLE 1
 ```
-Get-OMETemplate "TestTemplate01" | Remove-OMETemplate
+"TestTemplate01" | Get-OMETemplate | Remove-OMETemplate
 ```
 
 ## PARAMETERS

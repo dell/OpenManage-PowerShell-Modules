@@ -7,6 +7,7 @@ Describe "Template Tests" {
         $Script:DeviceServiceTag3 = "GV6V673"
         $Script:ConfigurationBaselineName = "TestConfigurationBaseline_$((Get-Date).ToString('yyyyMMddHHmmss'))"
         $Script:DeploymentTemplateNameFromString = "TestDeploymentTemplate_FromString_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+        $Script:DeploymentTemplateNameFromStringClone = "$($Script:DeploymentTemplateNameFromString) - Clone"
         $Script:ConfigurationTemplateNameFromString = "TestConfigurationTemplate_FromString_$((Get-Date).ToString('yyyyMMddHHmmss'))"
     }
     Context "General" {
@@ -55,9 +56,15 @@ Describe "Template Tests" {
             Invoke-OMETemplateDeploy -Template $template -Devices $devices -Wait | Should -BeIn @("Completed", "Warning")
         }
 
-        It "Should remove deploy template" {
+        It "Should clone template" {
             $template = $($Script:DeploymentTemplateNameFromString | Get-OMETemplate)
-            $template | Remove-OMETemplate
+            $template | Copy-OMETemplate -Name $Script:DeploymentTemplateNameFromStringClone
+            $Script:DeploymentTemplateNameFromStringClone | Get-OMETemplate -FilterBy "Name" | Select-Object -ExpandProperty Name | Should -Be $Script:DeploymentTemplateNameFromStringClone
+        }
+
+        It "Should remove deploy templates" {
+            Get-OMETemplate | Where-Object -Property "Name" -EQ $Script:DeploymentTemplateNameFromString | Remove-OMETemplate
+            Get-OMETemplate | Where-Object -Property "Name" -EQ $Script:DeploymentTemplateNameFromStringClone | Remove-OMETemplate
             $Script:DeploymentTemplateNameFromString | Get-OMETemplate | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
         }
     }
