@@ -85,7 +85,7 @@ jobs:
 
   publish:
     name: Publish to PowerShell Gallery
-    needs: tests
+    needs: build
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2

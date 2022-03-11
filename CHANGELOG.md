@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.8]() - 2022-03-11
+### Added
+- Examples/DiscoverAddToStaticGroup.ps1 will run a Discovery, create a static group and add the devices to the group
+
+### Fixed
+- Fixed column ordering in Invoke-OMEReport to properly match Report
+- Fixed filtering with paged results in Get-OMEDevice. OME does not automatically add the filter parameters to @odata.nextLink 
+
 ## [2.3.7]() - 2022-02-16
 ### Added
 - Copy-OMETemplate

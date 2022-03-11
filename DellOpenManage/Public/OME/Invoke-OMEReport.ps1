@@ -40,7 +40,7 @@
                 }
                 foreach ($value in $ReportResultList) {
                     $resultVals = $value.Values
-                    $tempHash = @{}
+                    $tempHash = [ordered]@{}
                     for ($i =0; $i -lt $ColumnNames.Count; $i++) {
                         $tempHash[$ColumnNames[$i]] = $resultVals[$i]
                     }

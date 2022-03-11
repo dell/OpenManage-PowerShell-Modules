@@ -148,14 +148,17 @@ Process {
         }
         else { # Filter Devices directly
             $DeviceCountUrl = $BaseUri + "/api/DeviceService/Devices"
+            $Filter = ""
             if ($Value) { # Filter By 
                 if ($FilterBy -eq 'Id' -or $FilterBy -eq 'Type') {
-                    $DeviceCountUrl += "?`$filter=$($FilterExpr) eq $($Value)"
+                    $Filter += "`$filter=$($FilterExpr) eq $($Value)"
                 }
                 else {
-                    $DeviceCountUrl += "?`$filter=$($FilterExpr) eq '$($Value)'"
+                    $Filter += "`$filter=$($FilterExpr) eq '$($Value)'"
                 }
             }
+            $DeviceCountUrl = $DeviceCountUrl + "?" + $Filter
+            Write-Verbose $DeviceCountUrl
             $DeviceResponse = Invoke-WebRequest -Uri $DeviceCountUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
             if ($DeviceResponse.StatusCode -eq 200)
             {
@@ -165,10 +168,11 @@ Process {
                 }
                 if($DeviceCountData.'@odata.nextLink')
                 {
-                    $NextLinkUrl = $BaseUri + $DeviceCountData.'@odata.nextLink'
+                    $NextLinkUrl = $BaseUri + $DeviceCountData.'@odata.nextLink' + "&" + $Filter
                 }
                 while($NextLinkUrl)
                 {
+                    Write-Verbose $NextLinkUrl
                     $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
                     if($NextLinkResponse.StatusCode -eq 200)
                     {
@@ -178,7 +182,7 @@ Process {
                         }
                         if($NextLinkData.'@odata.nextLink')
                         {
-                            $NextLinkUrl = $BaseUri + $NextLinkData.'@odata.nextLink'
+                            $NextLinkUrl = $BaseUri + $NextLinkData.'@odata.nextLink' + "&" + $Filter
                         }
                         else
                         {
@@ -198,9 +202,7 @@ Process {
         return $DeviceData 
     } 
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 
