@@ -32,9 +32,7 @@ limitations under the License.
     param(
     )
 
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
+    if (!$(Confirm-IsAuthenticated)){
         Return
     }
 

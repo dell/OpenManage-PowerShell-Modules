@@ -55,62 +55,57 @@ param(
     [Switch]$IgnoreCertificateWarning
 )
 
-    Try {
-        if ($IgnoreCertificateWarning) { Set-CertPolicy }
-        $Type = "application/json"
-        # Allow for use of Environment Variables
-        if ($Name) {
-            $OMEHost = $Name
-        } else {
-            $OMEHost = $env:OMEHost
-        }
-        if ($Credentials) {
-            $OMEUserName = $Credentials.username
-            $OMEPassword = $Credentials.GetNetworkCredential().password
-        } else {
-            $OMEUserName = $env:OMEUserName
-            $OMEPassword = $env:OMEPassword
-        }
-
-        # Input Validation
-        if ($null -eq $OMEHost) { throw [System.ArgumentNullException] "OMEHost" }
-        if ($null -eq $OMEUserName) { throw [System.ArgumentNullException] "OMEUserName" }
-        if ($null -eq $OMEPassword) { throw [System.ArgumentNullException] "OMEPassword" }
-
-        $SessionUrl  = "https://$($OMEHost)/api/SessionService/Sessions"
-        $UserDetails = @{"UserName"=$OMEUserName;"Password"=$OMEPassword;"SessionType"="API"} | ConvertTo-Json
-
-        $SessResponse = Invoke-WebRequest -Uri $SessionUrl -Method Post -Body $UserDetails -ContentType $Type
-        if ($SessResponse.StatusCode -eq 200 -or $SessResponse.StatusCode -eq 201) {
-            $SessResponseData = $SessResponse.Content | ConvertFrom-Json
-            
-            $Token = [String]$SessResponse.Headers["X-Auth-Token"]
-            $Headers = @{}
-            $Headers."X-Auth-Token" = $Token
-
-            # Get Appliance Version
-            $AppInfoUrl = "https://$($OMEHost)/api/ApplicationService/Info"
-            $AppInfoResponse = Invoke-WebRequest -Uri $AppInfoUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-            $AppVersion = [System.Version]"1.0.0"
-            if ($AppInfoResponse.StatusCode -eq 200 -or $AppInfoResponse.StatusCode -eq 201) {
-                $AppInfoResponseData = $AppInfoResponse.Content | ConvertFrom-Json
-                Write-Verbose $($AppInfoResponseData)
-                $AppVersion = [System.Version]$AppInfoResponseData.Version
-            }
-
-            $Script:SessionAuth = [SessionAuth]@{
-                Host = $OMEHost
-                Token = $Token
-                Id = $SessResponseData.Id
-                Version = $AppVersion
-                IgnoreCertificateWarning = $IgnoreCertificateWarning
-            }
-            
-        } else {
-            Write-Error "Unable to create a session with appliance $($OMEHost)"
-        }
+    if ($IgnoreCertificateWarning) { Set-CertPolicy }
+    $Type = "application/json"
+    # Allow for use of Environment Variables
+    if ($Name) {
+        $OMEHost = $Name
+    } else {
+        $OMEHost = $env:OMEHost
     }
-    Catch {
-        Resolve-Error $_
+    if ($Credentials) {
+        $OMEUserName = $Credentials.username
+        $OMEPassword = $Credentials.GetNetworkCredential().password
+    } else {
+        $OMEUserName = $env:OMEUserName
+        $OMEPassword = $env:OMEPassword
+    }
+
+    # Input Validation
+    if ($null -eq $OMEHost) { throw [System.ArgumentNullException] "OMEHost" }
+    if ($null -eq $OMEUserName) { throw [System.ArgumentNullException] "OMEUserName" }
+    if ($null -eq $OMEPassword) { throw [System.ArgumentNullException] "OMEPassword" }
+
+    $SessionUrl  = "https://$($OMEHost)/api/SessionService/Sessions"
+    $UserDetails = @{"UserName"=$OMEUserName;"Password"=$OMEPassword;"SessionType"="API"} | ConvertTo-Json
+
+    $SessResponse = Invoke-WebRequest -Uri $SessionUrl -Method Post -Body $UserDetails -ContentType $Type
+    if ($SessResponse.StatusCode -eq 200 -or $SessResponse.StatusCode -eq 201) {
+        $SessResponseData = $SessResponse.Content | ConvertFrom-Json
+        
+        $Token = [String]$SessResponse.Headers["X-Auth-Token"]
+        $Headers = @{}
+        $Headers."X-Auth-Token" = $Token
+
+        # Get Appliance Version
+        $AppInfoUrl = "https://$($OMEHost)/api/ApplicationService/Info"
+        $AppInfoResponse = Invoke-WebRequest -Uri $AppInfoUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
+        $AppVersion = [System.Version]"1.0.0"
+        if ($AppInfoResponse.StatusCode -eq 200 -or $AppInfoResponse.StatusCode -eq 201) {
+            $AppInfoResponseData = $AppInfoResponse.Content | ConvertFrom-Json
+            Write-Verbose $($AppInfoResponseData)
+            $AppVersion = [System.Version]$AppInfoResponseData.Version
+        }
+
+        $Script:SessionAuth = [SessionAuth]@{
+            Host = $OMEHost
+            Token = $Token
+            Id = $SessResponseData.Id
+            Version = $AppVersion
+            IgnoreCertificateWarning = $IgnoreCertificateWarning
+        }
+        
+    } else {
+        Write-Error "Unable to create a session with appliance $($OMEHost)"
     }
 }

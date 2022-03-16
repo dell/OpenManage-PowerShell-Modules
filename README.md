@@ -458,6 +458,12 @@ Run report
 Invoke-Report -ReportId 11709
 ```
 
+## Error Handling and Control Flow
+https://devblogs.microsoft.com/scripting/handling-errors-the-powershell-way
+```
+The -ErrorAction common parameter allows you to specify which action to take if a command fails. The available options are: Stop, Continue, SilentlyContinue, Ignore, or Inquire. By default, Windows PowerShell uses an error action preference of Continue, which means that errors will be written out to the host, but the script will continue to execute.
+```
+
 ## Troubleshooting
 Verbose Output
 - Append `-Verbose` to any command

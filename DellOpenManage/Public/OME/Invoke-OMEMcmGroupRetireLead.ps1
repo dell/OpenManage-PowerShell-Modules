@@ -94,17 +94,8 @@ function Invoke-OMEMcmGroupRetireLead {
         [int]$WaitTime = 3600
     )
 
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
-        Return
-    }
-    
-
     ## Script that does the work
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
+    if (!$(Confirm-IsAuthenticated)){
         Return
     }
     

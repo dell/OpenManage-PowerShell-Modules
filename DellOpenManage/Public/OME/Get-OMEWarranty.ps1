@@ -37,9 +37,7 @@ function Get-OMEWarranty {
     param(
     )
     
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
+    if (!$(Confirm-IsAuthenticated)){
         Return
     }
 

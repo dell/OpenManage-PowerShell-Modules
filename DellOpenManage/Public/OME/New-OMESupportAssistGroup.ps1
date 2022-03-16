@@ -201,72 +201,66 @@ param(
 )
 
 ## Script that does the work
-Begin {
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
+Begin {}
+Process {
+    if (!$(Confirm-IsAuthenticated)){
         Return
     }
     # Add version check for SupportAssist commandlets
     if ($SessionAuth.Version -lt [System.Version]"3.5.0") {
         Write-Error "SupportAssist API not supported in version $($SessionAuth.Version) of OpenManage Enterprise"
-        Break
         Return
     }
-}
+    Try {
+        if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
+        $BaseUri = "https://$($SessionAuth.Host)"
+        $Headers = @{}
+        $Headers."X-Auth-Token" = $SessionAuth.Token
+        $ContentType = "application/json"
 
-Process {
+        if ($PSBoundParameters.ContainsKey('GenerateJson')) {
+            Get-PromptGroupCreationPayload | ConvertTo-Json -Depth 10 | Out-String
+        } elseif ($PSBoundParameters.ContainsKey('ExportExampleJson')) {
+            Get-SupportAssistGroupPayload | ConvertTo-Json -Depth 10 | Out-String
+        } elseif ($PSBoundParameters.ContainsKey('AddGroup')) {
+            Write-Verbose "Creating new group..."
 
-  Try {
-      if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
-      $BaseUri = "https://$($SessionAuth.Host)"
-      $Headers = @{}
-      $Headers."X-Auth-Token" = $SessionAuth.Token
-      $ContentType = "application/json"
+            $AddGroupUrl = $BaseUri + "/api/SupportAssistService/Actions/SupportAssistService.CreateOrUpdateGroup"
 
-      if ($PSBoundParameters.ContainsKey('GenerateJson')) {
-          Get-PromptGroupCreationPayload | ConvertTo-Json -Depth 10 | Out-String
-      } elseif ($PSBoundParameters.ContainsKey('ExportExampleJson')) {
-          Get-SupportAssistGroupPayload | ConvertTo-Json -Depth 10 | Out-String
-      } elseif ($PSBoundParameters.ContainsKey('AddGroup')) {
-          Write-Verbose "Creating new group..."
+            try {
+                ConvertFrom-Json $AddGroup -ErrorAction Stop;
+                $validJson = $true;
+            } catch {
+                $validJson = $false;
+            }
 
-          $AddGroupUrl = $BaseUri + "/api/SupportAssistService/Actions/SupportAssistService.CreateOrUpdateGroup"
+            if ($validJson) {
+                $GroupPayload = $AddGroup
+            } else {
+                Write-Error "Provided text is not a valid JSON string or file not found";
+            }
 
-          try {
-              ConvertFrom-Json $AddGroup -ErrorAction Stop;
-              $validJson = $true;
-          } catch {
-              $validJson = $false;
+            Try {
+                Write-Verbose $($GroupPayload | Out-String)
+                $Response = Invoke-WebRequest -Uri $AddGroupUrl -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupPayload
+                if ($Response.StatusCode -eq 202) {
+                    Write-Verbose $Response.Content
+                    Write-Verbose "Group created successfully."
+                }
+
+            }
+            Catch {
+                Write-Error "There was a problem with the group creation request. This usually means there is a problem with one of the fields."
+                Resolve-Error $_
+            }
+        
+            Write-Verbose "Group creation completed successfully!"
           }
 
-          if ($validJson) {
-              $GroupPayload = $AddGroup
-          } else {
-              Write-Error "Provided text is not a valid JSON string or file not found";
-          }
-
-          Try {
-              Write-Verbose $($GroupPayload | Out-String)
-              $Response = Invoke-WebRequest -Uri $AddGroupUrl -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupPayload
-              if ($Response.StatusCode -eq 202) {
-                  Write-Verbose $Response.Content
-                  Write-Verbose "Group created successfully."
-              }
-
-          }
-          Catch {
-              Write-Error "There was a problem with the group creation request. This usually means there is a problem with one of the fields."
-              Resolve-Error $_
-          }
-      
-          Write-Verbose "Group creation completed successfully!"
-        }
-
-  }
-  Catch {
-      Resolve-Error $_
-  }
+    }
+    Catch {
+        Resolve-Error $_
+    }
 }
 
 End {}

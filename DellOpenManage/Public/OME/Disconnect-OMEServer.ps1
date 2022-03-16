@@ -28,6 +28,7 @@ limitations under the License.
 #>
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
+        if ($SessionAuth.Token){
             $Headers     = @{}
             $Headers."X-Auth-Token" = $SessionAuth.Token
             $SessionUrl = "https://$($SessionAuth.Host)/api/SessionService/Sessions('$($SessionAuth.Id)')"
@@ -36,7 +37,8 @@ limitations under the License.
             if ($SessResponse.StatusCode -eq 204) {
                 $Script:SessionAuth = [SessionAuth]::new()
             }
-        } 
+        }
+    } 
     Catch {
         Write-Error ($_.ErrorDetails)
         Write-Error ($_.Exception | Format-List -Force | Out-String) 

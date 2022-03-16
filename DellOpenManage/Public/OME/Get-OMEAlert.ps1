@@ -195,10 +195,8 @@ param(
     [string] $AlertsByGroupDescription
 )
 
-if(!$SessionAuth.Token){
-    Write-Error "Please use Connect-OMEServer first"
-    Break
-    Return
+if (!$(Confirm-IsAuthenticated)){
+  Return
 }
 
 function Get-Data {

@@ -41,21 +41,16 @@ param(
     [String]$FilterBy = "ServiceTag"
 )
 
-Begin {
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
+Begin {}
+Process {
+    if (!$(Confirm-IsAuthenticated)){
         Return
     }
     # Add version check for SupportAssist commandlets
     if ($SessionAuth.Version -lt [System.Version]"3.5.0") {
         Write-Error "SupportAssist API not supported in version $($SessionAuth.Version) of OpenManage Enterprise"
-        Break
         Return
     }
-}
-Process {
-
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
         $BaseUri = "https://$($SessionAuth.Host)"

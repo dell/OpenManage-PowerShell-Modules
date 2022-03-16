@@ -43,15 +43,12 @@ param(
     [int]$WaitTime = 3600
 )
 
-Begin {
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
+Begin {}
+Process {
+    if (!$(Confirm-IsAuthenticated)){
         Return
     }
-}
-Process {
-    Set-CertPolicy
+    if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
     $BaseUri = "https://$($SessionAuth.Host)"
     $Type        = "application/json"
     $Headers     = @{}

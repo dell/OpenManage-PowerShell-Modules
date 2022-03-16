@@ -72,14 +72,11 @@ param(
     [String] $Mode = "Append"
 )
 
-Begin {
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
+Begin {}
+Process {
+    if (!$(Confirm-IsAuthenticated)){
         Return
     }
-}
-Process {
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
         $BaseUri = "https://$($SessionAuth.Host)"

@@ -37,16 +37,11 @@ limitations under the License.
         [Device[]]$Devices
     )
 
-Begin {
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
+Begin {}
+Process {
+    if (!$(Confirm-IsAuthenticated)){
         Return
     }
-
-}
-
-Process {
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
         $ExportDeviceData = @()

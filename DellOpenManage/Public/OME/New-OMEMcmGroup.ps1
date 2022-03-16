@@ -93,9 +93,7 @@ function New-McmGroup($BaseUri, $Headers, $ContentType, $GroupName) {
 }
 
 ## Script that does the work
-if(!$SessionAuth.Token){
-    Write-Error "Please use Connect-OMEServer first"
-    Break
+if (!$(Confirm-IsAuthenticated)){
     Return
 }
 

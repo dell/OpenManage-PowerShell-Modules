@@ -88,9 +88,7 @@ function Invoke-OMEMcmGroupAssignBackupLead {
     }
     
     ## Script that does the work
-    if(!$SessionAuth.Token){
-        Write-Error "Please use Connect-OMEServer first"
-        Break
+    if (!$(Confirm-IsAuthenticated)){
         Return
     }
     
