@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0]() - 2022-12-07
+### Added
+- Invoke-OMEOnboarding
+
+### Changed
+- Install-Module script will detect default PowerShell module installation path from $env:PSModulePath
+
+### Fixed
+- Fixed issue with column sorting in Invoke-OMEReport ([Issue #7](https://github.com/dell/OpenManage-PowerShell-Modules/issues/7))
+- Fixed private fuction Resolve-Error to print error in red
+
 ## [3.0.0]() - 2022-03-16
 ### Changed
 - Changed the way commandlets exit when authentication fails. Previously all commandlets would stop script execution if not authenticated which isn't a PowerShell best practice. If you would like to maintain this behavior use the -ErrorAction Stop on the Connect-OMEServer or any commandlet. https://devblogs.microsoft.com/scripting/handling-errors-the-powershell-way/#erroraction-parameter

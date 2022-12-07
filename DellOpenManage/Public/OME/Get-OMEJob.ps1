@@ -120,7 +120,7 @@ Process {
         }
 
         $JobData = @()
-        $JobResponse = Invoke-WebRequest -UseBasicParsing -Uri $JobUrl -Headers $Headers -Method Get
+        $JobResponse = Invoke-WebRequest -UseBasicParsing -Uri $JobUrl -Headers $Headers -Method Get -ContentType $Type
         if ($JobResponse.StatusCode -eq 200) {
             $JobInfo = $JobResponse.Content | ConvertFrom-Json
             if ($JobInfo.value) { # Multiple jobs returned

@@ -37,6 +37,7 @@
 - [Invoke-OMEMcmGroupAddMember](Functions/Invoke-OMEMcmGroupAddMember.md)
 - [Invoke-OMEMcmGroupAssignBackupLead](Functions/Invoke-OMEMcmGroupAssignBackupLead.md)
 - [Invoke-OMEMcmGroupRetireLead](Functions/Invoke-OMEMcmGroupRetireLead.md)
+- [Invoke-OMEOnboarding](Functions/Invoke-OMEOnboarding.md)
 - [Invoke-OMEProfileUnassign](Functions/Invoke-OMEProfileUnassign.md)
 - [Invoke-OMEReport](Functions/Invoke-OMEReport.md)
 - [Invoke-OMETemplateDeploy](Functions/Invoke-OMETemplateDeploy.md)

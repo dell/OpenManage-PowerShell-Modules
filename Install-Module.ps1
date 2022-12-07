@@ -11,11 +11,7 @@ if ($MajorVersion -lt 5) {
 } else {
     $ModuleDir = "\DellOpenManage"
     $Source = $PSScriptRoot + $ModuleDir
-    if ($PSVersionTable.PSEdition -eq 'Core') {
-        $Destination = "$home\Documents\PowerShell\Modules"
-    } else {
-        $Destination = "$home\Documents\WindowsPowerShell\Modules"
-    }
+    $Destination = $env:PSModulePath.Split(";")[0]
     if (-not (Test-Path -Path $Destination)) {
         New-Item -ItemType Directory -Path $Destination -Force
     }
