@@ -458,6 +458,48 @@ Run report
 Invoke-Report -ReportId 11709
 ```
 
+## Services Plugin (aka Support Assist)
+Get Support cases for device by Service Tag
+```
+"C38V9T2" | Get-OMESupportAssistCase -Verbose
+```
+Export example json used to create new Support Assist group
+```
+New-OMESupportAssistGroup -ExportExampleJson 
+```
+Create new Support Assist group from file
+```
+New-OMESupportAssistGroup -AddGroup $(Get-Content "C:\Temp\Group.json" -Raw) -Verbose
+```
+Edit Support Assist group
+```
+$TestSupportAssistGroup = '{
+    "MyAccountId": "",
+    "Name": "Support Assist Group 2",
+    "Description": "Support Assist Group",
+    "DispatchOptIn": false,
+    "CustomerDetails": null,
+    "ContactOptIn":  false
+}' 
+"Support Assist Group 1" | Get-OMEGroup | Edit-OMESupportAssistGroup -EditGroup $TestSupportAssistGroup -Verbose
+```
+Add devices to Support Assist group
+```
+$devices = $("859N3L3", "759N3L3" | Get-OMEDevice -FilterBy "ServiceTag")
+"Support Assist Group 1" | Get-OMEGroup | Edit-OMESupportAssistGroup -Devices $devices -Verbose
+```
+Remove devices from Support Assist group
+```
+$devices = $("859N3L3", "759N3L3" | Get-OMEDevice -FilterBy "ServiceTag")
+"Support Assist Group 1"  | Get-OMEGroup | Edit-OMESupportAssistGroup -Mode "Remove" -Devices $devices -Verbose
+```
+Remove Support Assist group
+```
+"Support Assist Group 1" | Get-OMEGroup | Remove-OMESupportAssistGroup
+```
+Other Examples
+https://github.com/dell/OpenManage-PowerShell-Modules/blob/e8f150a122a16ab458d6cc18298ffe3ce94bf3b2/Examples/ServicesGroupCreateAddDevices.ps1
+
 ## Error Handling and Control Flow
 https://devblogs.microsoft.com/scripting/handling-errors-the-powershell-way
 ```
