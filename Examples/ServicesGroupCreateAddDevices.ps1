@@ -42,7 +42,7 @@ $GroupJson.Name = $GroupName
 # Print output to screen
 Write-Host $($GroupJson | ConvertTo-Json)
 
-# Create Services group from file 
+# Create Services group from json string
 New-OMESupportAssistGroup -AddGroup $($GroupJson | ConvertTo-Json) -Verbose
 
 # Get newly created group
