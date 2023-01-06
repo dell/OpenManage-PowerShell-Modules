@@ -15,6 +15,19 @@
 .\Documentation\GenerateMD.ps1
 ```
 
+## Update CHANGELOG.md
+```
+## [x.x.x]() - YYYY-MM-DD
+### Added
+- Added new commandlet
+
+### Changed
+- Changed existing commandlet
+
+### Fixed
+- Fixed issue on existing commandlet
+```
+
 ## Bump Version
 ```
 .\Build-Module.ps1 -Version 2.3.1

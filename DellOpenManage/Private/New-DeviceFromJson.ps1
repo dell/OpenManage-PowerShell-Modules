@@ -15,7 +15,7 @@ function New-DeviceFromJson {
     # We only want the iDRAC network attributes
     foreach ($DeviceManagement in $Device.DeviceManagement) {
         foreach ($ManagementProfile in $DeviceManagement.ManagementProfile) {
-            if ($ManagementProfile.AgentName -eq "iDRAC") {
+            if ($ManagementProfile.AgentName -eq "iDRAC" -and $DeviceManagement.NetworkAddress -ne "[::]") {
                 $DnsName = $DeviceManagement.DnsName
                 $NetworkAddress = $DeviceManagement.NetworkAddress
                 $MacAddress = $DeviceManagement.MacAddress
