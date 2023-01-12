@@ -458,6 +458,77 @@ Run report
 Invoke-Report -ReportId 11709
 ```
 
+## Directory Services (Active Directory and LDAP)
+Test AD Directory Service using Global Catalog Lookup
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
+    -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" `
+    -TestConnection -TestUserName "Username@lab.local" -TestPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Verbose
+```
+Create AD Directory Service using Global Catalog Lookup
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
+    -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local"
+```
+Create AD Directory Service using Global Catalog Lookup with Certificate Validation
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" -CertificateValidation -CertificateFile "C:\Temp\CA.cer"
+```
+Create AD Directory Service manually specifing Domain Controllers
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
+    -DirectoryServerLookup "MANUAL" -DirectoryServers @("ad1.lab.local", "ad2.lab.local") -ADGroupDomain "lab.local"
+``` 
+Create LDAP Directory Service
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "LDAP" `
+    -DirectoryServerLookup "MANUAL" -DirectoryServers @("ldap1.lab.local", "ldap2.lab.local") `
+    -LDAPBaseDistinguishedName "dc=lab,dc=local"
+```
+Import directory group
+```
+$AD = Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL"
+$ADGroups = Get-OMEDirectoryServiceSearch -Name "Admin" -DirectoryService $AD
+$Role = Get-OMERole -Name "chassis"
+Invoke-OMEDirectoryServiceImportGroup -DirectoryService $AD -DirectoryGroups $ADGroups -DirectoryType "AD" -UserName "Usename@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)) -Role $Role -Verbose
+```
+
+## Directory Services (Active Directory and LDAP)
+Test AD Directory Service using Global Catalog Lookup
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
+    -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" `
+    -TestConnection -TestUserName "Username@lab.local" -TestPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Verbose
+```
+Create AD Directory Service using Global Catalog Lookup
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
+    -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local"
+```
+Create AD Directory Service using Global Catalog Lookup with Certificate Validation
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" -CertificateValidation -CertificateFile "C:\Temp\CA.cer"
+```
+Create AD Directory Service manually specifing Domain Controllers
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
+    -DirectoryServerLookup "MANUAL" -DirectoryServers @("ad1.lab.local", "ad2.lab.local") -ADGroupDomain "lab.local"
+``` 
+Create LDAP Directory Service
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "LDAP" `
+    -DirectoryServerLookup "MANUAL" -DirectoryServers @("ldap1.lab.local", "ldap2.lab.local") `
+    -LDAPBaseDistinguishedName "dc=lab,dc=local"
+```
+Import directory group
+```
+$AD = Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL"
+$ADGroups = Get-OMEDirectoryServiceSearch -Name "Admin" -DirectoryService $AD
+$Role = Get-OMERole -Name "chassis"
+Invoke-OMEDirectoryServiceImportGroup -DirectoryService $AD -DirectoryGroups $ADGroups -DirectoryType "AD" -UserName "Usename@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)) -Role $Role -Verbose
+```
+
+
 ## Services Plugin (aka Support Assist)
 Get Support cases for device by Service Tag
 ```
