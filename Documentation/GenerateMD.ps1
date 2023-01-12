@@ -20,6 +20,9 @@ using module ..\DellOpenManage\Classes\DiscoveryTarget.psm1
 using module ..\DellOpenManage\Classes\IdentityPool.psm1
 using module ..\DellOpenManage\Classes\Network.psm1
 using module ..\DellOpenManage\Classes\SupportAssistGroup.psm1
+using module ..\DellOpenManage\Classes\AccountProvider.psm1
+using module ..\DellOpenManage\Classes\DirectoryGroup.psm1
+using module ..\DellOpenManage\Classes\Role.psm1
 
 Import-Module platyPS
 $module = "DellOpenManage"

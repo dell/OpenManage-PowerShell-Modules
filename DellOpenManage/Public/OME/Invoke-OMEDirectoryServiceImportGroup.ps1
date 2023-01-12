@@ -86,15 +86,15 @@ Process {
             $GroupsPayload += $GroupPayload
         }
         $GroupsPayload = ,$GroupsPayload | ConvertTo-Json -Depth 6
-        Write-Verbose $GroupsPayload
         Write-Verbose $AccountProviderImportUrl
 
         $AccountProviderImportResponse = Invoke-WebRequest -Uri $AccountProviderImportUrl -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupsPayload
         if ($AccountProviderImportResponse.StatusCode -in 200, 201) {
             $AccountProviderImportData = $AccountProviderImportResponse.Content | ConvertFrom-Json
-            Write-Verbose $AccountProviderImportData   
+            return $AccountProviderImportData   
         } else {
             Write-Error "Directory Service import failed..."
+            return $false
         }
     }
     Catch {

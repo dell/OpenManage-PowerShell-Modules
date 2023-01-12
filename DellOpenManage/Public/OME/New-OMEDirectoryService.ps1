@@ -39,6 +39,8 @@ limitations under the License.
     Search timeout
 .PARAMETER CertificateValidation
     Provide certificate validation. To be used with CertificateFile (NOT IMPLEMENTED)
+.PARAMETER CertificateFile
+    Path to directory certificate. Required when -CertificateValidation switch provided
 .PARAMETER LDAPBindUserName
     Username to use when connecting to LDAP server
 .PARAMETER LDAPBindPassword
@@ -67,6 +69,10 @@ limitations under the License.
     New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local"
 
     Create AD Directory Service using Global Catalog Lookup
+.EXAMPLE
+    New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" -CertificateValidation -CertificateFile "C:\Temp\CA.cer"
+
+    Create AD Directory Service using Global Catalog Lookup with Certificate Validation
 .EXAMPLE
     New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "MANUAL" -DirectoryServers @("ad1.lab.local", "ad2.lab.local") -ADGroupDomain "lab.local"
     
@@ -107,6 +113,9 @@ param(
 
     [Parameter(Mandatory=$false)]
     [Switch]$CertificateValidation,
+
+    [Parameter(Mandatory=$false)]
+    [String]$CertificateFile,
 
     [Parameter(Mandatory=$false)]
     [String]$LDAPBindUserName,
@@ -167,6 +176,11 @@ Process {
         $AccountProviderPayload.ServerType = $DirectoryServerLookup
         $AccountProviderPayload.NetworkTimeOut = $NetworkTimeOut
         $AccountProviderPayload.SearchTimeOut = $SearchTimeOut
+
+        if ($CertificateValidation) {
+            if ($null -eq $CertificateFile) { throw [System.ArgumentNullException] "CertificateFile" }
+            $AccountProviderPayload.CertificateFile = Get-Content $CertificateFile -Raw
+        }
         $AccountProviderPayload.CertificateValidation = $CertificateValidation.IsPresent
         
         if ($DirectoryServerLookup -eq "DNS") {
@@ -230,8 +244,8 @@ Process {
         }
 
         $AccountProviderPayload = $AccountProviderPayload | ConvertTo-Json -Depth 6
-        Write-Verbose $AccountProviderPayload
         Write-Verbose $AccountProviderURL
+        Write-Verbose $AccountProviderPayload
 
         $AccountProviderResponse = Invoke-WebRequest -Uri $AccountProviderURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $AccountProviderPayload
         Write-Verbose "Creating Group..."
@@ -239,9 +253,11 @@ Process {
             return $AccountProviderResponse.Content | ConvertFrom-Json
         } elseif ($AccountProviderResponse.StatusCode -eq 204) {
             Write-Verbose "Test Successful"
+            return $true
         }
         else {
             Write-Error "Directory Service creation failed..."
+            return $false
         }
     }
     Catch {

@@ -470,6 +470,10 @@ Create AD Directory Service using Global Catalog Lookup
 New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
     -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local"
 ```
+Create AD Directory Service using Global Catalog Lookup with Certificate Validation
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" -CertificateValidation -CertificateFile "C:\Temp\CA.cer"
+```
 Create AD Directory Service manually specifing Domain Controllers
 ```
 New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
