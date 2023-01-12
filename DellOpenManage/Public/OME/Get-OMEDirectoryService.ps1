@@ -1,7 +1,7 @@
 
 function Get-OMEDirectoryService {
 <#
-Copyright (c) 2021 Dell EMC Corporation
+Copyright (c) 2023 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,17 +18,27 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Get list of networks (VLAN) from OME
+   Get list of directory services that provide user authentication
 
  .DESCRIPTION
    This script uses the OME REST API.
    Note that the credentials entered are not stored to disk.
-.PARAMETER Value
-    String containing search value. Use with -FilterBy parameter. Supports regex based matching.
-.PARAMETER FilterBy
-    Filter the results by (Default="Name", "Id", "VlanMaximum", "VlanMinimum", "Type")
- .EXAMPLE
-   Get-OMEDirectoryServiceSearch -DirectoryType "AD" | Format-Table
+.PARAMETER Name
+    String containing group name to search
+.PARAMETER DirectoryType
+    Directory type (Default="AD", "LDAP")
+.EXAMPLE
+    Get-OMEDirectoryService -DirectoryType "AD" | Format-Table
+
+    Get all by type
+.EXAMPLE
+    Get-OMEDirectoryService -DirectoryType "AD" -Name "OSE.LOCAL" -Verbose | Format-Table
+
+    Get by name of type AD
+.EXAMPLE
+    Get-OMEDirectoryService -DirectoryType "LDAP" -Name "OSE.LOCAL" -Verbose | Format-Table
+    
+    Get by name of type LDAP
 #>   
 
 [CmdletBinding()]

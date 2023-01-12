@@ -23,10 +23,46 @@ limitations under the License.
     Only static groups are supported currently. Raise an issue on Github for query group support.
 .PARAMETER Name
     Name of group
-.PARAMETER Description
-    Description of group
+.PARAMETER DirectoryType
+    Directory type (Default="AD", "LDAP")
+.PARAMETER DirectoryServerLookup
+    Directory server lookup type. DNS will use automatically lookup Directory Servers (Domain Controllers). MANUAL you must provide them. (Default="DNS", "MANUAL")
+.PARAMETER DirectoryServers
+    Directory servers by hostname, fqdn or IP. For DirectoryServerLookup=DNS DirectoryServers must contain only 1 entry Example: lab.local. For DirectoryServerLookup=MANUAL provide an array of servers.
+.PARAMETER ADGroupDomain
+    Name of the domain Example: lab.local
+.PARAMETER ServerPort
+    Port to use when communicating with directory server
+.PARAMETER NetworkTimeOut
+    Network timeout
+.PARAMETER SearchTimeOut
+    Search timeout
+.PARAMETER CertificateValidation
+    Provide certificate validation. To be used with CertificateFile (NOT IMPLEMENTED)
+.PARAMETER LDAPBindUserName
+    Username to use when connecting to LDAP server
+.PARAMETER LDAPBindPassword
+    Password to use when connecting to LDAP server
+.PARAMETER LDAPBaseDistinguishedName
+    Base search DN for LDAP
+.PARAMETER LDAPAttributeUserLogin
+    LDAP attribute to use for username
+.PARAMETER LDAPAttributeGroupMembership
+    LDAP attribute to use for group membership
+.PARAMETER LDAPSearchFilter
+    LDAP base search filter
+.PARAMETER TestConnection
+    Test directory service connection. When provided it will only test the connection and not create directory service.
+.PARAMETER TestUserName
+    Username to use when testing directory service connection
+.PARAMETER TestPassword
+    Password to use when testing directory service connection
 .INPUTS
     None
+.EXAMPLE
+    New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" -TestConnection -TestUserName "Username@lab.local" -TestPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Verbose
+
+    Test AD Directory Service using Global Catalog Lookup
 .EXAMPLE
     New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local"
 
@@ -35,6 +71,10 @@ limitations under the License.
     New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "MANUAL" -DirectoryServers @("ad1.lab.local", "ad2.lab.local") -ADGroupDomain "lab.local"
     
     Create AD Directory Service manually specifing Domain Controllers
+.EXAMPLE
+    New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "LDAP" -DirectoryServerLookup "MANUAL" -DirectoryServers @("ldap1.lab.local", "ldap2.lab.local") -LDAPBaseDistinguishedName "dc=lab,dc=local"
+
+    Create LDAP Directory Service
 #>
 
 [CmdletBinding()]
@@ -112,26 +152,6 @@ Process {
         $Type = "application/json"
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
-
-        <#
-            $LDAPAccountProviderPayload = '{
-            "Name": "seaquest",
-            "ServerType": "DNS",
-            "ServerName": ["10.35.195.1"],
-            "UserName": "Admin",
-            "Password": "XXXXX",
-            "ServerPort": 636,
-            "BaseDistinguishedName" : "dc=dell,dc=com",
-            "AttributeUserLogin": null,
-            "AttributeGroupMembership": null,
-            "SearchFilter": null,
-            "NetworkTimeOut": 300,
-            "SearchTimeOut": 300,
-            "CertificateValidation": false,
-            "CertificateFile": ""
-            }' | ConvertFrom-Json
-
-        #>
 
         $AccountProviderPayload = '{
             "Name": "Starship",

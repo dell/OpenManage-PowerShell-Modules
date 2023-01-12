@@ -18,19 +18,21 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Get list of networks (VLAN) from OME
+   Get list of account roles
 
  .DESCRIPTION
    This script uses the OME REST API.
    Note that the credentials entered are not stored to disk.
-.PARAMETER Value
-    String containing search value. Use with -FilterBy parameter. Supports regex based matching.
-.PARAMETER FilterBy
-    Filter the results by (Default="Name", "Id", "VlanMaximum", "VlanMinimum", "Type")
+.PARAMETER Name
+    String containing name to search by
  .EXAMPLE
    Get-OMERole | Format-Table
+
+   List all account roles
  .EXAMPLE
    Get-OMERole -Name "chassis" | Format-Table
+
+   Search account roles by name
 #>   
 
 [CmdletBinding()]

@@ -2,7 +2,7 @@ using module ..\..\Classes\AccountProvider.psm1
 
 function Get-OMEDirectoryServiceSearch {
 <#
-Copyright (c) 2021 Dell EMC Corporation
+Copyright (c) 2023 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,17 +19,23 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Get list of networks (VLAN) from OME
+   Search a directory service for groups
 
  .DESCRIPTION
    This script uses the OME REST API.
    Note that the credentials entered are not stored to disk.
-.PARAMETER Value
-    String containing search value. Use with -FilterBy parameter. Supports regex based matching.
-.PARAMETER FilterBy
-    Filter the results by (Default="Name", "Id", "VlanMaximum", "VlanMinimum", "Type")
- .EXAMPLE
-   Get-OMEDirectoryServiceSearch | Format-Table
+.PARAMETER Name
+    String containing group name to search
+.PARAMETER DirectoryService
+    Object of type AccountProvider returned from Get-OMEDirectoryService commandlet
+.PARAMETER DirectoryType
+    Directory type (Default="AD", "LDAP")
+.PARAMETER UserName
+    Username to login to the Directory Service
+.PARAMETER Password
+    Password to login to the Directory Service
+.EXAMPLE
+   Get-OMEDirectoryServiceSearch -Name "Admin" -DirectoryService $(Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL") -DirectoryType "AD" -UserName "UserName@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Verbose | Format-Table
 #>   
 
 [CmdletBinding()]

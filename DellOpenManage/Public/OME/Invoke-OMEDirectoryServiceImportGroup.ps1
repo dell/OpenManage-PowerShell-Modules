@@ -21,17 +21,21 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Get list of networks (VLAN) from OME
+   Import directory group and assign to role from directory service
 
  .DESCRIPTION
    This script uses the OME REST API.
    Note that the credentials entered are not stored to disk.
-.PARAMETER Value
-    String containing search value. Use with -FilterBy parameter. Supports regex based matching.
-.PARAMETER FilterBy
-    Filter the results by (Default="Name", "Id", "VlanMaximum", "VlanMinimum", "Type")
+.PARAMETER DirectoryService
+    Object of type AccountProvider returned from Get-OMEDirectoryService commandlet
+.PARAMETER DirectoryGroups
+    Object of type DirectoryGroup returned from Get-OMEDirectoryServiceSearch commandlet
+.PARAMETER Role
+    Array of Objects of type Role returned from Get-OMERole commandlet
  .EXAMPLE
-   Invoke-OMEDirectoryServiceImportGroup | Format-Table
+   Invoke-OMEDirectoryServiceImportGroup -DirectoryService $(Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL") -DirectoryGroups $(Get-OMEDirectoryServiceSearch -Name "Admin" -DirectoryService $(Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL") -DirectoryType "AD" -UserName "Usename@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)) -Role $(Get-OMERole -Name "chassis") -Verbose
+
+   Import directory group
 #>   
 
 [CmdletBinding()]
