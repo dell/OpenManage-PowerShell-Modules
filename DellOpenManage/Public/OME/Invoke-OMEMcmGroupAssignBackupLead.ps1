@@ -53,11 +53,11 @@ function Invoke-OMEMcmGroupAssignBackupLead {
     function Invoke-AssignBackupLead($BaseUri, $Headers, $ContentType, $ServiceTag) {
         $URL = $BaseUri + "/api/ManagementDomainService/Actions/ManagementDomainService.AssignBackupLead"
         $ListOfMembers = @()
-        $ListOfMembers = Get-MXDomain -BaseUri $BaseUri -Headers $Headers -RoleType "MEMBER"
-        Write-Verbose "Management domains found..."
-        Write-Verbose $($ListOfMembers | Format-Table | Out-String)
+        $ListOfMembers = "MEMBER" | Get-OMEMXDomain
         $JobId = 0
-        if ($ListOfMembers.Length -gt 0) {
+        if ($ListOfMembers.Count -gt 0) {
+            Write-Verbose "Management domains found..."
+            Write-Verbose $($ListOfMembers | Format-Table | Out-String)
             if ($ServiceTag -ne "") {
                 $Member = $ListOfMembers | Where-Object {$_.Identifier -eq $ServiceTag}
             } else {

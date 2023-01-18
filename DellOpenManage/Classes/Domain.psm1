@@ -1,0 +1,19 @@
+Class Domain {
+    [Int]$Id
+    [Int]$DeviceId
+    [String[]]$PublicAddress
+    [String]$Name
+    [String]$Description
+    [String]$Identifier
+    [Int]$DomainTypeId
+    [String]$DomainTypeValue
+    [Int]$DomainRoleTypeId
+    [String]$DomainRoleTypeValue
+    [Version]$Version
+    [Boolean]$Local
+    [String]$GroupId
+    [String]$GroupName
+    [Boolean]$BackupLead
+    [String[]]$Capabilities
+    [Int]$BackupLeadHealth
+}

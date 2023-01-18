@@ -1,16 +1,18 @@
 function Invoke-RetireLead($BaseUri, $Headers, $ContentType, $PostRetirementRoleType) {
     $BackupLead = $null
     Write-Verbose "Checking for Backup Lead"
-    $BackupLead = Get-BackupLead -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType
+    $BackupLead = $("BACKUPLEAD" | Get-OMEMXDomain)
     $JobId = 0
+
     # Need to implemented -Force 
-    if ($null -eq $BackupLead) {
+    if ($BackupLead -eq $null -or $BackupLead.Count -eq 0) {
         Write-Error "No backup lead found. Exiting. Use the -Force parameter"
         Break
         Return
     } else {
+        Write-Verbose $($BackupLead | ConvertTo-Json -Depth 6)
         Write-Verbose "Checking Backup lead health"
-        $BackupLeadHealth = $BackupLead.'BackupLeadHealth'
+        $BackupLeadHealth = $BackupLead.BackupLeadHealth
         if ($BackupLeadHealth -ne 1000) {
             Write-Verbose "Backup lead health is CRITICAL or WARNING."
             Write-Verbose "Please ensure backup lead is healty before retiring the lead"
@@ -26,6 +28,7 @@ function Invoke-RetireLead($BaseUri, $Headers, $ContentType, $PostRetirementRole
 
     $Payload.PostRetirementRoleType = $PostRetirementRoleType
     $Body = $Payload | ConvertTo-Json -Depth 6
+    Write-Verbose $Body
     $Response = Invoke-WebRequest -Uri $URL -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
     if ($Response.StatusCode -eq 200) {
         $RetireLeadResp = $Response | ConvertFrom-Json
@@ -37,12 +40,7 @@ function Invoke-RetireLead($BaseUri, $Headers, $ContentType, $PostRetirementRole
     else {
         Write-Warning "Failed to retire lead"
     }
-
     return $JobId
-}
-function Get-BackupLead($BaseUri, $Headers, $ContentType) {
-    $Domains = Get-MXDomain -BaseUri $BaseUri -Headers $Headers -RoleType "BACKUPLEAD"
-    return $Domains
 }
 
 function Invoke-OMEMcmGroupRetireLead {
