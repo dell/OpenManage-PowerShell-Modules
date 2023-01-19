@@ -3,14 +3,14 @@
     $Type        = "application/json"
     $Headers     = @{}
     $Headers."X-Auth-Token" = $SessionAuth.Token
-    $ReportDeets = $BaseUri + "/api/ReportService/ReportDefs($($ReportId))"
+    $ReportDeets = $BaseUri + "/api/ReportService/ReportDefs($($ReportId))/ReportResults"
     $NextLinkUrl = $null
     $OutputArray = @()
     $ColumnNames = @()
     $DeetsResp = Invoke-WebRequest -Uri $ReportDeets -UseBasicParsing -Headers $Headers -Method Get -ContentType $Type
     if ($DeetsResp.StatusCode -eq 200){
         $DeetsInfo = $DeetsResp.Content | ConvertFrom-Json
-        $ColumnNames = $DeetsInfo.ColumnNames | Sort-Object Sequence | ForEach-Object{$_.Name}
+        $ColumnNames = $DeetsInfo.ResultRowColumns | Sort-Object Sequence | ForEach-Object{$_.Name}
         Write-Verbose "Extracting results for report ($($ReportId))"
         $ResultUrl = $BaseUri + "/api/ReportService/ReportDefs($($ReportId))/ReportResults/ResultRows"
         
