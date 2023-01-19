@@ -96,7 +96,7 @@ Process {
         $TemplatePayload = $TemplatePayload | ConvertTo-Json -Depth 6
         Write-Verbose $TemplatePayload
         $TemplateId = $null
-        $TemplateResponse = Invoke-WebRequest -Uri $TemplateUrl -Method Post -Body $TemplatePayload -ContentType $Type -Headers $Headers
+        $TemplateResponse = Invoke-WebRequest -Uri $TemplateUrl -UseBasicParsing -Method Post -Body $TemplatePayload -ContentType $Type -Headers $Headers
         Write-Verbose "Creating Template..."
         if ($TemplateResponse.StatusCode -eq 200) {
             $TemplateId = $TemplateResponse.Content | ConvertFrom-Json

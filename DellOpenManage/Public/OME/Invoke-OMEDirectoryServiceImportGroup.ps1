@@ -85,7 +85,12 @@ Process {
             $GroupPayload.RoleId = $Role.Id
             $GroupsPayload += $GroupPayload
         }
-        $GroupsPayload = ,$GroupsPayload | ConvertTo-Json -Depth 6
+        if ($GroupsPayload.Count -eq 1) {
+            $GroupsPayload = ConvertTo-Json -Depth 6 @($GroupsPayload)
+        } else {
+            $GroupsPayload = $GroupsPayload | ConvertTo-Json -Depth 6
+        }
+        Write-Verbose $GroupsPayload
         Write-Verbose $AccountProviderImportUrl
 
         $AccountProviderImportResponse = Invoke-WebRequest -Uri $AccountProviderImportUrl -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupsPayload

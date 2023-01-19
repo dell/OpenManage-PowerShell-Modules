@@ -12,7 +12,7 @@ function Set-AssignedIdentity($BaseUri, $Type, $Headers, $TemplateId, $TargetIds
     $Payload.BaseEntityIds = @()
     $Payload.BaseEntityIds = $TargetIds
     $AssignedIdentitiesPayload = $Payload|ConvertTo-Json -Depth 6
-    $AssignedIdentitiesResponse = Invoke-WebRequest -Uri $TemplateUrl -Method Post -Body $AssignedIdentitiesPayload -ContentType $Type -Headers $Headers
+    $AssignedIdentitiesResponse = Invoke-WebRequest -Uri $TemplateUrl -UseBasicParsing -Method Post -Body $AssignedIdentitiesPayload -ContentType $Type -Headers $Headers
     if ( $AssignedIdentitiesResponse.StatusCode -eq 200) {
         $AssignIdentitiesInfo = $AssignedIdentitiesResponse.Content | ConvertFrom-Json
         $AssignIdentitiesInfo = $AssignIdentitiesInfo |ConvertTo-Json -Depth 6
@@ -214,7 +214,7 @@ Process {
         # Associate Identity Pool to Template
         #$AssignIdentityResponse = Set-IdentitiesToTarget $IpAddress $Type $Headers $IdentityPoolId $TemplateId
 
-        $DeployTemplateResponse = Invoke-WebRequest -Uri $TemplateDeployUrl -Method Post -Body $TemplateDeployPayload -ContentType $Type -Headers $Headers
+        $DeployTemplateResponse = Invoke-WebRequest -Uri $TemplateDeployUrl -UseBasicParsing -Method Post -Body $TemplateDeployPayload -ContentType $Type -Headers $Headers
         if ($DeployTemplateResponse.StatusCode -eq 200) {
             $DeployTemplateContent = $DeployTemplateResponse.Content | ConvertFrom-Json
             $JobId = $DeployTemplateContent

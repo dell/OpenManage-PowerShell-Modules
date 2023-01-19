@@ -10,7 +10,7 @@ function Get-TemplateVlan($BaseUri, $ContentType, $Headers, $Template) {
     $TemplateVlanPayload = $TemplateVlanPayload | ConvertFrom-Json
     $NETWORK_HIERARCHY_VIEW = 4  # For Network hierarchy View in a Template
     $TemplateVlanUrl = $BaseUri + "/api/TemplateService/Templates($($Template.Id))/Views($($NETWORK_HIERARCHY_VIEW))/AttributeViewDetails"
-    $TemplateVlanResponse = Invoke-WebRequest -Uri $TemplateVlanUrl -Method Get -ContentType $ContentType -Headers $Headers
+    $TemplateVlanResponse = Invoke-WebRequest -Uri $TemplateVlanUrl -UseBasicParsing -Method Get -ContentType $ContentType -Headers $Headers
     if ($TemplateVlanResponse.StatusCode -eq 200) {
         $TemplateVlans = $TemplateVlanResponse.Content | ConvertFrom-Json
         $NICGroups = @()
@@ -187,7 +187,7 @@ Process {
         Write-Verbose $TemplatePayload
         $NewTemplateId = $null
         Write-Verbose "Clone Template..."
-        $TemplateResponse = Invoke-WebRequest -Uri $TemplateUrl -Method Post -Body $TemplatePayload -ContentType $ContentType -Headers $Headers
+        $TemplateResponse = Invoke-WebRequest -Uri $TemplateUrl -UseBasicParsing -Method Post -Body $TemplatePayload -ContentType $ContentType -Headers $Headers
         if ($TemplateResponse.StatusCode -eq 200) {
             $NewTemplateId = [int]$TemplateResponse.Content
             Write-Verbose "Clone Template Success - Id $($NewTemplateId)"
@@ -202,7 +202,7 @@ Process {
             $CloneTemplateVlanPayload = $($CloneTemplateVlanPayload | ConvertTo-Json -Depth 6)
             Write-Verbose $CloneTemplateVlanPayload
             $TemplateUpdateNetworkUrl = $BaseUri + "/api/TemplateService/Actions/TemplateService.UpdateNetworkConfig"
-            $TemplateVlanResponse = Invoke-WebRequest -Uri $TemplateUpdateNetworkUrl -Method Post -Body $CloneTemplateVlanPayload -ContentType $ContentType -Headers $Headers
+            $TemplateVlanResponse = Invoke-WebRequest -Uri $TemplateUpdateNetworkUrl -UseBasicParsing -Method Post -Body $CloneTemplateVlanPayload -ContentType $ContentType -Headers $Headers
             if ($TemplateVlanResponse.StatusCode -eq 200) {
                 Write-Verbose "Clone Template Success - VLANs"
             }

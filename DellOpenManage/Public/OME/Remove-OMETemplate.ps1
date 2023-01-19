@@ -50,7 +50,7 @@ Process {
         $TemplateUrl = $BaseUri + "/api/TemplateService/Templates($($Template.Id))"
 
         Write-Verbose "Removing template $($Template.Id)..."
-        $TemplateResponse = Invoke-WebRequest -Uri $TemplateUrl -Method Delete -ContentType $Type -Headers $Headers
+        $TemplateResponse = Invoke-WebRequest -Uri $TemplateUrl -UseBasicParsing -Method Delete -ContentType $Type -Headers $Headers
         if ($TemplateResponse.StatusCode -eq 204) {
             Write-Verbose "Remove template successful..."
         }

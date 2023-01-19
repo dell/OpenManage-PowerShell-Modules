@@ -80,7 +80,7 @@ function Get-ApplicableComponent($BaseUri, $Headers, $ContentType, $DupReportPay
 
     $DupReportUrl = $BaseUri + "/api/UpdateService/Actions/UpdateService.GetSingleDupReport"
     try {
-        $DupResponse = Invoke-WebRequest -Uri $DupReportUrl -Headers $Headers -ContentType $ContentType -Body $DupReportPayload -Method Post -ErrorAction SilentlyContinue       
+        $DupResponse = Invoke-WebRequest -Uri $DupReportUrl -UseBasicParsing -Headers $Headers -ContentType $ContentType -Body $DupReportPayload -Method Post -ErrorAction SilentlyContinue       
         if ($DupResponse.StatusCode -eq 200) {
             $DupResponseInfo = $DupResponse.Content | ConvertFrom-Json
             if ($DupResponse.Length -gt 0) {
@@ -147,7 +147,7 @@ function Push-DupToOME($BaseUri, $Headers, $DupFile) {
     $UploadActionUri = $BaseUri + "/api/UpdateService/Actions/UpdateService.UploadFile"
     Write-Verbose "Uploading $($DupFile) to $($BaseUri). This action may take some time to complete."
     
-    $UploadResponse = Invoke-WebRequest -Uri $UploadActionUri -Method Post -InFile $DupFile -ContentType "application/octet-stream" -Headers $Headers
+    $UploadResponse = Invoke-WebRequest -Uri $UploadActionUri -UseBasicParsing -Method Post -InFile $DupFile -ContentType "application/octet-stream" -Headers $Headers
     if ($UploadResponse.StatusCode -eq 200) {
         ## Successfully uploaded the DUP file . Get the file token
         ## returned by OME on upload of the DUP file
@@ -327,7 +327,7 @@ Process {
                         $JobBody = $DupUpdatePayload | ConvertTo-Json -Depth 6
                         $JobSvcUrl = $BaseUri + "/api/JobService/Jobs"
                         Write-Verbose $JobBody
-                        $JobResp = Invoke-WebRequest -Uri $JobSvcUrl -Method Post -Body $JobBody -Headers $Headers -ContentType $ContentType
+                        $JobResp = Invoke-WebRequest -Uri $JobSvcUrl -UseBasicParsing -Method Post -Body $JobBody -Headers $Headers -ContentType $ContentType
                         if ($JobResp.StatusCode -eq 201) {
                             $JobInfo = $JobResp.Content | ConvertFrom-Json
                             $JobId = $JobInfo.Id

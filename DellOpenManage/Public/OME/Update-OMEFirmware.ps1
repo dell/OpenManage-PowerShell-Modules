@@ -14,7 +14,7 @@ function Get-TargetPayload($ComplianceReportList) {
     return $ComplianceReportTargetList
 }
 
-function Get-FirmwareApplicablePayload($Name, $CatalogId, $RepositoryId, $BaselineId, $TargetPayload, $UpdateSchedule, $UpdateScheduleCron, $ResetiDRAC, $ClearJobQueue) {
+function Get-FirmwareApplicablePayload($Name, $CatalogId, $RepositoryId, $BaselineId, $TargetPayload, $UpdateSchedule, $UpdateScheduleCron, $RebootType, $ResetiDRAC, $ClearJobQueue) {
     $Payload = '{
         "JobName": "Update Firmware-Test",
         "JobDescription": "Firmware Update Job",
@@ -59,12 +59,18 @@ function Get-FirmwareApplicablePayload($Name, $CatalogId, $RepositoryId, $Baseli
 		{
             "Key": "stagingValue",
             "Value": "false"
-        }],
+        }
+        ],
         "Targets": []
     }' | ConvertFrom-Json
 
     $StageUpdate = $true
     $Schedule = "startNow"
+    <#
+     1—PowerCycle
+     2—Graceful reboot without forced shutdown
+     3—Graceful reboot with forced shutdown
+    #>
     if ($UpdateSchedule -eq "RebootNow") {
         $StageUpdate = $false
     } elseif ($UpdateSchedule -eq "ScheduleLater") {
@@ -87,6 +93,14 @@ function Get-FirmwareApplicablePayload($Name, $CatalogId, $RepositoryId, $Baseli
             $value = $Payload.'Params'[$i].'Key'
             $Payload.'Params'[$i].'Value' = $ParamsHashValMap.$value
         }
+    }
+    if ($StageUpdate -eq $false) {
+        $param = '{
+            "Key": "rebootType",
+            "Value": "3"
+        }' | ConvertFrom-Json
+        $param.Value = "${RebootType}"
+        $Payload.'Params' += $param
     }
     $Payload.Targets += $TargetPayload
     $Payload.JobName = $Name
@@ -130,6 +144,8 @@ limitations under the License.
     This option clears any active or pending jobs. Occurs immediately, regardless if StageForNextReboot is set
 .PARAMETER UpdateSchedule
     Determines when the updates will be performed. (Default="Preview", "RebootNow", "ScheduleLater", "StageForNextReboot")
+.PARAMETER RebootType
+    Used when -UpdateSchedule=RebootNow. ("PowerCycle", "Graceful" Graceful reboot without forced shutdown, Default="GracefulForced" Graceful reboot with forced shutdown
 .PARAMETER UpdateScheduleCron
     Cron string to schedule updates at a later time. Uses UTC time. Used with -UpdateSchedule "ScheduleLater"
 .PARAMETER UpdateAction
@@ -185,6 +201,10 @@ param(
     [String]$UpdateSchedule = "Preview",
 
     [Parameter(Mandatory=$false)]
+    [ValidateSet("GracefulForced", "Graceful", "PowerCycle")]
+    [String]$RebootType = "GracefulForced",
+
+    [Parameter(Mandatory=$false)]
     [String]$UpdateScheduleCron,
 
     [Parameter(Mandatory=$false)]
@@ -216,6 +236,12 @@ Process {
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
+        $RebootTypeMap = @{
+            "PowerCycle" = 1;
+            "Graceful" = 2;
+            "GracefulForced" = 3;
+        }
+
         $BaselineId = $Baseline.Id
         $CatalogId = $Baseline.CatalogId
         $RepositoryId = $Baseline.RepositoryId
@@ -227,7 +253,7 @@ Process {
             if ($ComplianceReportList.Length -gt 0) {
                 $TargetPayload = Get-TargetPayload $ComplianceReportList
                 if ($TargetPayload.Length -gt 0) {
-                    $UpdatePayload = Get-FirmwareApplicablePayload -Name $Name -CatalogId $CatalogId -RepositoryId $RepositoryId -BaselineId $BaselineId -TargetPayload $TargetPayload -UpdateSchedule $UpdateSchedule -UpdateScheduleCron $UpdateScheduleCron -ResetiDRAC $ResetiDRAC.IsPresent -ClearJobQueue $ClearJobQueue.IsPresent
+                    $UpdatePayload = Get-FirmwareApplicablePayload -Name $Name -CatalogId $CatalogId -RepositoryId $RepositoryId -BaselineId $BaselineId -TargetPayload $TargetPayload -UpdateSchedule $UpdateSchedule -UpdateScheduleCron $UpdateScheduleCron -RebootType $RebootTypeMap[$RebootType] -ResetiDRAC $ResetiDRAC.IsPresent -ClearJobQueue $ClearJobQueue.IsPresent
                     # Update firmware
                     $UpdateJobURL = $BaseUri + "/api/JobService/Jobs"
                     $UpdatePayload = $UpdatePayload | ConvertTo-Json -Depth 6

@@ -53,11 +53,11 @@ function Invoke-OMEMcmGroupAssignBackupLead {
     function Invoke-AssignBackupLead($BaseUri, $Headers, $ContentType, $ServiceTag) {
         $URL = $BaseUri + "/api/ManagementDomainService/Actions/ManagementDomainService.AssignBackupLead"
         $ListOfMembers = @()
-        $ListOfMembers = Get-MXDomain -BaseUri $BaseUri -Headers $Headers -RoleType "MEMBER"
-        Write-Verbose "Management domains found..."
-        Write-Verbose $($ListOfMembers | Format-Table | Out-String)
+        $ListOfMembers = "MEMBER" | Get-OMEMXDomain
         $JobId = 0
-        if ($ListOfMembers.Length -gt 0) {
+        if ($ListOfMembers.Count -gt 0) {
+            Write-Verbose "Management domains found..."
+            Write-Verbose $($ListOfMembers | Format-Table | Out-String)
             if ($ServiceTag -ne "") {
                 $Member = $ListOfMembers | Where-Object {$_.Identifier -eq $ServiceTag}
             } else {
@@ -73,7 +73,7 @@ function Invoke-OMEMcmGroupAssignBackupLead {
             $Body = ConvertTo-Json $TargetArray
             Write-Verbose "Invoking URL $($URL)"
             Write-Verbose "Payload $($Body)"
-            $Response = Invoke-WebRequest -Uri $URL -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
+            $Response = Invoke-WebRequest -Uri $URL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
             if ($Response.StatusCode -eq 200) {
                 $BackupLeadData = $Response | ConvertFrom-Json
                 $JobId = $BackupLeadData.'JobId'

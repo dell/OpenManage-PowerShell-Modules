@@ -158,7 +158,7 @@ Process {
                 $UpdatedJobServicePayload = Get-UpdatedJobServicePayload -JobServicePayload $JobServicePayload -DeviceId $Devices.Id -State $State 
                 $UpdatedJobServicePayload = $UpdatedJobServicePayload |ConvertTo-Json -Depth 6
                 Write-Verbose $UpdatedJobServicePayload
-                $JobResponse = Invoke-WebRequest -Uri $JobUrl -Method Post -Body $UpdatedJobServicePayload -ContentType $Type -Headers $Headers
+                $JobResponse = Invoke-WebRequest -Uri $JobUrl -UseBasicParsing -Method Post -Body $UpdatedJobServicePayload -ContentType $Type -Headers $Headers
                 if ($JobResponse.StatusCode -eq 201) {
                     $JobInfo = $JobResponse.Content | ConvertFrom-Json
                     $JobId = $JobInfo.Id
