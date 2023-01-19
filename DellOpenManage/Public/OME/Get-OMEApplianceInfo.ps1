@@ -49,12 +49,12 @@ Process {
 
         $ApplianceInfoUrl = $BaseUri + "/api/ApplicationService/Info"
 
-        $ApplianceInfos = @()
         Write-Verbose $ApplianceInfoUrl
         $ApplianceInfoResponse = Invoke-WebRequest -Uri $ApplianceInfoUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $ContentType
         if ($ApplianceInfoResponse.StatusCode -in 200, 201) {
             $ApplianceInfoData = $ApplianceInfoResponse.Content | ConvertFrom-Json
-            $ApplianceInfo = New-ApplianceInfoFromJsonn -ApplianceInfo $ApplianceInfoData
+            $ApplianceInfo = New-ApplianceInfoFromJson -ApplianceInfo $ApplianceInfoData
+            return $ApplianceInfo
         }
     }
     Catch {

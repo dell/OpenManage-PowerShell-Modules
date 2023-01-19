@@ -14,8 +14,9 @@ Update firmware on devices in OpenManage Enterprise
 
 ```
 Update-OMEFirmware [[-Name] <String>] [[-DeviceFilter] <Device[]>] [[-ComponentFilter] <String>]
- [-Baseline] <FirmwareBaseline> [[-UpdateSchedule] <String>] [[-UpdateScheduleCron] <String>]
- [[-UpdateAction] <String[]>] [-ResetiDRAC] [-ClearJobQueue] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
+ [-Baseline] <FirmwareBaseline> [[-UpdateSchedule] <String>] [[-RebootType] <String>]
+ [[-UpdateScheduleCron] <String>] [[-UpdateAction] <String[]>] [-ResetiDRAC] [-ClearJobQueue] [-Wait]
+ [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -147,6 +148,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -RebootType
+Used when -UpdateSchedule=RebootNow.
+("PowerCycle", "Graceful" Graceful reboot without forced shutdown, Default="GracefulForced" Graceful reboot with forced shutdown
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: GracefulForced
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -UpdateScheduleCron
 Cron string to schedule updates at a later time.
 Uses UTC time.
@@ -158,7 +175,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -174,7 +191,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: Upgrade
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -236,7 +253,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 9
 Default value: 3600
 Accept pipeline input: False
 Accept wildcard characters: False

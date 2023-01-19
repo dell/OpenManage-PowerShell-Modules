@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0]() - 2023-01-19
+### Added
+- Get-OMEApplianceInfo
+- Invoke-OMEApplianceBackup
+- Invoke-OMEResetApplication
+- Remove-OMECatalog
+- Remove-OMEFirmwareBaseline
+
+### Fixed
+- Column order issue in Invoke-OMEReport ([Issue #7](https://github.com/dell/OpenManage-PowerShell-Modules/issues/7))
+- Issue where RebootNow wasn't actually rebooting in Update-OMEFirmware ([Issue #10](https://github.com/dell/OpenManage-PowerShell-Modules/issues/10))
+- Issue where commandlets were failing when IE wasn't installed. Added -UseBasicParsing to all Invoke-WebRequest 
+- PowerShell v5 fix for Invoke-OMEDirectoryServiceImportGroup
+
 ## [3.2.0]() - 2023-01-12
 ### Added
 - New-OMEDirectoryService

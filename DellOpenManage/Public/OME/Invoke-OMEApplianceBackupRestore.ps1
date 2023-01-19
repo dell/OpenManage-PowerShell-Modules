@@ -1,6 +1,6 @@
 ﻿using module ..\..\Classes\Domain.psm1
 
-function Get-BackupJobPayload($Name, $Description, $Operation, $Share, $SharePath, $ShareType, $BackupFile, $DeviceId, [SecureString] $EncryptionPassword, $Username, [SecureString] $Password, $IncludePasswords, $IncludeCertificates, $ScheduleCron) {
+function Get-BackupJobPayload($Name, $Description, $Operation, $Share, $SharePath, $ShareType, $BackupFile, $DeviceId, [SecureString] $EncryptionPassword, $UserName, [SecureString] $Password, $IncludePw, $IncludeCertificates, $ScheduleCron) {
     $Payload = '{
         "Id": 0,
         "JobName": "Backup Task",
@@ -113,7 +113,7 @@ function Get-BackupJobPayload($Name, $Description, $Operation, $Share, $SharePat
             }
         }
         if ($Payload.'Params'[$i].'Key' -eq 'includePasswords') {
-            if ($IncludePasswords) {
+            if ($IncludePw) {
                 $Payload.'Params'[$i].'Value' = "true"
             }
         }
@@ -150,15 +150,46 @@ limitations under the License.
     Backup or restore appliance to a file on a network share
 .PARAMETER Name
     Name of the job
-
+.PARAMETER Description
+    Job description
+.PARAMETER IncludePw
+    Include passwords in backup
+.PARAMETER IncludeCertificates
+    Include certificates in backup
+.PARAMETER Share
+    Share host IP address or hostname
+.PARAMETER SharePath
+    Share directory path
+.PARAMETER ShareType
+    Share type ("NFS", Default="CIFS", "HTTP", "HTTPS")
+.PARAMETER Operation
+    Operation to perform (Default="BACKUP", "RESTORE")
+.PARAMETER BackupFile
+    Backup file name, .bin is automatically appended to file name. Default=BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))
+.PARAMETER Chassis
+    Lead or standalone chassis to backup or restore to. Object of type Domain returned from Get-OMEMXDomain
+.PARAMETER UserName
+    Used for CIFS . Username to connect to share
+.PARAMETER Password
+    Used for CIFS . Password to connect to share
+.PARAMETER EncryptionPassword
+    Password used to encrypt backup
+.PARAMETER ScheduleCron
+    Specify cron string to schedule the job in the future. Leave out to run now.
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
     Time, in seconds, to wait for the job to complete
 .INPUTS
-    Device
+    None
 .EXAMPLE
+    Invoke-OMEApplianceBackupRestore -Chassis @("LEAD" | Get-OMEMXDomain | Select-Object -First 1) -Share "192.168.1.100" -SharePath "/SHARE" -ShareType "CIFS" -UserName "Administrator" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Operation "BACKUP" -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
+
+    Backup chassis to CIFS share now
+.EXAMPLE
+    Invoke-OMEApplianceBackupRestore -Chassis  @("LEAD" | Get-OMEMXDomain | Select-Object -First 1) -Share "192.168.1.100" -SharePath "/mnt/data/backup" -ShareType "NFS" -Operation "BACKUP" -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -ScheduleCron '0 0 0 ? * sun *' -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
     
+    Backup chassis to NFS share on schedule
 #>
 
 [CmdletBinding()]
@@ -170,7 +201,7 @@ param(
     [String]$Description = "Create a backup of the appliance",
 
     [Parameter(Mandatory=$false)]
-    [Switch]$IncludePasswords,
+    [Switch]$IncludePw,
 
     [Parameter(Mandatory=$false)]
     [Switch]$IncludeCertificates,
@@ -196,7 +227,7 @@ param(
     [Domain[]] $Chassis,
 
     [Parameter(Mandatory=$false)]
-    [String]$Username,
+    [String]$UserName,
 
     [Parameter(Mandatory=$false)]
     [SecureString]$Password,    
@@ -232,12 +263,13 @@ Process {
         }
 
         $DeviceIds = @()
-        if ($Chassis.DeviceId -ne $null -and $Chassis.DeviceId -ne 0) {
+        if ($null -ne $Chassis.DeviceId -and $Chassis.DeviceId -ne 0) {
             $DeviceIds += $Chassis.DeviceId
             $JobPayload = Get-BackupJobPayload -Name $Name -Description $Description -Operation $Operation `
                 -Share $Share -SharePath $SharePath -ShareType $ShareType `
                 -BackupFile $BackupFile -DeviceId $Chassis.DeviceId -EncryptionPassword $EncryptionPassword `
-                -UserName $Username -Password $Password -ScheduleCron $ScheduleCron
+                -UserName $UserName -Password $Password -ScheduleCron $ScheduleCron `
+                -IncludePw $IncludePw -IncludeCertificates $IncludeCertificates
             
             $JobURL = $BaseUri + "/api/JobService/Jobs"
             $JobPayload = $JobPayload | ConvertTo-Json -Depth 6

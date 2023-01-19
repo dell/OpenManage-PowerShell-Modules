@@ -5,15 +5,16 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-OMESupportAssistCase
+# Invoke-OMEResetApplication
 
 ## SYNOPSIS
-Get list of Identity Pools from OME
+This method resets the application.
+You can either reset only the configuration or clear all the data.
 
 ## SYNTAX
 
 ```
-Get-OMESupportAssistCase [[-Value] <Object>] [[-FilterBy] <String>] [<CommonParameters>]
+Invoke-OMEResetApplication [-ResetType] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -24,39 +25,25 @@ Note that the credentials entered are not stored to disk.
 
 ### EXAMPLE 1
 ```
-Get-OMESupportAssistCase | Format-Table
+Invoke-OMEResetApplication -ResetType "RESET_ALL"
 ```
+
+Reset all application data
 
 ## PARAMETERS
 
-### -Value
-String containing search value.
-Use with -FilterBy parameter.
-Supports regex based matching.
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
-```
-
-### -FilterBy
-Filter the results by ("EventSource", "Id", "ServiceContract", Default="ServiceTag")
+### -ResetType
+Option to reset only the configuration or clear all the data.
+("RESET_CONFIG", "RESET_ALL")
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
-Position: 2
-Default value: ServiceTag
+Required: True
+Position: 1
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

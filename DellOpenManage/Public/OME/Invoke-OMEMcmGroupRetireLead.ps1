@@ -5,7 +5,7 @@ function Invoke-RetireLead($BaseUri, $Headers, $ContentType, $PostRetirementRole
     $JobId = 0
 
     # Need to implemented -Force 
-    if ($BackupLead -eq $null -or $BackupLead.Count -eq 0) {
+    if ($null -eq $BackupLead -or $BackupLead.Count -eq 0) {
         Write-Error "No backup lead found. Exiting. Use the -Force parameter"
         Break
         Return
