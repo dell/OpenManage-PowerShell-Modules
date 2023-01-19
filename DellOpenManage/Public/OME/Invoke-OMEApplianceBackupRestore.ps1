@@ -1,6 +1,6 @@
 ﻿using module ..\..\Classes\Domain.psm1
 
-function Get-BackupJobPayload($Name, $Description, $Share, $SharePath, $ShareType, $BackupFile, $DeviceId, [SecureString] $EncryptionPassword, $UserName, [SecureString] $Password) {
+function Get-BackupJobPayload($Name, $Description, $Operation, $Share, $SharePath, $ShareType, $BackupFile, $DeviceId, [SecureString] $EncryptionPassword, $Username, [SecureString] $Password, $IncludePasswords, $IncludeCertificates, $ScheduleCron) {
     $Payload = '{
         "Id": 0,
         "JobName": "Backup Task",
@@ -10,8 +10,16 @@ function Get-BackupJobPayload($Name, $Description, $Share, $SharePath, $ShareTyp
         "Targets": [],
         "Params": [
             {
+                "Key": "includePasswords",
+                "Value": "false"
+            },
+            {
+                "Key": "includeCertificates",
+                "Value": "false"
+            },
+            {
                 "Key": "shareName",
-                "Value": "Floder_Name"
+                "Value": "Folder_Name"
             },
             {
                 "Key": "backup_filename",
@@ -43,14 +51,23 @@ function Get-BackupJobPayload($Name, $Description, $Share, $SharePath, $ShareTyp
             }
         ],
         "JobType": {
-        "Id": 21,
-        "Name": "Appliance_Backup_Task",
-        "Internal": false
+            "Id": 21,
+            "Name": "Appliance_Backup_Task",
+            "Internal": false
         }
     }' | ConvertFrom-Json
 
     $Payload.JobName = $Name
     $Payload.JobDescription = $Description
+    $Payload.Schedule = $ScheduleCron
+    if ($Operation -eq "BACKUP") {
+        $Payload.JobType.Id = 106
+        $Payload.JobType.Name = "Appliance_Backup_Task"
+    }
+    if ($Operation -eq "RESTORE") {
+        $Payload.JobType.Id = 107
+        $Payload.JobType.Name = "Appliance_Restore_Task"
+    }
     # Update Params
     for ($i = 0; $i -le $Payload.'Params'.Length; $i++) {
         if ($Payload.'Params'[$i].'Key' -eq 'shareName') {
@@ -70,7 +87,7 @@ function Get-BackupJobPayload($Name, $Description, $Share, $SharePath, $ShareTyp
         }
         if ($Payload.'Params'[$i].'Key' -eq 'device_id') {
             if ($DeviceId) {
-                $Payload.'Params'[$i].'Value' = $DeviceId
+                $Payload.'Params'[$i].'Value' = $DeviceId.ToString()
             }
         }
         if ($Payload.'Params'[$i].'Key' -eq 'shareAddress') {
@@ -85,7 +102,7 @@ function Get-BackupJobPayload($Name, $Description, $Share, $SharePath, $ShareTyp
             }
         }
         if ($Payload.'Params'[$i].'Key' -eq 'userName') {
-            if ($UserName) {
+            if ($UserName) {    
                 $Payload.'Params'[$i].'Value' = $UserName
             }
         }
@@ -95,11 +112,21 @@ function Get-BackupJobPayload($Name, $Description, $Share, $SharePath, $ShareTyp
                 $Payload.'Params'[$i].'Value' = $PasswordText
             }
         }
+        if ($Payload.'Params'[$i].'Key' -eq 'includePasswords') {
+            if ($IncludePasswords) {
+                $Payload.'Params'[$i].'Value' = "true"
+            }
+        }
+        if ($Payload.'Params'[$i].'Key' -eq 'includeCertificates') {
+            if ($IncludeCertificates) {
+                $Payload.'Params'[$i].'Value' = "true"
+            }
+        }
     }
     return $payload
 }
 
-function Invoke-OMEOnboarding {
+function Invoke-OMEApplianceBackupRestore {
 <#
 Copyright (c) 2018 Dell EMC Corporation
 
@@ -118,9 +145,9 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Update onboarding credentials on devices in OpenManage Enterprise
+    Appliance backup/restore to file on network share
 .DESCRIPTION
-    Change onboarding credentials for device and submit an onboarding job to update device credentials in OME
+    Backup or restore appliance to a file on a network share
 .PARAMETER Name
     Name of the job
 
@@ -131,8 +158,7 @@ limitations under the License.
 .INPUTS
     Device
 .EXAMPLE
-    Invoke-OMEOnboarding -Devices $("PowerEdge R640" | Get-OMEDevice -FilterBy "Model") -OnboardingUserName "admin" -OnboardingPassword $(ConvertTo-SecureString "calvin" -AsPlainText -Force)
-    Change onboarding credentials
+    
 #>
 
 [CmdletBinding()]
@@ -143,6 +169,12 @@ param(
     [Parameter(Mandatory=$false)]
     [String]$Description = "Create a backup of the appliance",
 
+    [Parameter(Mandatory=$false)]
+    [Switch]$IncludePasswords,
+
+    [Parameter(Mandatory=$false)]
+    [Switch]$IncludeCertificates,
+    
     [Parameter(Mandatory)]
     [String]$Share,
 
@@ -154,10 +186,14 @@ param(
     [String]$ShareType = "CIFS",
 
     [Parameter(Mandatory=$false)]
-    [String]$BackupFile = "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss')).bin",
+    [ValidateSet("BACKUP", "RESTORE")]
+    [String]$Operation = "BACKUP",
 
-    [Parameter(Mandatory=$false, ValueFromPipeline)]
-    [Domain] $Chassis,
+    [Parameter(Mandatory=$false)]
+    [String]$BackupFile = "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))",
+
+    [Parameter(Mandatory)]
+    [Domain[]] $Chassis,
 
     [Parameter(Mandatory=$false)]
     [String]$Username,
@@ -167,6 +203,9 @@ param(
 
     [Parameter(Mandatory)]
     [SecureString]$EncryptionPassword,
+
+    [Parameter(Mandatory=$false)]
+    [String]$ScheduleCron = "startnow",
 
     [Parameter(Mandatory=$false)]
     [Switch]$Wait,
@@ -187,9 +226,19 @@ Process {
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
+        if ($ShareType -eq "CIFS") {
+            if ($null -eq $Username) { throw [System.ArgumentNullException] "Username required for CIFS" }
+            if ($null -eq $Password) { throw [System.ArgumentNullException] "Password required for CIFS" }
+        }
+
+        $DeviceIds = @()
         if ($Chassis.DeviceId -ne $null -and $Chassis.DeviceId -ne 0) {
-            $JobPayload = Get-BackupJobPayload -Name $Name -Description $Description -Share $Share -SharePath $SharePath -ShareType `
-                $ShareType -BackupFile $BackupFile DeviceId $Chassis.DeviceId -EncryptionPassword $EncryptionPassword -UserName $UserName -Password $Password
+            $DeviceIds += $Chassis.DeviceId
+            $JobPayload = Get-BackupJobPayload -Name $Name -Description $Description -Operation $Operation `
+                -Share $Share -SharePath $SharePath -ShareType $ShareType `
+                -BackupFile $BackupFile -DeviceId $Chassis.DeviceId -EncryptionPassword $EncryptionPassword `
+                -UserName $Username -Password $Password -ScheduleCron $ScheduleCron
+            
             $JobURL = $BaseUri + "/api/JobService/Jobs"
             $JobPayload = $JobPayload | ConvertTo-Json -Depth 6
             Write-Verbose $JobPayload

@@ -71,7 +71,7 @@ Process {
                 } else {
                     foreach ($Member in $MemberDevices) {
                         if ($RoleType -eq "LEAD" -and $Member.'DomainRoleTypeValue' -eq "LEAD") {
-                            $Members += New-DomainFromJson -Domain $Member
+                            $Members += New-DomainFromJson -Domain $Member 
                         } elseif ($RoleType -eq "MEMBER" -and $Member.'DomainRoleTypeValue' -eq "MEMBER") {
                             $Members += New-DomainFromJson -Domain $Member
                         } elseif ($RoleType -eq "BACKUPLEAD" -and $Member.'BackupLead' -eq $true) {
@@ -83,7 +83,7 @@ Process {
             else {
                 Write-Warning "No domains discovered"
             }
-            return ,$Members # Workaround for single element array
+            return $Members # Workaround for single element array
         }
         else {
             Write-Warning "Failed to get domains and status code returned is $($Response.StatusCode)"
