@@ -29,7 +29,7 @@ function Invoke-RetireLead($BaseUri, $Headers, $ContentType, $PostRetirementRole
     $Payload.PostRetirementRoleType = $PostRetirementRoleType
     $Body = $Payload | ConvertTo-Json -Depth 6
     Write-Verbose $Body
-    $Response = Invoke-WebRequest -Uri $URL -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
+    $Response = Invoke-WebRequest -Uri $URL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
     if ($Response.StatusCode -eq 200) {
         $RetireLeadResp = $Response | ConvertFrom-Json
         $JobId = $RetireLeadResp.'JobId'

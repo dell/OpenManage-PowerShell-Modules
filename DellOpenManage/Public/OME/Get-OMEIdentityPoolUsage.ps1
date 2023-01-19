@@ -65,7 +65,7 @@ Process {
 
         # Get Identity Pool Usage Sets
         $IdentityPoolUsageSetUrl = $BaseUri + "/api/IdentityPoolService/IdentityPools($($Id))/UsageIdentitySets"
-        $IdentityPoolUsageSetResp = Invoke-WebRequest -Uri $IdentityPoolUsageSetUrl -Method Get -Headers $Headers -ContentType $Type
+        $IdentityPoolUsageSetResp = Invoke-WebRequest -Uri $IdentityPoolUsageSetUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
         if ($IdentityPoolUsageSetResp.StatusCode -eq 200) {
             $IdentityPoolUsageSetRespData = $IdentityPoolUsageSetResp.Content | ConvertFrom-Json
             $IdentityPoolUsageSetRespData = $IdentityPoolUsageSetRespData.'value'
@@ -77,7 +77,7 @@ Process {
                 $IdentitySetName = $IdentitySet.Name
 
                 $IdentityPoolUsageDetailUrl = $BaseUri + "/api/IdentityPoolService/IdentityPools($($Id))/UsageIdentitySets($($IdentitySetId))/Details"
-                $IdentityPoolUsageDetailResp = Invoke-WebRequest -Uri $IdentityPoolUsageDetailUrl -Method Get -Headers $Headers -ContentType $Type
+                $IdentityPoolUsageDetailResp = Invoke-WebRequest -Uri $IdentityPoolUsageDetailUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
                 if ($IdentityPoolUsageDetailResp.StatusCode -eq 200) {
                     $IdentityPoolUsageDetailData = $IdentityPoolUsageDetailResp.Content | ConvertFrom-Json
                     # Loop through Details appending to object array
@@ -99,7 +99,7 @@ Process {
                     }
                     # Loop through pages until end
                     while ($NextLinkUrl) {
-                        $IdentityPoolUsageDetailNextLinkResp = Invoke-WebRequest -Uri $NextLinkUrl -Method Get -Headers $Headers -ContentType $Type
+                        $IdentityPoolUsageDetailNextLinkResp = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
                         if ($IdentityPoolUsageDetailNextLinkResp.StatusCode -eq 200) {
                             $IdentityPoolUsageDetailNextLinkData = $IdentityPoolUsageDetailNextLinkResp.Content | ConvertFrom-Json
                             # Loop through Details appending to object array

@@ -33,7 +33,7 @@ limitations under the License.
             $Headers."X-Auth-Token" = $SessionAuth.Token
             $SessionUrl = "https://$($SessionAuth.Host)/api/SessionService/Sessions('$($SessionAuth.Id)')"
             $Type = "application/json"
-            $SessResponse = Invoke-WebRequest -Uri $SessionUrl -Method Delete -Headers $Headers -ContentType $Type
+            $SessResponse = Invoke-WebRequest -Uri $SessionUrl -UseBasicParsing -Method Delete -Headers $Headers -ContentType $Type
             if ($SessResponse.StatusCode -eq 204) {
                 $Script:SessionAuth = [SessionAuth]::new()
             }

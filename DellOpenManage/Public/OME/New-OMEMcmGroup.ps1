@@ -79,7 +79,7 @@ function New-McmGroup($BaseUri, $Headers, $ContentType, $GroupName) {
     $JobId = 0
     $Payload."GroupName" = $GroupName
     $Body = $payload | ConvertTo-Json -Depth 6
-    $Response = Invoke-WebRequest -Uri $CreateGroupURL -Headers $Headers -ContentType $ContentType -Method PUT -Body $Body 
+    $Response = Invoke-WebRequest -Uri $CreateGroupURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method PUT -Body $Body 
     if ($Response.StatusCode -eq 200) {
         $GroupData = $Response | ConvertFrom-Json
         $JobId = $GroupData.'JobId'

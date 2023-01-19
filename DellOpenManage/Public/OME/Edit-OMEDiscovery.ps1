@@ -281,7 +281,7 @@ Process {
         $Payload = $Payload | ConvertTo-Json -Depth 6
         $DiscoveryId = $Discovery.Id
         $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups(" + $DiscoveryId + ")"
-        $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -Method Put -Body $Payload -Headers $Headers -ContentType $Type
+        $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Put -Body $Payload -Headers $Headers -ContentType $Type
         if ($DiscoverResponse.StatusCode -eq 200) {
             Write-Verbose "Discovering devices...."
             Start-Sleep -Seconds 10

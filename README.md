@@ -493,6 +493,84 @@ $Role = Get-OMERole -Name "chassis"
 Invoke-OMEDirectoryServiceImportGroup -DirectoryService $AD -DirectoryGroups $ADGroups -DirectoryType "AD" -UserName "Usename@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)) -Role $Role -Verbose
 ```
 
+## Directory Services (Active Directory and LDAP)
+Test AD Directory Service using Global Catalog Lookup
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
+    -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" `
+    -TestConnection -TestUserName "Username@lab.local" -TestPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Verbose
+```
+Create AD Directory Service using Global Catalog Lookup
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
+    -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local"
+```
+Create AD Directory Service using Global Catalog Lookup with Certificate Validation
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" -CertificateValidation -CertificateFile "C:\Temp\CA.cer"
+```
+Create AD Directory Service manually specifing Domain Controllers
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
+    -DirectoryServerLookup "MANUAL" -DirectoryServers @("ad1.lab.local", "ad2.lab.local") -ADGroupDomain "lab.local"
+``` 
+Create LDAP Directory Service
+```
+New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "LDAP" `
+    -DirectoryServerLookup "MANUAL" -DirectoryServers @("ldap1.lab.local", "ldap2.lab.local") `
+    -LDAPBaseDistinguishedName "dc=lab,dc=local"
+```
+Import directory group
+```
+$AD = Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL"
+$ADGroups = Get-OMEDirectoryServiceSearch -Name "Admin" -DirectoryService $AD
+$Role = Get-OMERole -Name "chassis"
+Invoke-OMEDirectoryServiceImportGroup -DirectoryService $AD -DirectoryGroups $ADGroups -DirectoryType "AD" -UserName "Usename@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)) -Role $Role -Verbose
+```
+
+
+## Services Plugin (aka Support Assist)
+Get Support cases for device by Service Tag
+```
+"C38V9T2" | Get-OMESupportAssistCase -Verbose
+```
+Export example json used to create new Support Assist group
+```
+New-OMESupportAssistGroup -ExportExampleJson 
+```
+Create new Support Assist group from file
+```
+New-OMESupportAssistGroup -AddGroup $(Get-Content "C:\Temp\Group.json" -Raw) -Verbose
+```
+Edit Support Assist group
+```
+$TestSupportAssistGroup = '{
+    "MyAccountId": "",
+    "Name": "Support Assist Group 2",
+    "Description": "Support Assist Group",
+    "DispatchOptIn": false,
+    "CustomerDetails": null,
+    "ContactOptIn":  false
+}' 
+"Support Assist Group 1" | Get-OMEGroup | Edit-OMESupportAssistGroup -EditGroup $TestSupportAssistGroup -Verbose
+```
+Add devices to Support Assist group
+```
+$devices = $("859N3L3", "759N3L3" | Get-OMEDevice -FilterBy "ServiceTag")
+"Support Assist Group 1" | Get-OMEGroup | Edit-OMESupportAssistGroup -Devices $devices -Verbose
+```
+Remove devices from Support Assist group
+```
+$devices = $("859N3L3", "759N3L3" | Get-OMEDevice -FilterBy "ServiceTag")
+"Support Assist Group 1"  | Get-OMEGroup | Edit-OMESupportAssistGroup -Mode "Remove" -Devices $devices -Verbose
+```
+Remove Support Assist group
+```
+"Support Assist Group 1" | Get-OMEGroup | Remove-OMESupportAssistGroup
+```
+Other Examples
+https://github.com/dell/OpenManage-PowerShell-Modules/blob/e8f150a122a16ab458d6cc18298ffe3ce94bf3b2/Examples/ServicesGroupCreateAddDevices.ps1
+
 ## Error Handling and Control Flow
 https://devblogs.microsoft.com/scripting/handling-errors-the-powershell-way
 ```

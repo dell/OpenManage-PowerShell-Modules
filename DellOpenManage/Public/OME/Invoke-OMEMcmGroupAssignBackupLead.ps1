@@ -73,7 +73,7 @@ function Invoke-OMEMcmGroupAssignBackupLead {
             $Body = ConvertTo-Json $TargetArray
             Write-Verbose "Invoking URL $($URL)"
             Write-Verbose "Payload $($Body)"
-            $Response = Invoke-WebRequest -Uri $URL -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
+            $Response = Invoke-WebRequest -Uri $URL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
             if ($Response.StatusCode -eq 200) {
                 $BackupLeadData = $Response | ConvertFrom-Json
                 $JobId = $BackupLeadData.'JobId'

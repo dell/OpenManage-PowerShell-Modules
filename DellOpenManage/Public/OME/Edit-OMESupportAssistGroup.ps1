@@ -131,7 +131,7 @@ Process {
             $GroupDevicePayload = $GroupDevicePayload | ConvertTo-Json -Depth 6
             Write-Verbose $GroupDevicePayload
             if ($DeviceIds.Length -gt 0) {
-                $GroupDeviceResponse = Invoke-WebRequest -Uri $GroupDeviceURL -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupDevicePayload
+                $GroupDeviceResponse = Invoke-WebRequest -Uri $GroupDeviceURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupDevicePayload
                 Write-Verbose "Updating group devices..."
                 if ($GroupDeviceResponse.StatusCode -eq 200 -or $GroupDeviceResponse.StatusCode -eq 202) {
                     Write-Verbose "Group device update successful..."
@@ -163,7 +163,7 @@ Process {
             $GroupPayload = $GroupPayload | ConvertTo-Json -Depth 6
             Write-Verbose $GroupPayload
 
-            $GroupResponse = Invoke-WebRequest -Uri $GroupURL -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupPayload
+            $GroupResponse = Invoke-WebRequest -Uri $GroupURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $GroupPayload
             Write-Verbose "Updating group..."
             if ($GroupResponse.StatusCode -eq 200 -or $GroupResponse.StatusCode -eq 202) {
                 Write-Verbose "Group update successful!"

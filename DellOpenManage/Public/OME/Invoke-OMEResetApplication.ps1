@@ -1,7 +1,7 @@
 
 function Invoke-OMEResetApplication {
 <#
-Copyright (c) 2021 Dell EMC Corporation
+Copyright (c) 2023 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,28 +18,24 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Import directory group and assign to role from directory service
+   This method resets the application. You can either reset only the configuration or clear all the data.
 
  .DESCRIPTION
    This script uses the OME REST API.
    Note that the credentials entered are not stored to disk.
-.PARAMETER DirectoryService
-    Object of type AccountProvider returned from Get-OMEDirectoryService commandlet
-.PARAMETER DirectoryGroups
-    Object of type DirectoryGroup returned from Get-OMEDirectoryServiceSearch commandlet
-.PARAMETER Role
-    Array of Objects of type Role returned from Get-OMERole commandlet
+.PARAMETER ResetType
+    Option to reset only the configuration or clear all the data. ("RESET_CONFIG", "RESET_ALL")
  .EXAMPLE
-   Invoke-OMEDirectoryServiceImportGroup -DirectoryService $(Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL") -DirectoryGroups $(Get-OMEDirectoryServiceSearch -Name "Admin" -DirectoryService $(Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL") -DirectoryType "AD" -UserName "Usename@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)) -Role $(Get-OMERole -Name "chassis") -Verbose
+   Invoke-OMEResetApplication -ResetType "RESET_ALL"
 
-   Import directory group
+   Reset all application data
 #>   
 
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
     [ValidateSet("RESET_ALL", "RESET_CONFIG")]
-    [String]$ResetType,
+    [String]$ResetType
 )
 
 Begin {}
@@ -62,6 +58,7 @@ Process {
         
         $Payload.ResetType = $ResetType
         $Payload = $Payload | ConvertTo-Json -Depth 6
+        Write-Verbose $Payload
         Write-Verbose $ResetApplicationUrl
 
         $ResetApplicationResponse = Invoke-WebRequest -Uri $ResetApplicationUrl -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $Payload

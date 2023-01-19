@@ -79,7 +79,7 @@ param(
     $SessionUrl  = "https://$($OMEHost)/api/SessionService/Sessions"
     $UserDetails = @{"UserName"=$OMEUserName;"Password"=$OMEPassword;"SessionType"="API"} | ConvertTo-Json
 
-    $SessResponse = Invoke-WebRequest -Uri $SessionUrl -Method Post -Body $UserDetails -ContentType $Type
+    $SessResponse = Invoke-WebRequest -Uri $SessionUrl -UseBasicParsing -Method Post -Body $UserDetails -ContentType $Type 
     if ($SessResponse.StatusCode -eq 200 -or $SessResponse.StatusCode -eq 201) {
         $SessResponseData = $SessResponse.Content | ConvertFrom-Json
         
@@ -89,7 +89,7 @@ param(
 
         # Get Appliance Version
         $AppInfoUrl = "https://$($OMEHost)/api/ApplicationService/Info"
-        $AppInfoResponse = Invoke-WebRequest -Uri $AppInfoUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
+        $AppInfoResponse = Invoke-WebRequest -Uri $AppInfoUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type 
         $AppVersion = [System.Version]"1.0.0"
         if ($AppInfoResponse.StatusCode -eq 200 -or $AppInfoResponse.StatusCode -eq 201) {
             $AppInfoResponseData = $AppInfoResponse.Content | ConvertFrom-Json

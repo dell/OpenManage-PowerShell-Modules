@@ -59,7 +59,7 @@ Process {
         $Members = @()
         $URL = $BaseUri + "/api/ManagementDomainService/Domains"
         $ContentType = "application/json"
-        $Response = Invoke-WebRequest -Uri $URL -Headers $Headers -ContentType $ContentType -Method GET
+        $Response = Invoke-WebRequest -Uri $URL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method GET
         if ($Response.StatusCode -eq 200) {
             $DomainResp = $Response.Content | ConvertFrom-Json
             if ($DomainResp."value".Length -gt 0) {
