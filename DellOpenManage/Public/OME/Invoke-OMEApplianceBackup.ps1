@@ -1,6 +1,6 @@
 ﻿using module ..\..\Classes\Domain.psm1
 
-function Get-BackupJobPayload($Name, $Description, $Operation, $Share, $SharePath, $ShareType, $BackupFile, $DeviceId, [SecureString] $EncryptionPassword, $UserName, [SecureString] $Password, $IncludePw, $IncludeCertificates, $ScheduleCron) {
+function Get-BackupJobPayload($Name, $Description, $Share, $SharePath, $ShareType, $BackupFile, $DeviceId, [SecureString] $EncryptionPassword, $UserName, [SecureString] $Password, $IncludePw, $IncludeCertificates, $ScheduleCron) {
     $Payload = '{
         "Id": 0,
         "JobName": "Backup Task",
@@ -8,7 +8,7 @@ function Get-BackupJobPayload($Name, $Description, $Operation, $Share, $SharePat
         "Schedule": "startnow",
         "State": "Enabled",
         "Targets": [],
-        "Params": [
+        "Params": [ 
             {
                 "Key": "includePasswords",
                 "Value": "false"
@@ -30,12 +30,12 @@ function Get-BackupJobPayload($Name, $Description, $Operation, $Share, $SharePat
                 "Value": "CIFS/NFS"
             },
             {
-                "Key": "device_id",
-                "Value": "<Chassis ID>"
-            },
-            {
                 "Key": "shareAddress",
                 "Value": "<IP Address>"
+            },
+            {
+                "Key": "device_id",
+                "Value": "<Chassis ID>"
             },
             {
                 "Key": "encryption_password",
@@ -48,10 +48,14 @@ function Get-BackupJobPayload($Name, $Description, $Operation, $Share, $SharePat
             {
                 "Key": "password",
                 "Value": "<Share user password>"
-            }
+            },
+            {
+                "Key": "verifyCert",
+                "Value": "false"
+            }               
         ],
         "JobType": {
-            "Id": 21,
+            "Id": 106,
             "Name": "Appliance_Backup_Task",
             "Internal": false
         }
@@ -60,73 +64,36 @@ function Get-BackupJobPayload($Name, $Description, $Operation, $Share, $SharePat
     $Payload.JobName = $Name
     $Payload.JobDescription = $Description
     $Payload.Schedule = $ScheduleCron
-    if ($Operation -eq "BACKUP") {
-        $Payload.JobType.Id = 106
-        $Payload.JobType.Name = "Appliance_Backup_Task"
+    $ParamsHashValMap = @{
+        "shareName" = $SharePath
+        "backup_filename" = $BackupFile
+        "shareType" = $ShareType
+        "shareAddress" = $Share
+        "device_id" = $DeviceId.ToString()
+        "userName" =  $UserName
+        "password" = if ($Password) {
+            $PasswordText = (New-Object PSCredential "user", $Password).GetNetworkCredential().Password
+            $PasswordText
+        }
+        "encryption_password" = if ($EncryptionPassword) {
+            $EncryptionPasswordText = (New-Object PSCredential "user", $EncryptionPassword).GetNetworkCredential().Password
+            $EncryptionPasswordText
+        }
+        "includePasswords" = $(if ($IncludePw) { "true" } else { "false"})
+        "includeCertificates" = $(if ($IncludeCertificates) { "true" } else { "false"})
     }
-    if ($Operation -eq "RESTORE") {
-        $Payload.JobType.Id = 107
-        $Payload.JobType.Name = "Appliance_Restore_Task"
-    }
-    # Update Params
+
+    # Update Params from ParamsHashValMap
     for ($i = 0; $i -le $Payload.'Params'.Length; $i++) {
-        if ($Payload.'Params'[$i].'Key' -eq 'shareName') {
-            if ($SharePath) {
-                $Payload.'Params'[$i].'Value' = $SharePath
-            }
-        }
-        if ($Payload.'Params'[$i].'Key' -eq 'backup_filename') {
-            if ($BackupFile) {
-                $Payload.'Params'[$i].'Value' = $BackupFile
-            }
-        }
-        if ($Payload.'Params'[$i].'Key' -eq 'shareType') {
-            if ($ShareType) {
-                $Payload.'Params'[$i].'Value' = $ShareType
-            }
-        }
-        if ($Payload.'Params'[$i].'Key' -eq 'device_id') {
-            if ($DeviceId) {
-                $Payload.'Params'[$i].'Value' = $DeviceId.ToString()
-            }
-        }
-        if ($Payload.'Params'[$i].'Key' -eq 'shareAddress') {
-            if ($Share) {
-                $Payload.'Params'[$i].'Value' = $Share
-            }
-        }
-        if ($Payload.'Params'[$i].'Key' -eq 'encryption_password') {
-            if ($EncryptionPassword) {
-                $EncryptionPasswordText = (New-Object PSCredential "user", $EncryptionPassword).GetNetworkCredential().Password
-                $Payload.'Params'[$i].'Value' = $EncryptionPasswordText
-            }
-        }
-        if ($Payload.'Params'[$i].'Key' -eq 'userName') {
-            if ($UserName) {    
-                $Payload.'Params'[$i].'Value' = $UserName
-            }
-        }
-        if ($Payload.'Params'[$i].'Key' -eq 'password') {
-            if ($Password) {
-                $PasswordText = (New-Object PSCredential "user", $Password).GetNetworkCredential().Password
-                $Payload.'Params'[$i].'Value' = $PasswordText
-            }
-        }
-        if ($Payload.'Params'[$i].'Key' -eq 'includePasswords') {
-            if ($IncludePw) {
-                $Payload.'Params'[$i].'Value' = "true"
-            }
-        }
-        if ($Payload.'Params'[$i].'Key' -eq 'includeCertificates') {
-            if ($IncludeCertificates) {
-                $Payload.'Params'[$i].'Value' = "true"
-            }
+        if ($ParamsHashValMap.Keys -Contains ($Payload.'Params'[$i].'Key')) {
+            $value = $Payload.'Params'[$i].'Key'
+            $Payload.'Params'[$i].'Value' = $ParamsHashValMap.$value
         }
     }
     return $payload
-}
+} 
 
-function Invoke-OMEApplianceBackupRestore {
+function Invoke-OMEApplianceBackup {
 <#
 Copyright (c) 2018 Dell EMC Corporation
 
@@ -145,9 +112,9 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Appliance backup/restore to file on network share
+    Appliance backup to file on network share. Restore must be performed in OME-M at this time.
 .DESCRIPTION
-    Backup or restore appliance to a file on a network share
+    Backup appliance to a file on a network share
 .PARAMETER Name
     Name of the job
 .PARAMETER Description
@@ -162,8 +129,6 @@ limitations under the License.
     Share directory path
 .PARAMETER ShareType
     Share type ("NFS", Default="CIFS", "HTTP", "HTTPS")
-.PARAMETER Operation
-    Operation to perform (Default="BACKUP", "RESTORE")
 .PARAMETER BackupFile
     Backup file name, .bin is automatically appended to file name. Default=BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))
 .PARAMETER Chassis
@@ -183,11 +148,11 @@ limitations under the License.
 .INPUTS
     None
 .EXAMPLE
-    Invoke-OMEApplianceBackupRestore -Chassis @("LEAD" | Get-OMEMXDomain | Select-Object -First 1) -Share "192.168.1.100" -SharePath "/SHARE" -ShareType "CIFS" -UserName "Administrator" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Operation "BACKUP" -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
+    Invoke-OMEApplianceBackup -Chassis @("LEAD" | Get-OMEMXDomain | Select-Object -First 1) -Share "192.168.1.100" -SharePath "/SHARE" -ShareType "CIFS" -UserName "Administrator" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
 
     Backup chassis to CIFS share now
 .EXAMPLE
-    Invoke-OMEApplianceBackupRestore -Chassis  @("LEAD" | Get-OMEMXDomain | Select-Object -First 1) -Share "192.168.1.100" -SharePath "/mnt/data/backup" -ShareType "NFS" -Operation "BACKUP" -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -ScheduleCron '0 0 0 ? * sun *' -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
+    Invoke-OMEApplianceBackup -Chassis  @("LEAD" | Get-OMEMXDomain | Select-Object -First 1) -Share "192.168.1.100" -SharePath "/mnt/data/backup" -ShareType "NFS" -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -ScheduleCron '0 0 0 ? * sun *' -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
     
     Backup chassis to NFS share on schedule
 #>
@@ -215,10 +180,6 @@ param(
     [Parameter(Mandatory=$false)]
     [ValidateSet("NFS", "CIFS", "HTTP", "HTTPS")]
     [String]$ShareType = "CIFS",
-
-    [Parameter(Mandatory=$false)]
-    [ValidateSet("BACKUP", "RESTORE")]
-    [String]$Operation = "BACKUP",
 
     [Parameter(Mandatory=$false)]
     [String]$BackupFile = "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))",
@@ -265,7 +226,7 @@ Process {
         $DeviceIds = @()
         if ($null -ne $Chassis.DeviceId -and $Chassis.DeviceId -ne 0) {
             $DeviceIds += $Chassis.DeviceId
-            $JobPayload = Get-BackupJobPayload -Name $Name -Description $Description -Operation $Operation `
+            $JobPayload = Get-BackupJobPayload -Name $Name -Description $Description `
                 -Share $Share -SharePath $SharePath -ShareType $ShareType `
                 -BackupFile $BackupFile -DeviceId $Chassis.DeviceId -EncryptionPassword $EncryptionPassword `
                 -UserName $UserName -Password $Password -ScheduleCron $ScheduleCron `
@@ -279,7 +240,7 @@ Process {
                 Write-Verbose "Job creation successful..."
                 $JobInfo = $JobResp.Content | ConvertFrom-Json
                 $JobId = $JobInfo.Id
-                Write-Verbose "Created job $($JobId) to create appliance backup..."
+                Write-Verbose "Created job $($JobId) for application backup..."
                 if ($Wait) {
                     $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
                     return $JobStatus

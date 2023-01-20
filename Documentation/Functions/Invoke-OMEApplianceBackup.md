@@ -5,30 +5,39 @@ online version:
 schema: 2.0.0
 ---
 
-# Invoke-OMEApplianceBackupRestore
+# Invoke-OMEApplianceBackup
 
 ## SYNOPSIS
-Appliance backup/restore to file on network share
+Appliance backup to file on network share.
+Restore must be performed in OME-M at this time.
 
 ## SYNTAX
 
 ```
-Invoke-OMEApplianceBackupRestore [[-Name] <String>] [[-Description] <String>] [-IncludePasswords]
- [-IncludeCertificates] [-Share] <String> [-SharePath] <String> [[-ShareType] <String>] [[-Operation] <String>]
- [[-BackupFile] <String>] [-Chassis] <Domain[]> [[-Username] <String>] [[-Password] <SecureString>]
- [-EncryptionPassword] <SecureString> [[-ScheduleCron] <String>] [-Wait] [[-WaitTime] <Int32>]
- [<CommonParameters>]
+Invoke-OMEApplianceBackup [[-Name] <String>] [[-Description] <String>] [-IncludePw] [-IncludeCertificates]
+ [-Share] <String> [-SharePath] <String> [[-ShareType] <String>] [[-BackupFile] <String>] [-Chassis] <Domain[]>
+ [[-UserName] <String>] [[-Password] <SecureString>] [-EncryptionPassword] <SecureString>
+ [[-ScheduleCron] <String>] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Backup or restore appliance to a file on a network share
+Backup appliance to a file on a network share
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-
+Invoke-OMEApplianceBackup -Chassis @("LEAD" | Get-OMEMXDomain | Select-Object -First 1) -Share "192.168.1.100" -SharePath "/SHARE" -ShareType "CIFS" -UserName "Administrator" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
 ```
+
+Backup chassis to CIFS share now
+
+### EXAMPLE 2
+```
+Invoke-OMEApplianceBackup -Chassis  @("LEAD" | Get-OMEMXDomain | Select-Object -First 1) -Share "192.168.1.100" -SharePath "/mnt/data/backup" -ShareType "NFS" -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -ScheduleCron '0 0 0 ? * sun *' -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
+```
+
+Backup chassis to NFS share on schedule
 
 ## PARAMETERS
 
@@ -48,7 +57,7 @@ Accept wildcard characters: False
 ```
 
 ### -Description
-{{ Fill Description Description }}
+Job description
 
 ```yaml
 Type: String
@@ -62,8 +71,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -IncludePasswords
-{{ Fill IncludePasswords Description }}
+### -IncludePw
+Include passwords in backup
 
 ```yaml
 Type: SwitchParameter
@@ -78,7 +87,7 @@ Accept wildcard characters: False
 ```
 
 ### -IncludeCertificates
-{{ Fill IncludeCertificates Description }}
+Include certificates in backup
 
 ```yaml
 Type: SwitchParameter
@@ -93,7 +102,7 @@ Accept wildcard characters: False
 ```
 
 ### -Share
-{{ Fill Share Description }}
+Share host IP address or hostname
 
 ```yaml
 Type: String
@@ -108,7 +117,7 @@ Accept wildcard characters: False
 ```
 
 ### -SharePath
-{{ Fill SharePath Description }}
+Share directory path
 
 ```yaml
 Type: String
@@ -123,7 +132,7 @@ Accept wildcard characters: False
 ```
 
 ### -ShareType
-{{ Fill ShareType Description }}
+Share type ("NFS", Default="CIFS", "HTTP", "HTTPS")
 
 ```yaml
 Type: String
@@ -137,8 +146,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Operation
-{{ Fill Operation Description }}
+### -BackupFile
+Backup file name, .bin is automatically appended to file name.
+Default=BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))
 
 ```yaml
 Type: String
@@ -147,28 +157,14 @@ Aliases:
 
 Required: False
 Position: 6
-Default value: BACKUP
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -BackupFile
-{{ Fill BackupFile Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
 Default value: "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))"
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -Chassis
-{{ Fill Chassis Description }}
+Lead or standalone chassis to backup or restore to.
+Object of type Domain returned from Get-OMEMXDomain
 
 ```yaml
 Type: Domain[]
@@ -176,17 +172,34 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UserName
+Used for CIFS .
+Username to connect to share
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
 Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Username
-{{ Fill Username Description }}
+### -Password
+Used for CIFS .
+Password to connect to share
 
 ```yaml
-Type: String
+Type: SecureString
 Parameter Sets: (All)
 Aliases:
 
@@ -197,23 +210,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Password
-{{ Fill Password Description }}
-
-```yaml
-Type: SecureString
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 10
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -EncryptionPassword
-{{ Fill EncryptionPassword Description }}
+Password used to encrypt backup
 
 ```yaml
 Type: SecureString
@@ -221,14 +219,15 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 11
+Position: 10
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -ScheduleCron
-{{ Fill ScheduleCron Description }}
+Specify cron string to schedule the job in the future.
+Leave out to run now.
 
 ```yaml
 Type: String
@@ -236,7 +235,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 12
+Position: 11
 Default value: Startnow
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -266,7 +265,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 13
+Position: 12
 Default value: 80
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -277,7 +276,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### Device
+### None
 ## OUTPUTS
 
 ## NOTES

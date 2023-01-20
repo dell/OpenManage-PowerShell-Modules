@@ -528,14 +528,14 @@ $Role = Get-OMERole -Name "chassis"
 Invoke-OMEDirectoryServiceImportGroup -DirectoryService $AD -DirectoryGroups $ADGroups -DirectoryType "AD" -UserName "Usename@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)) -Role $Role -Verbose
 ```
 
-## Backup/Restore
+## Backup (Restore must be performed in OME-M at this time)
 Backup chassis to CIFS share now
 ```
 $MXChassis = @("LEAD" | Get-OMEMXDomain | Select-Object -First 1)
 
-Invoke-OMEApplianceBackupRestore -Chassis $MXChassis -Share "192.168.1.100" -SharePath "/SHARE" -ShareType "CIFS" `
+Invoke-OMEApplianceBackup -Chassis $MXChassis -Share "192.168.1.100" -SharePath "/SHARE" -ShareType "CIFS" `
     -UserName "Administrator" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) `
-    -Operation "BACKUP" -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" `
+    -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" `
     -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
 ```
 
@@ -543,8 +543,8 @@ Backup chassis to NFS share now
 ```
 $MXChassis = @("LEAD" | Get-OMEMXDomain | Select-Object -First 1)
 
-Invoke-OMEApplianceBackupRestore -Chassis $MXChassis -Share "192.168.1.100" -SharePath "/mnt/data/backup" -ShareType "NFS" `
-    -Operation "BACKUP" -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" `
+Invoke-OMEApplianceBackup -Chassis $MXChassis -Share "192.168.1.100" -SharePath "/mnt/data/backup" -ShareType "NFS" `
+    -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" `
     -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
 ```
 
@@ -552,8 +552,8 @@ Backup chassis to NFS share on schedule every Sunday at 12:00AM UTC
 ```
 $MXChassis = @("LEAD" | Get-OMEMXDomain | Select-Object -First 1)
 
-Invoke-OMEApplianceBackupRestore -Chassis $MXChassis -Share "192.168.1.100" -SharePath "/mnt/data/backup" -ShareType "NFS" `
-    -Operation "BACKUP" -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -ScheduleCron '0 0 0 ? * sun *' `
+Invoke-OMEApplianceBackup -Chassis $MXChassis -Share "192.168.1.100" -SharePath "/mnt/data/backup" -ShareType "NFS" `
+    -BackupFile "BACKUP_$((Get-Date).ToString('yyyyMMddHHmmss'))" -ScheduleCron '0 0 0 ? * sun *' `
     -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
 ```
 
