@@ -71,14 +71,14 @@ function Get-BackupJobPayload($Name, $Description, $Share, $SharePath, $ShareTyp
         "shareAddress" = $Share
         "device_id" = $DeviceId.ToString()
         "userName" =  $UserName
-        "password" = if ($Password) {
+        "password" = $(if ($Password) {
             $PasswordText = (New-Object PSCredential "user", $Password).GetNetworkCredential().Password
             $PasswordText
-        }
-        "encryption_password" = if ($EncryptionPassword) {
+        })
+        "encryption_password" = $(if ($EncryptionPassword) {
             $EncryptionPasswordText = (New-Object PSCredential "user", $EncryptionPassword).GetNetworkCredential().Password
             $EncryptionPasswordText
-        }
+        })
         "includePasswords" = $(if ($IncludePw) { "true" } else { "false"})
         "includeCertificates" = $(if ($IncludeCertificates) { "true" } else { "false"})
     }
