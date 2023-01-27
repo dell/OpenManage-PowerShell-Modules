@@ -1,4 +1,58 @@
 
+function Get-McmGroupPayload($Name, $Description, $JoinApproval, $VIPIPv4Address, $VIPSubnetMask, $VIPGateway) {
+    $Payload = '{
+        "GroupName": "",
+        "GroupDescription": "",
+        "JoinApproval": "AUTOMATIC",
+        "ConfigReplication": [{
+            "ConfigType": "Power",
+            "Enabled": "true"
+        }, {
+            "ConfigType": "UserAuthentication",
+            "Enabled": "true"
+        }, {
+            "ConfigType": "AlertDestinations",
+            "Enabled": "true"
+        }, {
+            "ConfigType": "TimeSettings",
+            "Enabled": "true"
+        }, {
+            "ConfigType": "ProxySettings",
+            "Enabled": "true"
+        }, {
+            "ConfigType": "SecuritySettings",
+            "Enabled": "true"
+        }, {
+            "ConfigType": "NetworkServices",
+            "Enabled": "true"
+        }, {
+            "ConfigType": "LocalAccessConfiguration",
+            "Enabled": "true"
+        }]
+    }' | ConvertFrom-Json
+
+    $VirtualIPConfiguration = '{
+        "Ipv4": {
+            "StaticIPAddress":"10.35.155.155",
+            "SubnetMask":"255.255.255.32",
+            "Gateway":"10.35.2.1"
+        }
+    }' | ConvertFrom-Json
+
+    $Payload.GroupName = $Name
+    $Payload.GroupDescription = $Description
+    $Payload.JoinApproval = $JoinApproval
+
+    if ($null -ne $VIPIPv4Address -and $VIPIPv4Address -ne "") {
+        $VirtualIPConfiguration.Ipv4.StaticIPAddress = $VIPIPv4Address
+        $VirtualIPConfiguration.Ipv4.SubnetMask = $VIPSubnetMask
+        $VirtualIPConfiguration.Ipv4.Gateway = $VIPGateway
+        $Payload | Add-Member -NotePropertyName VirtualIPConfiguration -NotePropertyValue $VirtualIPConfiguration
+    }
+    $Payload = $Payload | ConvertTo-Json -Depth 6
+    return $Payload
+}
+
 function New-OMEMcmGroup {
 <#
 _author_ = Vittalareddy Nanjareddy <vittalareddy_nanjare@Dell.com>
@@ -35,7 +89,23 @@ limitations under the License.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [String] $GroupName,
+    [String] $Name,
+
+    [Parameter(Mandatory=$false)]
+    [String] $Description,
+
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Automatic", "Manual")]
+    [String]$JoinApproval = "Automatic",
+
+    [Parameter(Mandatory=$false)]
+    [String] $VIPIPv4Address,
+    
+    [Parameter(Mandatory=$false)]
+    [String] $VIPSubnetMask,
+
+    [Parameter(Mandatory=$false)]
+    [String] $VIPGateway,
 
     [Parameter(Mandatory=$false)]
     [Switch]$Wait,
@@ -43,54 +113,6 @@ param(
     [Parameter(Mandatory=$false)]
     [int]$WaitTime = 3600
 )
-function New-McmGroup($BaseUri, $Headers, $ContentType, $GroupName) {
-    $CreateGroupURL = $BaseUri + "/api/ManagementDomainService"
-    $payload = '{
-        "GroupName": "",
-        "GroupDescription": "",
-        "JoinApproval": "AUTOMATIC",
-        "ConfigReplication": [{
-            "ConfigType": "Power",
-            "Enabled": "true"
-        }, {
-            "ConfigType": "UserAuthentication",
-            "Enabled": "true"
-        }, {
-            "ConfigType": "AlertDestinations",
-            "Enabled": "true"
-        }, {
-            "ConfigType": "TimeSettings",
-            "Enabled": "true"
-        }, {
-            "ConfigType": "ProxySettings",
-            "Enabled": "true"
-        }, {
-            "ConfigType": "SecuritySettings",
-            "Enabled": "true"
-        }, {
-            "ConfigType": "NetworkServices",
-            "Enabled": "true"
-        }, {
-            "ConfigType": "LocalAccessConfiguration",
-            "Enabled": "true"
-        }]
-    }' | ConvertFrom-Json
-
-    $JobId = 0
-    $Payload."GroupName" = $GroupName
-    $Body = $payload | ConvertTo-Json -Depth 6
-    $Response = Invoke-WebRequest -Uri $CreateGroupURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method PUT -Body $Body 
-    if ($Response.StatusCode -eq 200) {
-        $GroupData = $Response | ConvertFrom-Json
-        $JobId = $GroupData.'JobId'
-        Write-Verbose "MCM group created successfully...JobId is $($JobId)"
-    }
-    else {
-        Write-Warning "Failed to create MCM group"
-    }
-
-    return $JobId
-}
 
 ## Script that does the work
 if (!$(Confirm-IsAuthenticated)){
@@ -104,11 +126,27 @@ Try {
     $Headers."X-Auth-Token" = $SessionAuth.Token
     $ContentType = "application/json"
 
+    if ($null -ne $VIPIPv4Address -and $VIPIPv4Address -ne "") {
+        if ($null -eq $VIPSubnetMask) { throw [System.ArgumentNullException] "VIPSubnetMask when specifing VIPIPv4Address" }
+        if ($null -eq $VIPGateway) { throw [System.ArgumentNullException] "VIPGateway when specifing VIPIPv4Address" }
+    }
+
     # Create mcm group
     $JobId = 0
     Write-Verbose "Creating mcm group"
-    $JobId = New-McmGroup -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -GroupName $GroupName
-    if ($JobId) {
+    $McmGroupPayload = Get-McmGroupPayload -Name $Name -Description $Description -JoinApproval $JoinApproval -VIPIPv4Address $VIPIPv4Address -VIPSubnetMask $VIPSubnetMask -VIPGateway $VIPGateway
+    Write-Verbose $McmGroupPayload
+    $CreateGroupURL = $BaseUri + "/api/ManagementDomainService"
+    $Response = Invoke-WebRequest -Uri $CreateGroupURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method PUT -Body $McmGroupPayload 
+    if ($Response.StatusCode -eq 200) {
+        $GroupData = $Response | ConvertFrom-Json
+        $JobId = $GroupData.JobId
+        Write-Verbose "MCM group created successfully...JobId is $($JobId)"
+    }
+    else {
+        Write-Warning "Failed to create MCM group"
+    }
+    if ($JobId -ne 0) {
         Write-Verbose "Created job $($JobId) to create mcm group ... Polling status now"
         if ($Wait) {
             $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
