@@ -1,6 +1,6 @@
 ﻿using module ..\..\Classes\Device.psm1
 
-function Get-PortBreakoutPayload($Name, $TargetPayload, $BreakoutType, $Ports) {
+function Get-PortBreakoutPayload($Name, $TargetPayload, $BreakoutType, $PortGroups) {
     $Payload = '{
         "JobName": "Breakout Port",
         "JobDescription": null,
@@ -42,7 +42,7 @@ function Get-PortBreakoutPayload($Name, $TargetPayload, $BreakoutType, $Ports) {
 
     $ParamsHashValMap = @{
         "breakoutType" = $BreakoutType
-        "interfaceId" = $Ports
+        "interfaceId" = $PortGroups
     }
 
     # Update Params from ParamsHashValMap
@@ -58,7 +58,7 @@ function Get-PortBreakoutPayload($Name, $TargetPayload, $BreakoutType, $Ports) {
 
 function Set-OMEIOMPortBreakout {
 <#
-Copyright (c) 2018 Dell EMC Corporation
+Copyright (c) 2023 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -75,18 +75,37 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Refresh inventory on devices in OpenManage Enterprise
+    Configure port breakout on IOM devices
 .DESCRIPTION
-    This will submit a job to refresh the inventory on provided Devices.
+    Only supports configuring 1 IOM device per execution but multiple port groups can be configured with the same BreakoutType.
 .PARAMETER Name
-    Name of the inventory refresh job
-.PARAMETER Devices
-    Array of type Device returned from Get-OMEDevice function.
+    Name of the configure port breakout job
+.PARAMETER Device
+    Object of type Device returned from Get-OMEDevice function. Only supports configuring 1 device per execution.
+.PARAMETER BreakoutType
+    String specifing the breakout type. ("4X25GE","2X50GE","4X10GE","4X1GE","1X40GE","1X100GE","4X16GFC","4X32GFC","2X32GFC","4X8GFC","1X32GFC","HardwareDefault")
+.PARAMETER PortGroups
+    Comma delimited string specifing the port group(s) to configure.
+.PARAMETER RefreshInventory
+    Refresh IOM device inventory upon job completion. Required to update the OME-M UI with changes to port breakout. Requires -Wait parameter to be specified.
+.PARAMETER Wait
+    Wait for job to complete
+.PARAMETER WaitTime
+    Time, in seconds, to wait for the job to complete
 .INPUTS
-    Device
+    None
 .EXAMPLE
-    "PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Invoke-OMEInventoryRefresh -Verbose
-    Create separate inventory refresh job for each device in list
+    Set-OMEIOMPortBreakout -Device $("C38S9T2" | Get-OMEDevice) -BreakoutType "4X10GE" -PortGroups "port-group1/1/13" -Wait -Verbose
+
+    Configure port for 4 x 10GE breakout and wait for job to complete
+.EXAMPLE
+    Set-OMEIOMPortBreakout -Device $("C38S9T2" | Get-OMEDevice) -BreakoutType "4X10GE" -PortGroups "port-group1/1/13" -Wait -RefreshInventory -Verbose
+
+    Configure port for 4 x 10GE breakout, wait for job to complete and refresh device inventory upon completion.
+.EXAMPLE
+    Set-OMEIOMPortBreakout -Device $("C38S9T2" | Get-OMEDevice) -BreakoutType "4X8GFC" -PortGroups "port-group1/1/15,port-group1/1/16" -Verbose
+    
+    Configure multiple ports for 4 x 8G FC
 #>
 
 [CmdletBinding()]
@@ -102,7 +121,16 @@ param(
     [String]$BreakoutType,
 
     [Parameter(Mandatory)]
-    [String] $Ports
+    [String] $PortGroups,
+
+    [Parameter(Mandatory=$false)]
+    [Switch]$RefreshInventory,
+
+    [Parameter(Mandatory=$false)]
+    [Switch]$Wait,
+
+    [Parameter(Mandatory=$false)]
+    [int]$WaitTime = 3600
 )
 
 Begin {}
@@ -120,26 +148,30 @@ Process {
         $DeviceIds = @()
         $DeviceIds += $Device.Id
         $TargetPayload = Get-JobTargetPayload $DeviceIds
-        $PortSplit = $Ports.Split(",")
-        $PortsParam = @()
+        $PortSplit = $PortGroups.Split(",")
+        $PortGroupsParam = @()
         foreach ($Port in $PortSplit) {
-            $PortsParam += "$($Device.DeviceServiceTag):$($Port)"
+            $PortGroupsParam += "$($Device.DeviceServiceTag):$($Port)"
         }
-        $JobPayload = Get-PortBreakoutPayload -Name $Name -TargetPayload $TargetPayload -BreakoutType $BreakoutType -Ports $($PortsParam -join ",")
+        $JobPayload = Get-PortBreakoutPayload -Name $Name -TargetPayload $TargetPayload -BreakoutType $BreakoutType -PortGroups $($PortGroupsParam -join ",")
         # Submit job
         $JobURL = $BaseUri + "/api/JobService/Jobs"
         $JobPayload = $JobPayload | ConvertTo-Json -Depth 6
         Write-Verbose $JobPayload
         $JobResp = Invoke-WebRequest -Uri $JobURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $JobPayload
         if ($JobResp.StatusCode -eq 201) {
-            Write-Verbose "Job creation successful..."
             $JobInfo = $JobResp.Content | ConvertFrom-Json
             $JobId = $JobInfo.Id
-            Write-Verbose "Waiting for job $($JobId) to set port breakout until completion..."
-            $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
-            Write-Verbose "Submitting inventory refresh job"
-            $Device | Invoke-OMEInventoryRefresh -Wait
-            return $JobStatus
+            Write-Verbose "Job $($JobId) created successful..."
+            if ($Wait) {
+                $JobStatus = $($JobId | Wait-OnJob -WaitTime $WaitTime)
+                if ($JobStatus -eq "Completed" -and $RefreshInventory) {
+                    $JobStatus = $($Device | Invoke-OMEInventoryRefresh -Wait)
+                }
+                return $JobStatus
+            } else {
+                return $JobId
+            }
         }
         else {
             Write-Error "Job creation failed"
