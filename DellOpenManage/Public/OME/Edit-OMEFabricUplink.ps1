@@ -2,11 +2,13 @@ using module ..\..\Classes\Fabric.psm1
 using module ..\..\Classes\Uplink.psm1
 using module ..\..\Classes\Network.psm1
 
-function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $NetworkIds, $UplinkFailureDetection, $Uplink, $Mode) {
+function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $NetworkIds, $UnTaggedNetwork, $UplinkFailureDetection, $Uplink, $Mode) {
     $Payload = '{
+        "Id": "",
         "Name": "Uplink_Ethernet_Fabric-B",
         "Description": "Ethernet Uplink created from REST.",
         "MediaType": "Ethernet",
+        "NativeVLAN": 0,
         "UfdEnable":"Disabled",
         "Ports": [
             {
@@ -23,6 +25,8 @@ function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $N
         ]
     }' | ConvertFrom-Json
 
+    $Payload.Id = $Uplink.Id
+    $Payload.NativeVLAN = $Uplink.NativeVLAN
     # The API requires that we rebuild the payload from the existing values. You can't make a partial update.
     # Only update attributes if value provided, otherwise set them to the existing value. 
     if ($Name) {
@@ -43,11 +47,21 @@ function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $N
         $Payload.UfdEnable = "Enabled"
     }
 
+    if ($null -eq $UnTaggedNetwork) {
+        $Payload.NativeVLAN = $Uplink.NativeVLAN
+    } else {
+        $Payload.NativeVLAN = $UnTaggedNetwork.VlanMaximum
+    }
+
     $PortList = [System.Collections.ArrayList]@()
     # Split $Ports into array by comma and trim whitespace
-    $PortSplit = $($Ports.Split(",") | % { $_.Trim() })
+    $PortSplit = @()
+    if ($Ports) {
+        $PortSplit = $($Ports.Split(",") | % { $_.Trim() })
+    }
     $NetworkList = [System.Collections.ArrayList]@()
     if ($Mode -eq "Append") {
+        Write-Host $PortSplit.Count
         if ($PortSplit.Count -gt 0) {
             $PortList += $Uplink.Ports
             # Check to make sure we aren't adding a duplicate
@@ -64,8 +78,8 @@ function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $N
             $NetworkList += $Uplink.Networks
             # Check to make sure we aren't adding a duplicate
             foreach ($Nv in $NetworkIds) {
-                if (-not ($NetworkList -contains [String]$Nv)) {
-                    $NetworkList += [String]$Nv
+                if (-not ($NetworkList -contains $Nv)) {
+                    $NetworkList += $Nv
                 }
             }
         } else {
@@ -97,8 +111,8 @@ function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $N
         $NetworkList = [System.Collections.ArrayList]$Uplink.Networks
         if ($NetworkIds.Count -gt 0) {
             foreach ($Nv in $NetworkIds) {
-                if ($NetworkList -contains [String]$Nv) {
-                    $NetworkList.Remove([String]$Nv)
+                if ($NetworkList -contains $Nv) {
+                    $NetworkList.Remove($Nv)
                 }
             }
         } 
@@ -121,7 +135,7 @@ function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $N
         $NetworkPayload = '{
             "Id": ""
         }' | ConvertFrom-Json
-        $NetworkPayload.Id = [String]$NetworkId
+        $NetworkPayload.Id = $NetworkId
         $NetworkPayloads += $NetworkPayload
     }
 
@@ -187,6 +201,9 @@ param(
     [Network[]] $TaggedNetworks,
 
     [Parameter(Mandatory=$false)]
+    [Network] $UnTaggedNetwork,
+
+    [Parameter(Mandatory=$false)]
 	[ValidateSet("Append", "Replace", "Remove")]
     [String] $Mode
 )
@@ -207,24 +224,24 @@ Try {
     foreach ($Network in $TaggedNetworks) {
         $TaggedNetworkIds += $Network.Id
     }
+    if ($TaggedNetworkIds.Length -gt 0) {
+        if ($null -eq $Mode) { throw [System.ArgumentNullException] "Mode parameter required when specifing -TaggedNetworks" }
+    }
     Write-Verbose "Updating fabric uplink"
     $FabricPayload = Get-FabricUplinkEditPayload -Name $Name -Description $Description -MediaType $UplinkType `
-        -Ports $Ports -NetworkIds $TaggedNetworkIds -UplinkFailureDetection $UplinkFailureDetection `
+        -Ports $Ports -NetworkIds $TaggedNetworkIds -UnTaggedNetwork $UnTaggedNetwork -UplinkFailureDetection $UplinkFailureDetection `
         -Uplink $Uplink -Mode $Mode
     Write-Verbose $FabricPayload
-    $CreateFabricUplinkURL = $BaseUri + "/api/NetworkService/Fabrics('$($Fabric.Id)')/Uplinks"
+    $CreateFabricUplinkURL = $BaseUri + "/api/NetworkService/Fabrics('$($Fabric.Id)')/Uplinks('$($Uplink.Id)')"
     Write-Verbose $CreateFabricUplinkURL
-    <#
-    $Response = Invoke-WebRequest -Uri $CreateFabricUplinkURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $FabricPayload 
+    $Response = Invoke-WebRequest -Uri $CreateFabricUplinkURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method PUT -Body $FabricPayload 
     if ($Response.StatusCode -in 200, 201) {
-        $UplinkId = $Response.Content | ConvertFrom-Json
+        #$UplinkId = $Response.Content | ConvertFrom-Json
         Write-Verbose "Updated fabric uplink successfully..."
-        return $UplinkId
     }
     else {
         Write-Warning "Failed to update fabric uplink"
     }
-    #>
 }
 catch {
     Resolve-Error $_

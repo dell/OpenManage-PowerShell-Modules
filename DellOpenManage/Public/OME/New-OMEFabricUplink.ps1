@@ -1,11 +1,12 @@
 using module ..\..\Classes\Fabric.psm1
 using module ..\..\Classes\Network.psm1
 
-function Get-FabricUplinkPayload($Name, $Description, $MediaType, $Ports, $NetworkIds, $UplinkFailureDetection) {
+function Get-FabricUplinkPayload($Name, $Description, $MediaType, $Ports, $NetworkIds, $UnTaggedNetwork, $UplinkFailureDetection) {
     $Payload = '{
         "Name": "Uplink_Ethernet_Fabric-B",
         "Description": "Ethernet Uplink created from REST.",
         "MediaType": "Ethernet",
+        "NativeVLAN": 0,
         "UfdEnable":"Disabled",
         "Ports": [
             {
@@ -25,19 +26,27 @@ function Get-FabricUplinkPayload($Name, $Description, $MediaType, $Ports, $Netwo
     $Payload.Name = $Name
     $Payload.Description = $Description
     $Payload.MediaType = $MediaType
+    if ($null -eq $UnTaggedNetwork) {
+        $Payload.NativeVLAN = 0
+    } else {
+        $Payload.NativeVLAN = $UnTaggedNetwork.VlanMaximum
+    }
     
     if ($UplinkFailureDetection) {
         $Payload.UfdEnable = "Enabled"
     }
 
     $PortPayloads = @()
-    $Ports = $Ports.Split(",")
-    foreach ($Port in $Ports) {
+    $PortSplit = @()
+    if ($null -ne $Ports) {
+        $PortSplit = $($Ports.Split(",") | % { $_.Trim() })
+    }
+    foreach ($Port in $PortSplit) {
         if ($Port -ne "") {
             $PortPayload = '{
                 "Id": ""
             }' | ConvertFrom-Json
-            $PortPayload.Id = $Port.Trim()
+            $PortPayload.Id = $Port
             $PortPayloads += $PortPayload
         }
     }
@@ -111,7 +120,10 @@ param(
     [String] $Ports,
     
     [Parameter(Mandatory=$false)]
-    [Network[]] $TaggedNetworks
+    [Network[]] $TaggedNetworks,
+
+    [Parameter(Mandatory=$false)]
+    [Network] $UnTaggedNetwork
 )
 
 ## Script that does the work
@@ -131,7 +143,8 @@ Try {
         $TaggedNetworkIds += $Network.Id
     }
     Write-Verbose "Creating fabric uplink"
-    $FabricPayload = Get-FabricUplinkPayload -Name $Name -Description $Description -MediaType $UplinkType -Ports $Ports -NetworkIds $TaggedNetworkIds -UplinkFailureDetection $UplinkFailureDetection
+    $FabricPayload = Get-FabricUplinkPayload -Name $Name -Description $Description -MediaType $UplinkType -Ports $Ports `
+        -NetworkIds $TaggedNetworkIds -UnTaggedNetwork $UnTaggedNetwork -UplinkFailureDetection $UplinkFailureDetection
     Write-Verbose $FabricPayload
     $CreateFabricUplinkURL = $BaseUri + "/api/NetworkService/Fabrics('$($Fabric.Id)')/Uplinks"
     Write-Verbose $CreateFabricUplinkURL

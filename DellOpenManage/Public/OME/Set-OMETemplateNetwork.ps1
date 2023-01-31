@@ -2,7 +2,7 @@
 using module ..\..\Classes\IdentityPool.psm1
 using module ..\..\Classes\Network.psm1
 
-function Get-TemplateVlanPayload($Template, $NICIdentifier, $Port, $TaggedNetworkIds, $UnTaggedNetworkId, $VlanPortMap, $PropagateVlan) {
+function Get-TemplateVlanPayload($Template, $NICIdentifier, $Port, $TaggedNetworkIds, $UnTaggedNetworkId, $VlanPortMap, $PropagateVlan, $Mode) {
     $Payload = '{
         "TemplateId": 13,
         "IdentityPoolId": 0,
@@ -34,9 +34,50 @@ function Get-TemplateVlanPayload($Template, $NICIdentifier, $Port, $TaggedNetwor
     $VlanAttribute.ComponentId = $VlanPort.CustomId
     # We will overwrite the current tagged and untagged vlans with those provided.
     # TODO: modify this to add a -Mode ("Append", "Replace") parameter and append the vlan to the existing list
-    $VlanAttribute.Untagged = $UnTaggedNetworkId
-    $VlanAttribute.Tagged = $TaggedNetworkIds
+    if ($UnTaggedNetworkId -ne 0) {
+        $VlanAttribute.Untagged = $UnTaggedNetworkId
+    } else {
+        $VlanAttribute.Untagged = [Int]$VlanPort.VlanUnTagged
+    }
 
+    $NetworkSplit = @()
+    if ($null -ne $VlanPort.VlanTagged) {
+        # Split string into array, trim whitespace and cast to Int
+        $NetworkSplit = $($VlanPort.VlanTagged.Split(",") | % { $_.Trim() } | % { [Int]$_ })
+    }
+    $NetworkList = [System.Collections.ArrayList]@()
+    if ($Mode -eq "Append") {
+        if ($TaggedNetworkIds.Count -gt 0) {
+            $NetworkList += $NetworkSplit
+            # Check to make sure we aren't adding a duplicate
+            foreach ($Nv in $TaggedNetworkIds) {
+                if (-not ($NetworkList -contains $Nv)) {
+                    $NetworkList += $Nv
+                }
+            }
+        } else {
+            $NetworkList = $NetworkSplit
+        }
+    } elseif ($Mode -eq "Replace") {
+        if ($TaggedNetworkIds.Count -gt 0) {
+            $NetworkList = $TaggedNetworkIds
+        } else {
+            $NetworkList = $NetworkSplit
+        }
+    } elseif ($Mode -eq "Remove") {
+        $NetworkList = [System.Collections.ArrayList]$NetworkSplit
+        if ($TaggedNetworkIds.Count -gt 0) {
+            foreach ($Nv in $TaggedNetworkIds) {
+                if ($NetworkList -contains $Nv) {
+                    $NetworkList.Remove($Nv)
+                }
+            }
+        } 
+    } else {
+        $NetworkList = $NetworkSplit
+    }
+
+    $VlanAttribute.Tagged = $NetworkList
     $Payload.TemplateId = $Template.Id
     $Payload.IdentityPoolId = $Template.IdentityPoolId
     $Payload.PropagateVlan = $PropagateVlan
@@ -152,7 +193,11 @@ param(
     [Network] $UnTaggedNetwork,
 
     [Parameter(Mandatory=$false)]
-    [Boolean]$PropagateVlan = $true
+    [Boolean]$PropagateVlan = $true,
+
+    [Parameter(Mandatory=$false)]
+	[ValidateSet("Append", "Replace", "Remove")]
+    [String] $Mode
 )
 
 Begin {}
@@ -177,24 +222,24 @@ Process {
             $UnTaggedNetworkId = $UnTaggedNetwork.Id
         }
         if ($TaggedNetworkIds.Length -gt 0) {
-            # Get network port and vlan info from existing template
-            $VlanPortMap = Get-TemplateVlanInfo -BaseUri $BaseUri -Headers $Headers -TemplateId $Template.Id
-
-            $UpdateNetworkConfigPayload = Get-TemplateVlanPayload -Template $Template -NICIdentifier $NICIdentifier -Port $Port `
-                -TaggedNetworkIds $TaggedNetworkIds -UnTaggedNetworkId $UnTaggedNetworkId -VlanPortMap $VlanPortMap -PropagateVlan $PropagateVlan
-            $UpdateNetworkConfigURL = $BaseUri + "/api/TemplateService/Actions/TemplateService.UpdateNetworkConfig"
-            $UpdateNetworkConfigPayload = $UpdateNetworkConfigPayload | ConvertTo-Json -Depth 6
-            Write-Verbose $UpdateNetworkConfigPayload
-            $UpdateNetworkConfigResp = Invoke-WebRequest -Uri $UpdateNetworkConfigURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $UpdateNetworkConfigPayload
-            if ($UpdateNetworkConfigResp.StatusCode -in 200, 201) {
-                Write-Verbose "Update template network config successful..."
-                
-            }
-            else {
-                Write-Error "Update template network config failed"
-            }
-        } else {
-            Write-Warning "No networks found"
+            if ($null -eq $Mode) { throw [System.ArgumentNullException] "Mode parameter required when specifing -TaggedNetworks" }
+        }
+        # Get network port and vlan info from existing template
+        $VlanPortMap = Get-TemplateVlanInfo -BaseUri $BaseUri -Headers $Headers -TemplateId $Template.Id
+        Write-Verbose "Current template network config"
+        Write-Verbose $($VlanPortMap | ConvertTo-Json)
+        $UpdateNetworkConfigPayload = Get-TemplateVlanPayload -Template $Template -NICIdentifier $NICIdentifier -Port $Port `
+            -TaggedNetworkIds $TaggedNetworkIds -UnTaggedNetworkId $UnTaggedNetworkId -VlanPortMap $VlanPortMap -PropagateVlan $PropagateVlan -Mode $Mode
+        $UpdateNetworkConfigURL = $BaseUri + "/api/TemplateService/Actions/TemplateService.UpdateNetworkConfig"
+        $UpdateNetworkConfigPayload = $UpdateNetworkConfigPayload | ConvertTo-Json -Depth 6
+        Write-Verbose $UpdateNetworkConfigPayload
+        $UpdateNetworkConfigResp = Invoke-WebRequest -Uri $UpdateNetworkConfigURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $UpdateNetworkConfigPayload
+        if ($UpdateNetworkConfigResp.StatusCode -in 200, 201) {
+            Write-Verbose "Update template network config successful..."
+            
+        }
+        else {
+            Write-Error "Update template network config failed"
         }
     }
     Catch {
