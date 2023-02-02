@@ -28,9 +28,13 @@ limitations under the License.
 .PARAMETER Name
     String containing fabric name to search
 .EXAMPLE
-    "SmartUplink01 | Get-OMEUplinkUplink | Format-Table
+    "Uplink01" | Get-OMEFabricUplink -Fabric $("SmartFabric01" | Get-OMEFabric)
 
-    Get fabric by name
+    Get uplink by name
+.EXAMPLE
+    Get-OMEFabricUplink -Fabric $("SmartFabric01" | Get-OMEFabric) | Format-Table
+
+    Get all uplinks
 #>   
 
 [CmdletBinding()]

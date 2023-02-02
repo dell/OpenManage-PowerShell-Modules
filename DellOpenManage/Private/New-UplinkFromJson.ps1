@@ -3,7 +3,7 @@ function New-UplinkFromJson {
     Param(
         [PSCustomObject]$Uplink,
         [String[]]$Ports,
-        [String[]]$Networks
+        [Int[]]$Networks
     )
     return [Uplink]@{
         Id = $Uplink.Id

@@ -102,7 +102,8 @@ limitations under the License.
 
  .EXAMPLE
    New-OMEFabric -FabricName TestFabric -Wait
-
+.EXAMPLE 
+    For more examples visit https://github.com/dell/OpenManage-PowerShell-Modules/blob/main/README.md
 #>
 [CmdletBinding()]
 param(

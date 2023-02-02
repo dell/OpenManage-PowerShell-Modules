@@ -61,7 +61,6 @@ function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $N
     }
     $NetworkList = [System.Collections.ArrayList]@()
     if ($Mode -eq "Append") {
-        Write-Host $PortSplit.Count
         if ($PortSplit.Count -gt 0) {
             $PortList += $Uplink.Ports
             # Check to make sure we aren't adding a duplicate
@@ -121,6 +120,10 @@ function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $N
         $NetworkList = $Uplink.Networks
     }
 
+    if ($PortList.Count -eq 0 -or $NetworkList.Count -eq 0) {
+        throw [System.Exception]::new("FabricException", "Uplink must have at least 1 Port ($($PortList.Count)) and TaggedNetwork ($($NetworkList.Count))")
+    }
+
     $PortPayloads = @()
     foreach ($Port in $PortList) {
         $PortPayload = '{
@@ -165,17 +168,37 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Create an MCM group 
-
+   Edit fabric uplink
  .DESCRIPTION
-   This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
+   This script uses the OME REST API to edit fabric uplink attributes
+ .PARAMETER Name
+    Name of the uplink
+ .PARAMETER Description
+    Description of the uplink
+ .PARAMETER Fabric
+    Object of type Fabric returned from Get-OMEFabric
+ .PARAMETER Uplink
+    Object of type Uplink returned from Get-OMEFabricUplink
+ .PARAMETER UplinkFailureDetection
+    Add the uplink to the Uplink Failure Detection (UFD) group
+ .PARAMETER Ports
+    Comma delimited string containing uplink ports (Example: C38S9T2:ethernet1/1/41:2,CMWSV43:ethernet1/1/41:2)
+ .PARAMETER TaggedNetworks
+    Array of type Network returned from Get-OMENetwork
+ .PARAMETER UnTaggedNetwork
+    Object of type Network returned from Get-OMENetwork
+ .PARAMETER Mode
+    String specifing operation to perform on TaggedNetworks and Ports, required with -TaggedNetworks or -Ports ("Append", "Replace", "Remove")
+.EXAMPLE
+    Edit-OMEFabricUplink -Fabric $("SmartFabric01" | Get-OMEFabric) -Uplink $("EthernetUplink01" | Get-OMEFabricUplink -Fabric $("SmartFabric01" | Get-OMEFabric)) -Mode "Append" -TaggedNetworks $("VLAN 1005", "VLAN 1006" | Get-OMENetwork) -Verbose
 
- .PARAMETER FabricName
-   The Name of the MCM Fabric.
+    Add ports to uplink
+.EXAMPLE
+    Edit-OMEFabricUplink -Fabric $("SmartFabric01" | Get-OMEFabric) -Uplink $("EthernetUplink01" | Get-OMEFabricUplink -Fabric $("SmartFabric01" | Get-OMEFabric)) -Mode "Append" -Ports "C38S9T2:ethernet1/1/41:2,CMWSV43:ethernet1/1/41:2" -Verbose
 
- .EXAMPLE
-   New-OMEFabric -FabricName TestFabric -Wait
-
+    Add tagged networks to uplink
+.EXAMPLE 
+    For more examples visit https://github.com/dell/OpenManage-PowerShell-Modules/blob/main/README.md
 #>
 [CmdletBinding()]
 param(
@@ -224,8 +247,8 @@ Try {
     foreach ($Network in $TaggedNetworks) {
         $TaggedNetworkIds += $Network.Id
     }
-    if ($TaggedNetworkIds.Length -gt 0) {
-        if ($null -eq $Mode) { throw [System.ArgumentNullException] "Mode parameter required when specifing -TaggedNetworks" }
+    if ($TaggedNetworkIds.Length -gt 0 -or $null -ne $Ports) {
+        if ($null -eq $Mode) { throw [System.ArgumentNullException] "Mode parameter required when specifing -TaggedNetworks or -Ports" }
     }
     Write-Verbose "Updating fabric uplink"
     $FabricPayload = Get-FabricUplinkEditPayload -Name $Name -Description $Description -MediaType $UplinkType `

@@ -86,17 +86,31 @@ limitations under the License.
 
 <#
  .SYNOPSIS
-   Create an MCM group 
-
+   Create a fabric uplink 
  .DESCRIPTION
-   This script uses the OME REST API to create mcm group, find memebers and add the members to the group.
-
- .PARAMETER FabricName
-   The Name of the MCM Fabric.
-
+   This script uses the OME REST API to create a smart fabric uplink
+ .PARAMETER Name
+    Name of the uplink
+ .PARAMETER Description
+    Description of the uplink
+ .PARAMETER Fabric
+    Object of type Fabric returned from Get-OMEFabric
+ .PARAMETER Uplink
+    Object of type Uplink returned from Get-OMEFabricUplink
+ .PARAMETER UplinkFailureDetection
+    Add the uplink to the Uplink Failure Detection (UFD) group
+ .PARAMETER Ports
+    Comma delimited string containing uplink ports (Example: C38S9T2:ethernet1/1/41:2,CMWSV43:ethernet1/1/41:2)
+ .PARAMETER TaggedNetworks
+    Array of type Network returned from Get-OMENetwork
+ .PARAMETER UnTaggedNetwork
+    Object of type Network returned from Get-OMENetwork
  .EXAMPLE
-   New-OMEFabric -FabricName TestFabric -Wait
+    New-OMEFabricUplink -Name "EthernetUplink01" -Fabric $("SmartFabric01" | Get-OMEFabric) -UplinkType "Ethernet - No Spanning Tree" -TaggedNetworks $("VLAN 1001", "VLAN 1003" | Get-OMENetwork) -Ports "C38S9T2:ethernet1/1/41:1,CMWSV43:ethernet1/1/41:1" -Verbose
 
+    Create ethernet uplink
+.EXAMPLE 
+    For more examples visit https://github.com/dell/OpenManage-PowerShell-Modules/blob/main/README.md
 #>
 [CmdletBinding()]
 param(

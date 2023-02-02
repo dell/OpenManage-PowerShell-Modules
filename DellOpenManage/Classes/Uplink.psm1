@@ -7,6 +7,6 @@ Class Uplink {
     [Int]$PortCount
     [Int]$NetworkCount
     [String]$UfdEnable
-    [String[]]$Ports=@()
-    [Int[]]$Networks=@()
+    [String[]]$Ports
+    [Int[]]$Networks
 }

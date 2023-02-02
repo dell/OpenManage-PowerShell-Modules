@@ -173,6 +173,8 @@ limitations under the License.
     "MX740c Template" | Get-OMETemplate | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $("VLAN 1001", "VLAN 1003", "VLAN 1004", "VLAN 1005" | Get-OMENetwork) -Verbose
 
     Set tagged networks on NIC port 1
+.EXAMPLE 
+    For more examples visit https://github.com/dell/OpenManage-PowerShell-Modules/blob/main/README.md
 #>
 
 [CmdletBinding()]

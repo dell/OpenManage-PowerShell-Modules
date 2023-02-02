@@ -27,8 +27,6 @@ See [Contributing](CONTRIBUTE.md)
 # Command Reference
 See [Command Reference](Documentation/CommandReference.md)
 
-# Examples
-
 ## Getting Started
 See if Module is available
 ```
@@ -42,7 +40,7 @@ Show help for commandlet
 ```
 Get-Help Connect-OMEServer -Detailed
 ```
-## Basic Example
+### Basic Example
 * Copy and paste these commands into a Test.ps1 script or PowerShell ISE and execute the script.
 * This will Import the Module, connect to server prompting for credentials, list servers by model, then disconnect the current session.
 ```
@@ -450,7 +448,9 @@ Run report
 Invoke-Report -ReportId 11709
 ```
 
-## Directory Services (Active Directory and LDAP)
+## Directory Services 
+### Active Directory
+
 Test AD Directory Service using Global Catalog Lookup
 ```
 New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
@@ -471,12 +471,6 @@ Create AD Directory Service manually specifing Domain Controllers
 New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
     -DirectoryServerLookup "MANUAL" -DirectoryServers @("ad1.lab.local", "ad2.lab.local") -ADGroupDomain "lab.local"
 ``` 
-Create LDAP Directory Service
-```
-New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "LDAP" `
-    -DirectoryServerLookup "MANUAL" -DirectoryServers @("ldap1.lab.local", "ldap2.lab.local") `
-    -LDAPBaseDistinguishedName "dc=lab,dc=local"
-```
 Import directory group
 ```
 $AD = Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL"
@@ -485,42 +479,17 @@ $Role = Get-OMERole -Name "chassis"
 Invoke-OMEDirectoryServiceImportGroup -DirectoryService $AD -DirectoryGroups $ADGroups -DirectoryType "AD" -UserName "Usename@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)) -Role $Role -Verbose
 ```
 
-## Directory Services (Active Directory and LDAP)
-Test AD Directory Service using Global Catalog Lookup
-```
-New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
-    -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" `
-    -TestConnection -TestUserName "Username@lab.local" -TestPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -Verbose
-```
-Create AD Directory Service using Global Catalog Lookup
-```
-New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
-    -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local"
-```
-Create AD Directory Service using Global Catalog Lookup with Certificate Validation
-```
-New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" -DirectoryServerLookup "DNS" -DirectoryServers @("lab.local") -ADGroupDomain "lab.local" -CertificateValidation -CertificateFile "C:\Temp\CA.cer"
-```
-Create AD Directory Service manually specifing Domain Controllers
-```
-New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "AD" `
-    -DirectoryServerLookup "MANUAL" -DirectoryServers @("ad1.lab.local", "ad2.lab.local") -ADGroupDomain "lab.local"
-``` 
+### LDAP
 Create LDAP Directory Service
 ```
 New-OMEDirectoryService -Name "LAB.LOCAL" -DirectoryType "LDAP" `
     -DirectoryServerLookup "MANUAL" -DirectoryServers @("ldap1.lab.local", "ldap2.lab.local") `
     -LDAPBaseDistinguishedName "dc=lab,dc=local"
 ```
-Import directory group
-```
-$AD = Get-OMEDirectoryService -DirectoryType "AD" -Name "LAB.LOCAL"
-$ADGroups = Get-OMEDirectoryServiceSearch -Name "Admin" -DirectoryService $AD
-$Role = Get-OMERole -Name "chassis"
-Invoke-OMEDirectoryServiceImportGroup -DirectoryService $AD -DirectoryGroups $ADGroups -DirectoryType "AD" -UserName "Usename@lab.local" -Password $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)) -Role $Role -Verbose
-```
 
-## Backup (Restore must be performed in OME-M at this time)
+## Backup 
+### *Restore must be performed in OME-M at this time*
+
 Backup chassis to CIFS share now
 ```
 $MXChassis = @("LEAD" | Get-OMEMXDomain | Select-Object -First 1)
@@ -549,7 +518,7 @@ Invoke-OMEApplianceBackup -Chassis $MXChassis -Share "192.168.1.100" -SharePath 
     -IncludePw -IncludeCertificates -EncryptionPassword $(ConvertTo-SecureString 'nkQ*DTrNK7$b' -AsPlainText -Force) -Wait -Verbose
 ```
 
-## Services Plugin (aka Support Assist)
+## Services Plugin
 Get Support cases for device by Service Tag
 ```
 "C38V9T2" | Get-OMESupportAssistCase -Verbose
@@ -590,6 +559,9 @@ Remove Support Assist group
 ```
 Other Examples
 https://github.com/dell/OpenManage-PowerShell-Modules/blob/e8f150a122a16ab458d6cc18298ffe3ce94bf3b2/Examples/ServicesGroupCreateAddDevices.ps1
+
+## MX
+
 
 ## Error Handling and Control Flow
 https://devblogs.microsoft.com/scripting/handling-errors-the-powershell-way
