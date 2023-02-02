@@ -1,3 +1,4 @@
+using module ..\DellOpenManage\Classes\Network.psm1
 $credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Global:OMEUsername, $(ConvertTo-SecureString -Force -AsPlainText $Global:OMEPassword)
 Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "MX7000 Tests" {
@@ -153,8 +154,28 @@ Describe "MX7000 Tests" {
             $TestNetwork1 = $($Script:TestNetwork1.Name | Get-OMENetwork)
             $TestNetwork2 = $($Script:TestNetwork2.Name | Get-OMENetwork)
             $TestNetworks = @($TestNetwork1, $TestNetwork2)
-            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $TestNetworks -Mode "Replace" -Verbose
-            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -TaggedNetworks $TestNetworks -Mode "Replace" -Verbose
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $TestNetworks -Mode "Replace"
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -TaggedNetworks $TestNetworks -Mode "Replace"
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 1 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 2
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 2 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 2
+        }
+        It "Should set UntaggedNetwork on Template" {
+            $Template = $($Script:TemplateNameFromFile | Get-OMETemplate -FilterBy "Name")
+            $TestNetwork1 = $($Script:TestNetwork1.Name | Get-OMENetwork)
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -UnTaggedNetwork $TestNetwork1 -Mode "Replace"
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -UnTaggedNetwork $TestNetwork1 -Mode "Replace"
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 1 } | Select-Object -ExpandProperty VlanUnTagged | Should -Be $TestNetwork1.Id
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 2 } | Select-Object -ExpandProperty VlanUnTagged | Should -Be $TestNetwork1.Id
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 1 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 2
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 2 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 2
+        }
+        It "Should set UntaggedNetwork on Template to 0" {
+            $Template = $($Script:TemplateNameFromFile | Get-OMETemplate -FilterBy "Name")
+            $TestNetwork1 = $($Script:TestNetwork1.Name | Get-OMENetwork)
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -UnTaggedNetwork $TestNetwork1 -Mode "Remove"
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -UnTaggedNetwork $TestNetwork1 -Mode "Remove"
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 1 } | Select-Object -ExpandProperty VlanUnTagged | Should -Be 0
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 2 } | Select-Object -ExpandProperty VlanUnTagged | Should -Be 0
             $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 1 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 2
             $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 2 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 2
         }

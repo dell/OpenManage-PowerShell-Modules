@@ -1,4 +1,5 @@
 using module ..\..\Classes\Template.psm1
+using module ..\..\Classes\TemplateNetwork.psm1
 
 function Get-OMETemplateNetwork {
     <#
@@ -71,20 +72,24 @@ function Get-OMETemplateNetwork {
                                             # Loop through Partition Attributes
                                             if ($Attribute.DisplayName -eq "Vlan Tagged") {
                                                 $CustomId = $Attribute.CustomId
-                                                $PortVlanTagged = $Attribute.Value
+                                                if ($null -eq $Attribute.Value) {
+                                                    $PortVlanTagged = @()
+                                                } else {
+                                                    $PortVlanTagged = $($Attribute.Value.Split(",") | ForEach-Object { $_.Trim() } | ForEach-Object { [Int]$_ })
+                                                }
                                             }
 
                                             if ($Attribute.DisplayName -eq "Vlan UnTagged") {
-                                                $PortVlanUnTagged = $Attribute.Value
+                                                $PortVlanUnTagged = [Int]$Attribute.Value
                                             }
                                         }
 
-                                        $PortInfo = [PSCustomObject]@{
-                                            "NICIdentifier" = $NICDisplayName
-                                            "Port"          = $PortNumber
-                                            "CustomId"      = $CustomId
-                                            "VlanTagged"    = $PortVlanTagged
-                                            "VlanUnTagged"  = $PortVlanUnTagged
+                                        $PortInfo = [TemplateNetwork]@{
+                                            NICIdentifier = $NICDisplayName
+                                            Port          = $PortNumber
+                                            CustomId      = $CustomId
+                                            VlanTagged    = $PortVlanTagged
+                                            VlanUnTagged  = $PortVlanUnTagged
                                         }
                                         $PortVlanInfo += $PortInfo
                                     }

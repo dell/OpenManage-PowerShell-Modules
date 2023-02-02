@@ -32,19 +32,8 @@ function Get-TemplateVlanPayload($Template, $NICIdentifier, $Port, $TaggedNetwor
     $VlanPort = $VlanPortMap | Where-Object { $_.NICIdentifier -eq $NICIdentifier -and $_.Port -eq $Port }
     
     $VlanAttribute.ComponentId = $VlanPort.CustomId
-    # We will overwrite the current tagged and untagged vlans with those provided.
-    # TODO: modify this to add a -Mode ("Append", "Replace") parameter and append the vlan to the existing list
-    if ($UnTaggedNetworkId -ne 0) {
-        $VlanAttribute.Untagged = $UnTaggedNetworkId
-    } else {
-        $VlanAttribute.Untagged = [Int]$VlanPort.VlanUnTagged
-    }
 
-    $NetworkSplit = @()
-    if ($null -ne $VlanPort.VlanTagged) {
-        # Split string into array, trim whitespace and cast to Int
-        $NetworkSplit = $($VlanPort.VlanTagged.Split(",") | % { $_.Trim() } | % { [Int]$_ })
-    }
+    $NetworkSplit = $VlanPort.VlanTagged
     $NetworkList = [System.Collections.ArrayList]@()
     if ($Mode -eq "Append") {
         if ($TaggedNetworkIds.Count -gt 0) {
@@ -58,11 +47,23 @@ function Get-TemplateVlanPayload($Template, $NICIdentifier, $Port, $TaggedNetwor
         } else {
             $NetworkList = $NetworkSplit
         }
+
+        if ($null -ne $UnTaggedNetworkId) {
+            $VlanAttribute.Untagged = $UnTaggedNetworkId
+        } else {
+            $VlanAttribute.Untagged = $VlanPort.VlanUnTagged
+        }
     } elseif ($Mode -eq "Replace") {
         if ($TaggedNetworkIds.Count -gt 0) {
             $NetworkList = $TaggedNetworkIds
         } else {
             $NetworkList = $NetworkSplit
+        }
+
+        if ($null -ne $UnTaggedNetworkId) {
+            $VlanAttribute.Untagged = $UnTaggedNetworkId
+        } else {
+            $VlanAttribute.Untagged = $VlanPort.VlanUnTagged
         }
     } elseif ($Mode -eq "Remove") {
         $NetworkList = [System.Collections.ArrayList]$NetworkSplit
@@ -72,9 +73,18 @@ function Get-TemplateVlanPayload($Template, $NICIdentifier, $Port, $TaggedNetwor
                     $NetworkList.Remove($Nv)
                 }
             }
-        } 
+        }
+        
+        if ($null -ne $UnTaggedNetworkId) {
+            if ($VlanAttribute.Untagged -eq $UnTaggedNetworkId) {
+                $VlanAttribute.Untagged = 0
+            }
+        } else {
+            $VlanAttribute.Untagged = $VlanPort.VlanUnTagged
+        }
     } else {
         $NetworkList = $NetworkSplit
+        $VlanAttribute.Untagged = $VlanPort.VlanUnTagged
     }
 
     $VlanAttribute.Tagged = $NetworkList
@@ -119,6 +129,8 @@ limitations under the License.
     Object of type Network returned from Get-OMENetwork function. In most instances we want to omit this parameter. The Untagged network will default to VLAN 1.
 .PARAMETER PropagateVlan
     Boolean value that will determine if VLAN settings are propagated immediately without having to re-deploy the template (Default=$true)
+.PARAMETER Mode
+    String specifing operation to perform on TaggedNetworks and UnTaggedNetwork, required with -TaggedNetworks or -UnTaggedNetwork ("Append", "Replace", "Remove")
 .INPUTS
     Template
 .EXAMPLE
@@ -171,12 +183,12 @@ Process {
             $TaggedNetworkIds += $Network.Id
         }
         if ($null -eq $UnTaggedNetwork) {
-            $UnTaggedNetworkId = 0
+            $UnTaggedNetworkId = $null
         } else {
             $UnTaggedNetworkId = $UnTaggedNetwork.Id
         }
-        if ($TaggedNetworkIds.Length -gt 0) {
-            if ($null -eq $Mode) { throw [System.ArgumentNullException] "Mode parameter required when specifing -TaggedNetworks" }
+        if ($TaggedNetworkIds.Length -gt 0 -or $null -ne $UnTaggedNetwork) {
+            if ($null -eq $Mode) { throw [System.ArgumentNullException] "Mode parameter required when specifing -TaggedNetworks or -UnTaggedNetwork" }
         }
         # Get network port and vlan info from existing template
         $VlanPortMap = Get-OMETemplateNetwork -Template $Template
