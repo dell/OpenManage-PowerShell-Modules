@@ -16,11 +16,11 @@ $ChassisSettings = @{
     GroupVIPSubnetMask = "255.255.255.0"
     GroupVIPGateway = "192.168.1.1"
     Networks = @(
-        @{ Name = "VLAN 1001", Id = 1001, Type = 1},
-        @{ Name = "VLAN 1002", Id = 1002, Type = 1}
+        { Name = "VLAN 1001", Id = 1001, Type = 1},
+        { Name = "VLAN 1002", Id = 1002, Type = 1}
     )
-    NetworkStorageFabricA = @{ Name = "Storage Fabric A", Id = 30, Type = 8}
-    NetworkStorageFabricB = @{ Name = "Storage Fabric B", Id = 40, Type = 8}
+    NetworkStorageFabricA = { Name = "Storage Fabric A", Id = 30, Type = 8}
+    NetworkStorageFabricB = { Name = "Storage Fabric B", Id = 40, Type = 8}
     FabricName = "SmartFabric01"
     FabricDesignType = "2xMX9116n_Fabric_Switching_Engines_in_same_chassis"
     FabricSwitchAServiceTag = "C38S9T2"
