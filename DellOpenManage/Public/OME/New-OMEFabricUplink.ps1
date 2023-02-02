@@ -39,7 +39,7 @@ function Get-FabricUplinkPayload($Name, $Description, $MediaType, $Ports, $Netwo
     $PortPayloads = @()
     $PortSplit = @()
     if ($null -ne $Ports) {
-        $PortSplit = $($Ports.Split(",") | % { $_.Trim() })
+        $PortSplit = $($Ports.Split(",") | ForEach-Object { $_.Trim() })
     }
     foreach ($Port in $PortSplit) {
         if ($Port -ne "") {

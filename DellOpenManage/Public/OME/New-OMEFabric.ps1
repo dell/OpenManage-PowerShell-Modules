@@ -34,7 +34,7 @@ function Get-FabricPayload($Name, $Description, $DesignType, $SwitchAServiceTag,
     return $Payload
 }
 
-function Invoke-CheckOMEFabricApplicableNodes ($BaseUri, $Headers, $ContentType, $DesignType, $SwitchAServiceTag, $SwitchBServiceTag) {
+function Invoke-CheckOMEFabricApplicableNode ($BaseUri, $Headers, $ContentType, $DesignType, $SwitchAServiceTag, $SwitchBServiceTag) {
     $ApplicableNodesURL = $BaseUri + "/api/NetworkService/FabricDesigns('$($DesignType)')/NetworkService.GetApplicableNodes"
     Write-Verbose "Get fabric applicable nodes"
     Write-Verbose $ApplicableNodesURL
@@ -145,7 +145,7 @@ Try {
     $Headers."X-Auth-Token" = $SessionAuth.Token
     $ContentType = "application/json"
 
-    $CheckApplicableNodes = Invoke-CheckOMEFabricApplicableNodes -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -DesignType $DesignType -SwitchAServiceTag $SwitchAServiceTag -SwitchBServiceTag $SwitchBServiceTag
+    $CheckApplicableNodes = Invoke-CheckOMEFabricApplicableNode -BaseUri $BaseUri -Headers $Headers -ContentType $ContentType -DesignType $DesignType -SwitchAServiceTag $SwitchAServiceTag -SwitchBServiceTag $SwitchBServiceTag
     if (!$CheckApplicableNodes) {
         throw [System.Exception]::new("FabricException", "Fabric applicable nodes check failed. Check your chassis and IOM service tags.")
     }

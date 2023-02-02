@@ -5,6 +5,7 @@
 ## Requirements
 - PowerShell 5+
 - OpenManage Enterprise 3.4+
+- OpenManage Enterprise Modular 1.20.00+
 
 ## Scripted Installation
 1. Open PowerShell Command Window
@@ -561,7 +562,85 @@ Other Examples
 https://github.com/dell/OpenManage-PowerShell-Modules/blob/e8f150a122a16ab458d6cc18298ffe3ce94bf3b2/Examples/ServicesGroupCreateAddDevices.ps1
 
 ## MX
+### Chassis
+Create new Chassis Group
+```
+New-OMEMcmGroup -Name "TestLabMX"
+```
+Create new Chassis Group with VIP
+```
+New-OMEMcmGroup -Name "TestLabMX" -VIPIPv4Address "100.79.6.111" -VIPSubnetMask "255.255.254.0" -VIPGateway "100.79.7.254" -Wait -Verbose 
+```
 
+### SmartFabric
+Create new Smart Fabric
+```
+New-OMEFabric -Name "SmartFabric01" -DesignType "2xMX9116n_Fabric_Switching_Engines_in_same_chassis" `
+    -SwitchAServiceTag "C38S9T2" -SwitchBServiceTag "CMWSV43" -Verbose
+```
+Configure Port Breakouts and Refresh Inventory
+```
+$SwitchA = $("C38S9T2" | Get-OMEDevice)
+$SwitchB = $("CMWSV43" | Get-OMEDevice)
+
+Set-OMEIOMPortBreakout -Device $SwitchA -BreakoutType "4X10GE" -PortGroups "port-group1/1/13" -Wait -Verbose
+Set-OMEIOMPortBreakout -Device $SwitchA -BreakoutType "4X8GFC" -PortGroups "port-group1/1/15,port-group1/1/16" -Wait -Verbose
+Set-OMEIOMPortBreakout -Device $SwitchB -BreakoutType "4X10GE" -PortGroups "port-group1/1/13" -Wait -Verbose
+Set-OMEIOMPortBreakout -Device $SwitchB -BreakoutType "4X8GFC" -PortGroups "port-group1/1/15,port-group1/1/16" -Wait -Verbose
+Invoke-OMEInventoryRefresh -Devices @($SwitchA, $SwitchB) -Wait
+```
+Create new Uplink
+```
+$SwitchA = $("C38S9T2" | Get-OMEDevice)
+$SwitchB = $("CMWSV43" | Get-OMEDevice)
+$DefaultNetworks = $("VLAN 1001", "VLAN 1003" | Get-OMENetwork)
+$StorageFabricANetwork = $("Storage Fabric A" | Get-OMENetwork)
+$StorageFabricBNetwork = $("Storage Fabric B" | Get-OMENetwork)
+$Fabric = $("SmartFabric01" | Get-OMEFabric)
+New-OMEFabricUplink -Name "EthernetUplink01" -Fabric $Fabric -UplinkType "Ethernet - No Spanning Tree" `
+    -TaggedNetworks $DefaultNetworks -Ports "C38S9T2:ethernet1/1/41:1,CMWSV43:ethernet1/1/41:1" -Verbose
+New-OMEFabricUplink -Name "StorageFabricAUplink" -Fabric $Fabric -UplinkType "FC Gateway" `
+    -TaggedNetworks $StorageFabricANetwork -Ports "C38S9T2:fibrechannel1/1/43:1" -Verbose
+New-OMEFabricUplink -Name "StorageFabricBUplink" -Fabric $Fabric -UplinkType "FC Gateway" `
+    -TaggedNetworks $StorageFabricBNetwork -Ports "CMWSV43:fibrechannel1/1/43:1" -Verbose
+
+```
+Edit Uplink
+```
+$Fabric = "SmartFabric01" | Get-OMEFabric
+$Uplink = "EthernetUplink01" | Get-OMEFabricUplink -Fabric $Fabric
+$AddNetwork = "VLAN 1005", "VLAN 1006" | Get-OMENetwork
+$UnTaggedNetwork = "default" | Get-OMENetwork
+Edit-OMEFabricUplink -Fabric $Fabric -Uplink $Uplink -Name "NewUplinkName"
+Edit-OMEFabricUplink -Fabric $Fabric -Uplink $Uplink -Mode "Append" -TaggedNetworks $AddNetwork -Verbose
+Edit-OMEFabricUplink -Fabric $Fabric -Uplink $Uplink -Mode "Append" -Ports "C38S9T2:ethernet1/1/41:2,CMWSV43:ethernet1/1/41:2" -Verbose
+Edit-OMEFabricUplink -Fabric $Fabric -Uplink $Uplink -Mode "Remove" -TaggedNetworks $AddNetwork -Ports "C38S9T2:ethernet1/1/41:2" -Verbose
+Edit-OMEFabricUplink -Fabric $Fabric -Uplink $Uplink -Mode "Replace" -TaggedNetworks $AddNetwork -Ports "C38S9T2:ethernet1/1/41:1,CMWSV43:ethernet1/1/41:1" -Verbose
+Edit-OMEFabricUplink -Fabric $Fabric -Uplink $Uplink -UnTaggedNetwork $UnTaggedNetwork -Verbose
+```
+
+### Templates
+Configure Template with Storage Networks
+```
+$DefaultNetworks = $("VLAN 1001", "VLAN 1003", "VLAN 1004", "VLAN 1005" | Get-OMENetwork)
+$StorageFabricANetwork = $("Storage Fabric A" | Get-OMENetwork)
+$StorageFabricBNetwork = $("Storage Fabric B" | Get-OMENetwork)
+$Template = "MX740c 4 Port" | Get-OMETemplate 
+$Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $DefaultNetworks -Mode "Append" -Verbose
+$Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -TaggedNetworks $DefaultNetworks -Mode "Append" -Verbose
+$Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $StorageFabricANetwork -Mode "Append" -Verbose
+$Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -TaggedNetworks $StorageFabricBNetwork -Mode "Append" -Verbose
+```
+Remove Network from Template
+```
+$Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $StorageFabricANetwork -Mode "Remove" -Verbose
+$Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -TaggedNetworks $StorageFabricBNetwork -Mode "Remove" -Verbose
+```
+Configure Template Identity Pool
+```
+$IdentityPool = $("default" | Get-OMEIdentityPool)
+"MX740c 4 Port"  | Get-OMETemplate | Set-OMETemplateIdentityPool -IdentityPool $IdentityPool -Verbose
+```
 
 ## Error Handling and Control Flow
 https://devblogs.microsoft.com/scripting/handling-errors-the-powershell-way

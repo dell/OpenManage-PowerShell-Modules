@@ -14,5 +14,10 @@ Describe "User Tests" {
         It "Should return all users" {
             Get-OMEUser | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 1
         }
+
+        It "Should remove user" {
+            $Script:TestUserName | Get-OMEUser | Remove-OMEUser
+            $Script:TestUserName | Get-OMEUser | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+        }
     }
 }

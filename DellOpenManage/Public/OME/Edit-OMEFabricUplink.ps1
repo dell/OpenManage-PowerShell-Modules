@@ -57,7 +57,7 @@ function Get-FabricUplinkEditPayload($Name, $Description, $MediaType, $Ports, $N
     # Split $Ports into array by comma and trim whitespace
     $PortSplit = @()
     if ($Ports) {
-        $PortSplit = $($Ports.Split(",") | % { $_.Trim() })
+        $PortSplit = $($Ports.Split(",") | ForEach-Object { $_.Trim() })
     }
     $NetworkList = [System.Collections.ArrayList]@()
     if ($Mode -eq "Append") {

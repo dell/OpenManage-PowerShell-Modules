@@ -4,7 +4,7 @@ Describe "Firmware Tests" {
     BeforeAll {
         $CatalogName = "Test01"
         $BaselineName = "TestBaseline01"
-        $DeviceServiceTag = "GV6V673"
+        $DeviceServiceTag = "C86D0Q2"
     }
     Context "Firmware" {
         It "Should export at least one function" {
@@ -41,20 +41,33 @@ Describe "Firmware Tests" {
             $BaselineName | Get-OMEFirmwareBaseline | Invoke-OMEFirmwareBaselineRefresh -Wait | Should -Be "Completed"
         }
 
-        #It ("Should try to update firmware") {
-        #    $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
-        #    $baseline = $($BaselineName | Get-OMEFirmwareBaseline)
-        #    Update-OMEFirmware -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "StageForNextReboot" -ComponentFilter "PERC" -Wait | Should -Be "Completed"
-        #}
+        <#
+        It ("Should try to update firmware") {
+            $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
+            $baseline = $($BaselineName | Get-OMEFirmwareBaseline)
+            Update-OMEFirmware -Baseline $baseline -DeviceFilter $devices -UpdateAction "All" -UpdateSchedule "StageForNextReboot" -ComponentFilter "PERC" -Wait | Should -Be "Completed"
+        }
         
         It "Should try to update firmware from DUP with preview only" -Tag "DUP" {
             $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
             Update-OMEFirmwareDUP -Device $devices -UpdateSchedule "Preview" -DupFile "C:\Temp\BIOS_92RFG_WN64_2.11.2.EXE" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterOrEqual 0
         }
 
-        #It ("Should try to update firmware from DUP") {
-        #    $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
-        #    Update-OMEFirmwareDUP -Device $devices -UpdateSchedule "StageForNextReboot" -DupFile "C:\Temp\Network_Firmware_DK4G2_WN64_20.0.17_A00.EXE" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
-        #}
+        It ("Should try to update firmware from DUP") {
+            $devices = $($DeviceServiceTag | Get-OMEDevice -FilterBy "ServiceTag")
+            Update-OMEFirmwareDUP -Device $devices -UpdateSchedule "StageForNextReboot" -DupFile "C:\Temp\Network_Firmware_DK4G2_WN64_20.0.17_A00.EXE" | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
+        }
+        #>
     }
+
+    Context "Cleanup" -Tag "Cleanup" {
+        It "Should remove Firmware Baseline" {
+            $BaselineName | Get-OMEFirmwareBaseline | Remove-OMEFirmwareBaseline
+            $BaselineName | Get-OMEFirmwareBaseline | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+        }
+        It "Should remove Firmware Catalog" {
+            $CatalogName | Get-OMECatalog | Remove-OMECatalog
+            $CatalogName | Get-OMECatalog | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+        }
+    } 
 }

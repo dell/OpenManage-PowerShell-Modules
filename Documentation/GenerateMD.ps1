@@ -25,6 +25,9 @@ using module ..\DellOpenManage\Classes\DirectoryGroup.psm1
 using module ..\DellOpenManage\Classes\Role.psm1
 using module ..\DellOpenManage\Classes\ApplianceInfo.psm1
 using module ..\DellOpenManage\Classes\Domain.psm1
+using module ..\DellOpenManage\Classes\Fabric.psm1
+using module ..\DellOpenManage\Classes\Uplink.psm1
+using module ..\DellOpenManage\Classes\TemplateNetwork.psm1
 
 Import-Module platyPS
 $module = "DellOpenManage"

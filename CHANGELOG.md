@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.4.0]() - 2023-02-01
+## [3.4.0]() - 2023-02-02
 ### Added
 - Get-OMEFabric
 - Get-OMEFabricUplink
@@ -15,9 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set-OMETemplateIdentityPool
 - Set-OMETemplateNetwork
 - Remove-OMEDevice
+- Remove-OMEDirectoryService
+- Remove-OMEUser
+- Improved Pester test coverage
+- Tested against OME 3.10 and OME-M 2.00.00
 
 ### Changed
-- New-OMEMcmGroup to create VIP
+- New-OMEMcmGroup to allow for VIP creation
 
 ## [3.3.3]() - 2023-01-23
 ### Fixed

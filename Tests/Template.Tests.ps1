@@ -2,9 +2,9 @@ $credentials = New-Object -TypeName System.Management.Automation.PSCredential -A
 Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Template Tests" {
     BeforeAll {
-        $Script:DeviceServiceTag1 = "37KP0Q2"
+        $Script:DeviceServiceTag1 = "C86D0Q2"
         $Script:DeviceServiceTag2 = "C86F0Q2"
-        $Script:DeviceServiceTag3 = "GV6V673"
+        $Script:DeviceServiceTag3 = "47BXBM2"
         $Script:ConfigurationBaselineName = "TestConfigurationBaseline_$((Get-Date).ToString('yyyyMMddHHmmss'))"
         $Script:DeploymentTemplateNameFromString = "TestDeploymentTemplate_FromString_$((Get-Date).ToString('yyyyMMddHHmmss'))"
         $Script:DeploymentTemplateNameFromStringClone = "$($Script:DeploymentTemplateNameFromString) - Clone"

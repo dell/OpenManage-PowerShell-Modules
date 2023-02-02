@@ -2,7 +2,7 @@ $credentials = New-Object -TypeName System.Management.Automation.PSCredential -A
 Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Device Tests" {
     BeforeEach {
-        $TestDeviceServiceTags = @("37KP0Q2")
+        $TestDeviceServiceTags = @("C86D0Q2")
         $TestDeviceModel = "PowerEdge R740"
     }
     Context "Device Checks" {

@@ -38,8 +38,10 @@ Describe "Group Tests" {
         It "Should remove Devices from Group" {
             $TestNewGroupEdit | Get-OMEGroup | Edit-OMEGroup -Mode "Remove" -Devices $($TestNewGroupEdit | Get-OMEGroup | Get-OMEDevice)
             $TestNewGroupEdit | Get-OMEGroup | Get-OMEDevice | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
-        }
+        } 
+    }
 
+    Context "Cleanup" -Tag "Cleanup" {
         It "Should remove Group" {
             $TestNewGroupEdit | Get-OMEGroup | Remove-OMEGroup
             $TestNewGroupEdit | Get-OMEGroup | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0

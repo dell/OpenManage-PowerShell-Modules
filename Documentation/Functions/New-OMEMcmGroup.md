@@ -13,7 +13,9 @@ Create an MCM group
 ## SYNTAX
 
 ```
-New-OMEMcmGroup [-GroupName] <String> [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
+New-OMEMcmGroup [-Name] <String> [[-Description] <String>] [[-JoinApproval] <String>]
+ [[-VIPIPv4Address] <String>] [[-VIPSubnetMask] <String>] [[-VIPGateway] <String>] [-Wait]
+ [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -28,8 +30,8 @@ New-OMEMcmGroup -GroupName TestGroup -Wait
 
 ## PARAMETERS
 
-### -GroupName
-The Name of the MCM Group.
+### -Name
+{{ Fill Name Description }}
 
 ```yaml
 Type: String
@@ -38,6 +40,81 @@ Aliases:
 
 Required: True
 Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Description
+{{ Fill Description Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -JoinApproval
+{{ Fill JoinApproval Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: Automatic
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -VIPIPv4Address
+{{ Fill VIPIPv4Address Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -VIPSubnetMask
+{{ Fill VIPSubnetMask Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -VIPGateway
+{{ Fill VIPGateway Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -67,7 +144,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 7
 Default value: 3600
 Accept pipeline input: False
 Accept wildcard characters: False
