@@ -85,54 +85,6 @@ function Get-TemplateVlanPayload($Template, $NICIdentifier, $Port, $TaggedNetwor
     return $Payload
 }
 
-function Get-TemplateVlanInfo($BaseUri, $Headers, $TemplateId) {
-    $TemplateVlanUrl = $BaseUri + "/api/TemplateService/Templates($($TemplateId))/Views(4)/AttributeViewDetails"
-    $TemplateVlanResponse = Invoke-WebRequest -UseBasicParsing -Uri $TemplateVlanUrl -Headers $Headers -Method Get
-    if ($TemplateVlanResponse.StatusCode -eq 200) {
-        $TemplateVlanInfo = $TemplateVlanResponse.Content | ConvertFrom-Json
-        $AttributeGroups = $TemplateVlanInfo.AttributeGroups
-        $PortVlanInfo = @()
-        foreach ($AttributeGroup in $AttributeGroups) {
-            if ($AttributeGroup.DisplayName -eq "NICModel") {
-                foreach ($NIC in $AttributeGroup.SubAttributeGroups) { # Loop through NICs
-                    $NICDisplayName = $NIC.DisplayName
-                    foreach ($Port in $NIC.SubAttributeGroups) { # Loop through Ports
-                        $PortNumber = $Port.GroupNameId
-                        foreach ($Partition in $Port.SubAttributeGroups) { # Loop through Partitions
-                            if ($Partition.GroupNameId -eq 1) { # We are only concerned with Partition 1
-                                foreach ($Attribute in $Partition.Attributes) { # Loop through Partition Attributes
-                                    if ($Attribute.DisplayName -eq "Vlan Tagged") {
-                                        $CustomId = $Attribute.CustomId
-                                        $PortVlanTagged = $Attribute.Value
-                                    }
-
-                                    if ($Attribute.DisplayName -eq "Vlan UnTagged") {
-                                        $PortVlanUnTagged = $Attribute.Value
-                                    }
-                                }
-
-                                $PortInfo = [PSCustomObject]@{
-                                    "NICIdentifier" = $NICDisplayName
-                                    "Port" = $PortNumber
-                                    "CustomId" = $CustomId
-                                    "VlanTagged" = $PortVlanTagged
-                                    "VlanUnTagged" = $PortVlanUnTagged
-                                }
-                                $PortVlanInfo += $PortInfo
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $PortVlanInfo
-    }
-    else {
-        Write-Error "Unable to get TemplateVlanId $($TemplateVlanId)"
-    }
-    return $null
-}
-
 function Set-OMETemplateNetwork {
 <#
 Copyright (c) 2018 Dell EMC Corporation
@@ -227,7 +179,7 @@ Process {
             if ($null -eq $Mode) { throw [System.ArgumentNullException] "Mode parameter required when specifing -TaggedNetworks" }
         }
         # Get network port and vlan info from existing template
-        $VlanPortMap = Get-TemplateVlanInfo -BaseUri $BaseUri -Headers $Headers -TemplateId $Template.Id
+        $VlanPortMap = Get-OMETemplateNetwork -Template $Template
         Write-Verbose "Current template network config"
         Write-Verbose $($VlanPortMap | ConvertTo-Json)
         $UpdateNetworkConfigPayload = Get-TemplateVlanPayload -Template $Template -NICIdentifier $NICIdentifier -Port $Port `

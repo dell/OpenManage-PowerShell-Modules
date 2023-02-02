@@ -4,7 +4,7 @@ param(
     [String]$Test,
 
     [Parameter(Mandatory=$false)]
-    [String]$Tag,
+    [String[]]$Tag,
 
     [Parameter(Mandatory=$false)]
     [String]$Server
@@ -31,7 +31,7 @@ $PesterPreference.Output.Verbosity = 'Detailed'
 
 if ($Test -ne "") {
     if ($Tag -ne "") {
-        Invoke-Pester ".\Tests\$($Test).Tests.ps1" -Tag "$($Tag)"
+        Invoke-Pester ".\Tests\$($Test).Tests.ps1" -Tag $Tag
     } else {
         Invoke-Pester ".\Tests\$($Test).Tests.ps1"
     }

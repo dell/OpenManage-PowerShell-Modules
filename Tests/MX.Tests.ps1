@@ -23,6 +23,7 @@ Describe "MX7000 Tests" {
             "VlanMinimum" = 4002
             "Type"        = 1
         }
+        $Script:TemplateNameFromFile = "TestDeploymentTemplate_FromFile_$((Get-Date).ToString('yyyyMMddHHmmss'))"
     }
     <#
     Context "MCM Group" {
@@ -129,6 +130,46 @@ Describe "MX7000 Tests" {
         }
     }
 
+    Context "Template" -Tag "Template" {
+        It "Should create Template from file" {
+            $xml = Get-Content -Path .\Tests\Data\MX740c_4Port.xml | Out-String
+            New-OMETemplateFromFile -Name $Script:TemplateNameFromFile -Content $xml -Wait
+            $Script:TemplateNameFromFile | Get-OMETemplate -FilterBy "Name" | Select-Object -ExpandProperty Name | Should -Be $Script:TemplateNameFromFile
+        }
+        It "Should return 0 Template Networks" {
+            $Template = $($Script:TemplateNameFromFile | Get-OMETemplate -FilterBy "Name")
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 1 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+        }
+        It "Should add Network to Template" {
+            $Template = $($Script:TemplateNameFromFile | Get-OMETemplate -FilterBy "Name")
+            $TestNetwork1 = $($Script:TestNetwork1.Name | Get-OMENetwork)
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $TestNetwork1 -Mode "Append"
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -TaggedNetworks $TestNetwork1 -Mode "Append"
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 1 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 1
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 2 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 1
+        }
+        It "Should replace Networks in Template" {
+            $Template = $($Script:TemplateNameFromFile | Get-OMETemplate -FilterBy "Name")
+            $TestNetwork1 = $($Script:TestNetwork1.Name | Get-OMENetwork)
+            $TestNetwork2 = $($Script:TestNetwork2.Name | Get-OMENetwork)
+            $TestNetworks = @($TestNetwork1, $TestNetwork2)
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $TestNetworks -Mode "Replace" -Verbose
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -TaggedNetworks $TestNetworks -Mode "Replace" -Verbose
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 1 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 2
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 2 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 2
+        }
+        It "Should remove Networks from Template" {
+            $Template = $($Script:TemplateNameFromFile | Get-OMETemplate -FilterBy "Name")
+            $TestNetwork1 = $($Script:TestNetwork1.Name | Get-OMENetwork)
+            $TestNetwork2 = $($Script:TestNetwork2.Name | Get-OMENetwork)
+            $TestNetworks = @($TestNetwork1, $TestNetwork2)
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $TestNetworks -Mode "Remove"
+            $Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -TaggedNetworks $TestNetworks -Mode "Remove"
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 1 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+            $Template | Get-OMETemplateNetwork | Where-Object { $_.NICIdentifier -eq "NIC in Mezzanine 1A" -and $_.Port -eq 2 } | Select-Object -ExpandProperty VlanTagged | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+        }
+    }
+
     Context "Cleanup" -Tag "Cleanup" {
         It "Should remove Uplink" {
             $TestFabric = $($Script:TestFabricName | Get-OMEFabric)
@@ -142,6 +183,11 @@ Describe "MX7000 Tests" {
             $TestNetwork1, $TestNetwork2 | Remove-OMENetwork
             $Script:TestNetwork1.Name | Get-OMENetwork | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
             $Script:TestNetwork2.Name | Get-OMENetwork | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+        }
+        It "Should remove Template" {
+            $Template = $($Script:TemplateNameFromFile | Get-OMETemplate -FilterBy "Name")
+            $Template | Remove-OMETemplate
+            $Script:TemplateNameFromFile | Get-OMETemplate -FilterBy "Name" | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
         }
     }
 

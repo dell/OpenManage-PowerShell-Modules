@@ -26,7 +26,7 @@ limitations under the License.
 .PARAMETER Name
     String containing fabric name to search
 .EXAMPLE
-    "SmartFabric01 | Get-OMEFabric | Format-Table
+    "SmartFabric01" | Get-OMEFabric | Format-Table
 
     Get fabric by name
 #>   

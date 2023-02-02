@@ -16,5 +16,5 @@ Install-Module -Name Pester -Scope CurrentUser -Force
 ```
 ## Run Tests by Tag
 ```
-.\Tests\Main.Tests.ps1 -Server "192.168.1.100" -Test Template -Tag Deployment
+.\Tests\Main.Tests.ps1 -Server "192.168.1.100" -Test MX -Tag "Network", "Template", "Cleanup"
 ```
