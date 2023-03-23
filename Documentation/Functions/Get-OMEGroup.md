@@ -61,7 +61,7 @@ Accept wildcard characters: False
 ```
 
 ### -FilterBy
-Filter the results by ("Name", "Id")
+Filter the results by ("Name", "Type")
 
 ```yaml
 Type: String

@@ -23,7 +23,7 @@ limitations under the License.
 .PARAMETER Value
     String containing search value. Use with -FilterBy parameter
 .PARAMETER FilterBy
-    Filter the results by ("Name", "Id")
+    Filter the results by ("Name", "Type")
 .INPUTS
     String[]
 .EXAMPLE
@@ -45,7 +45,7 @@ param(
     [String[]]$Value,
 
     [Parameter(Mandatory=$false)]
-    [ValidateSet("Name", "Id")]
+    [ValidateSet("Name", "Type")]
     [String]$FilterBy = "Name"
 )
 
@@ -56,27 +56,60 @@ Process {
     }
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
-        $GroupUrl   = "https://$($SessionAuth.Host)/api/GroupService/Groups"
+        $BaseUri = "https://$($SessionAuth.Host)"
+        $GroupUrl   =  $BaseUri + "/api/GroupService/Groups"
         $Type        = "application/json"
         $Headers     = @{}
-        $FilterMap = @{'Name'='Name'; 'Id'='DefinitionId'; 'Type'='Type'}
+        $FilterMap = @{'Name'='Name'; 'Id'='Id'; 'Type'='TypeId'}
         $FilterExpr  = $FilterMap[$FilterBy]
         $GroupData = @()
 
         $Headers."X-Auth-Token" = $SessionAuth.Token
+        $Filter = ""
         if ($Value.Count -gt 0) { 
-            if ($FilterBy -eq 'Id') {
-                $GroupUrl += "?`$filter=$($FilterExpr) eq $($Value)"
+            if ($FilterBy -eq 'Id' -or $FilterBy -eq 'Type') {
+                $Filter += "`$filter=$($FilterExpr) eq $($Value)"
             }
             else {
-                $GroupUrl += "?`$filter=$($FilterExpr) eq '$($Value)'"
+                $Filter += "`$filter=$($FilterExpr) eq '$($Value)'"
             }
         }
+        $GroupUrl = $GroupUrl + "?" + $Filter
+        Write-Verbose $GroupUrl
         $GrpResp = Invoke-WebRequest -Uri $GroupUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
         if ($GrpResp.StatusCode -eq 200) {
             $GroupInfo = $GrpResp.Content | ConvertFrom-Json
             foreach ($Group in $GroupInfo.'value') {
                 $GroupData += New-GroupFromJson $Group
+            }
+            if($GroupInfo.'@odata.nextLink')
+            {
+                $NextLinkUrl = $BaseUri + $GroupInfo.'@odata.nextLink' + "&" + $Filter
+            }
+            while($NextLinkUrl)
+            {
+                Write-Verbose $NextLinkUrl
+                $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
+                if($NextLinkResponse.StatusCode -eq 200)
+                {
+                    $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
+                    foreach ($Group in $NextLinkData.'value') {
+                        $GroupData += New-GroupFromJson $Group
+                    }
+                    if($NextLinkData.'@odata.nextLink')
+                    {
+                        $NextLinkUrl = $BaseUri + $NextLinkData.'@odata.nextLink' + "&" + $Filter
+                    }
+                    else
+                    {
+                        $NextLinkUrl = $null
+                    }
+                }
+                else
+                {
+                    Write-Warning "Unable to get nextlink response for $($NextLinkUrl)"
+                    $NextLinkUrl = $null
+                }
             }
             return $GroupData
         }
@@ -85,9 +118,7 @@ Process {
         }
     } 
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String) 
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 
