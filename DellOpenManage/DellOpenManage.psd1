@@ -27,7 +27,7 @@ Author = 'Trevor Squillario <Trevor.Squillario@Dell.com>'
 CompanyName = 'Dell EMC'
 
 # Copyright statement for this module
-Copyright = '(c) 2021 Dell EMC. All rights reserved.'
+Copyright = '(c) 2023 Dell EMC. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'Dell OpenManage Enterprise PowerShell Module'
