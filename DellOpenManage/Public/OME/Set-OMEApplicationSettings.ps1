@@ -1,4 +1,4 @@
-﻿function Get-ApplianceSettingsPayload($Name, $Settings) {
+﻿function Get-ApplianceSettingsPayload($Settings) {
     $Payload = '{
         "SystemConfiguration": {
             "Components": [{
@@ -22,7 +22,7 @@
 
 function Set-OMEApplicationSettings {
     <#
-Copyright (c) 2018 Dell EMC Corporation
+Copyright (c) 2023 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,28 +39,18 @@ limitations under the License.
 
     <#
 .SYNOPSIS
-    Refresh inventory on devices in OpenManage Enterprise
+    Set Application Settings
 .DESCRIPTION
-    This will submit a job to refresh the inventory on provided Devices.
-.PARAMETER Name
-    Name of the inventory refresh job
-.PARAMETER Devices
-    Array of type Device returned from Get-OMEDevice function.
+.PARAMETER Settings
+    Array of PSCustomObject (Hashtable) containing Attributes to set. Use Get-OMEApplicationSettings to view available Attributes. Example: $Settings = @(@{Name="SSH.1#Enable"; Value=$true})
 .INPUTS
-    Device
-.EXAMPLE
-    "PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Invoke-OMEInventoryRefresh -Verbose
-    Create separate inventory refresh job for each device in list
-.EXAMPLE
-    ,$("PowerEdge R640" | Get-OMEDevice -FilterBy "Model") | Invoke-OMEInventoryRefresh -Verbose
-    Create one inventory refresh job for all devices in list. Notice the preceeding comma before the device list.
+.EXAMPLE  
+    Set-OMEApplicationSettings -Settings @(@{Name="SSH.1#Enable"; Value=$true}) -Wait -Verbose
+    Enable SSH. See README for more examples.
 #>
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $false)]
-        [String]$Name = "Inventory Task Device $((Get-Date).ToString('yyyyMMddHHmmss'))",
-
         [Parameter(Mandatory)]
         [PSCustomObject[]]$Settings,
 

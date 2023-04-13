@@ -1,6 +1,6 @@
 ﻿function Get-OMEApplicationSettings {
     <#
-Copyright (c) 2018 Dell EMC Corporation
+Copyright (c) 2023 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,21 +17,14 @@ limitations under the License.
 
     <#
 .SYNOPSIS
-    Refresh inventory on devices in OpenManage Enterprise
+    Get Application Settings
 .DESCRIPTION
-    This will submit a job to refresh the inventory on provided Devices.
-.PARAMETER Name
-    Name of the inventory refresh job
-.PARAMETER Devices
-    Array of type Device returned from Get-OMEDevice function.
 .INPUTS
-    Device
 .EXAMPLE
-    "PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Invoke-OMEInventoryRefresh -Verbose
-    Create separate inventory refresh job for each device in list
+    Get-OMEApplicationSettings
 .EXAMPLE
-    ,$("PowerEdge R640" | Get-OMEDevice -FilterBy "Model") | Invoke-OMEInventoryRefresh -Verbose
-    Create one inventory refresh job for all devices in list. Notice the preceeding comma before the device list.
+    Get-OMEApplicationSettings | Select-Object -ExpandProperty SystemConfiguration | Select-Object -ExpandProperty Components | Select-Object -First 1 | Select-Object -ExpandProperty Attributes | Format-Table
+    Display all Attributes in Table. See README for more examples.
 #>
 
     [CmdletBinding()]

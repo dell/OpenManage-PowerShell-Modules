@@ -37,7 +37,7 @@ function Get-ChassisSlotNamePayload($Slot, $Name, $SlotType, $TargetPayload) {
     if ($SlotType -eq "SLED") { $SlotTypeInt = 1000 }
     if ($SlotType -eq "STORAGESLED") { $SlotTypeInt = 2100 }
     $SlotParam = @{
-        "Key" = "slotConfig"
+        "Key"   = "slotConfig"
         "Value" = "${Slot}|${SlotTypeInt}|${Name}"
     }
     $Payload.Params += $SlotParam
@@ -48,7 +48,7 @@ function Get-ChassisSlotNamePayload($Slot, $Name, $SlotType, $TargetPayload) {
 
 function Set-OMEChassisSlotName {
     <#
-Copyright (c) 2018 Dell EMC Corporation
+Copyright (c) 2023 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -65,20 +65,31 @@ limitations under the License.
 
     <#
 .SYNOPSIS
-    Set power state of server
+    Set Chassis slot names
 .DESCRIPTION
-.PARAMETER Devices
-    Array of type Device returned from Get-OMEDevice function. Used to limit the devices updated within the baseline.
-.PARAMETER State
-    String to represent the desired power state of device. ("On", "Off", "ColdBoot", "WarmBoot", "ShutDown")
+.PARAMETER Chassis
+    Object of type Device returned from Get-OMEDevice function. Must be a Chassis device type.
+.PARAMETER Slot
+    Int to represent the slot number
+.PARAMETER Name
+    String to represent the slot name
+.PARAMETER SlotType 
+    String to represent the slot type (Default="SLED", "STORAGESLED", "IOM")
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
     Time, in seconds, to wait for the job to complete
 .INPUTS
-    Device[]
+    Device
 .EXAMPLE
-    Set-OMEPowerState -State "On" -Devices $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag")
+    Set-OMEChassisSlotName -Chassis $("C38V9ZZ" | Get-OMEDevice) -Slot 1 -Name "MX840c-C39N9ZZ" -Wait -Verbose
+    Set chassis sled slot name
+.EXAMPLE
+    Set-OMEChassisSlotName -Chassis $("C38V9ZZ" | Get-OMEDevice) -Slot 4 -Name "MX5016s-C39R9ZZ" -SlotType "STORAGESLED" -Wait -Verbose
+    Set chassis storage sled slot name
+.EXAMPLE
+    Set-OMEChassisSlotName -Chassis $("C38V9ZZ" | Get-OMEDevice) -Slot 1 -Name "MX5108-C38T9ZZ" -SlotType "IOM" -Wait -Verbose
+    Set chassis IOM slot name
 #>
 
     [CmdletBinding()]
@@ -92,7 +103,7 @@ limitations under the License.
         [Parameter(Mandatory)]
         [String]$Name,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet("SLED", "STORAGESLED", "IOM")]
         [String]$SlotType = "SLED",
     
@@ -118,7 +129,7 @@ limitations under the License.
 
             $DeviceIds = @()
             $DeviceIds += $Chassis.Id
-            if ($DeviceIds.Length -gt 0) {
+            if ($Chassis.Type -eq 2000) {
                 $TargetPayload = Get-JobTargetPayload $DeviceIds
 
                 $ChassisSlotNamePayload = Get-ChassisSlotNamePayload -TargetPayload $TargetPayload -Slot $Slot -Name $Name -SlotType $SlotType
@@ -144,7 +155,7 @@ limitations under the License.
                 }
             } 
             else {
-                Write-Error "Unable to fetch powerstate for device with id $($Devices.Id))"
+                throw [System.Exception]::new("DeviceException", "Device must be of type Chassis")
             }
         } 
         Catch {

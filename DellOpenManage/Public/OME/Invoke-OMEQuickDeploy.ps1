@@ -119,7 +119,7 @@ function Get-QuickDeployPayload($Name, [SecureString]$RootPassword, $SlotType, $
 
 function Invoke-OMEQuickDeploy {
 <#
-Copyright (c) 2018 Dell EMC Corporation
+Copyright (c) 2023 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -136,21 +136,43 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Refresh inventory on devices in OpenManage Enterprise
+    Invoke quick deploy job on chassis slots
 .DESCRIPTION
-    This will submit a job to refresh the inventory on provided Devices.
 .PARAMETER Name
-    Name of the inventory refresh job
-.PARAMETER Devices
-    Array of type Device returned from Get-OMEDevice function.
+    Name of the quick deploy job
+.PARAMETER Chassis
+    Object of type Device returned from Get-OMEDevice function. Must be a Chassis device type.
+.PARAMETER RootPassword
+    SecureString containing the root password
+.PARAMETER SlotType
+    String to represent the slot type (Default="SLED", "IOM")
+.PARAMETER IPv4Enabled
+    Switch to enable IPv4
+.PARAMETER IPv4NetworkType
+    String to determine the network type (Default="DHCP", "STATIC")
+.PARAMETER IPv4SubnetMask
+    String representing the IPv4 subnet mask
+.PARAMETER IPv4Gateway
+    String representing the IPv4 gateway
+.PARAMETER IPv6Enabled
+    Switch to enable IPv6
+.PARAMETER IPv6NetworkType
+    String to determine the network type (Default="DHCP", "STATIC")
+.PARAMETER IPv6Gateway
+    String representing the IPv6 gateway
+.PARAMETER IPv6PrefixLength
+    String representing the IPv6 prefix length
+.PARAMETER Slots
+    Array of PSCustomObject (Hashtable) containing slot quick deploy settings. Example: $Settings = @(@{Slot=1; IPv4Address="192.169.1.100"; IPv6Address="2001:0db8:85a3:0000:0000:8a2e:0370:7334"; VlanId=1})
+.PARAMETER Wait
+    Wait for job to complete
+.PARAMETER WaitTime
+    Time, in seconds, to wait for the job to complete
 .INPUTS
     Device
 .EXAMPLE
-    "PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Invoke-OMEInventoryRefresh -Verbose
-    Create separate inventory refresh job for each device in list
-.EXAMPLE
-    ,$("PowerEdge R640" | Get-OMEDevice -FilterBy "Model") | Invoke-OMEInventoryRefresh -Verbose
-    Create one inventory refresh job for all devices in list. Notice the preceeding comma before the device list.
+    Invoke-OMEQuickDeploy -RootPassword $(ConvertTo-SecureString 'calvin' -AsPlainText -Force) -SlotType "SLED" -Chassis $("C38V9ZZ" | Get-OMEDevice) -IPv4Enabled -IPv4NetworkType "DHCP" -Slots @(@{Slot=1;},@{Slot=2;}) -Wait -Verbose
+    Quick Deploy sleds in slot 1 and 2 using DHCP. See README for more examples.
 #>
 
 [CmdletBinding()]
@@ -159,7 +181,7 @@ param(
     [String]$Name = "Quick Deploy Task Device $((Get-Date).ToString('yyyyMMddHHmmss'))",
 
     [Parameter(Mandatory=$false, ValueFromPipeline)]
-    [Device] $Chassis,
+    [Device]$Chassis,
 
     [Parameter(Mandatory)]
     [SecureString]$RootPassword,
@@ -187,9 +209,6 @@ param(
     [Parameter(Mandatory=$false)]
     [ValidateSet("STATIC", "DHCP")]
     [String]$IPv6NetworkType = "DHCP",
-
-    [Parameter(Mandatory=$false)]
-    [String]$IPv6SubnetMask,
 
     [Parameter(Mandatory=$false)]
     [String]$IPv6Gateway,
@@ -221,10 +240,10 @@ Process {
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
         $DeviceId = $Chassis.Id
-        if ($Device.Type -ne 2000) {
+        if ($Chassis.Type -eq 2000) {
             $JobPayload = Get-QuickDeployPayload -Name $Name -RootPassword $RootPassword -SlotType $SlotType -DeviceId $DeviceId `
                 -IPv4Enabled $IPv4Enabled -IPv4NetworkType $IPv4NetworkType -IPv4SubnetMask $IPv4SubnetMask -IPv4Gateway $IPv4Gateway `
-                -IPv6Enabled $IPv6Enabled -IPv6NetworkType $IPv6NetworkType -IPv6SubnetMask $IPv6SubnetMask -IPv6Gateway $IPv6Gateway -IPv6PrefixLength $IPv6PrefixLength `
+                -IPv6Enabled $IPv6Enabled -IPv6NetworkType $IPv6NetworkType -IPv6Gateway $IPv6Gateway -IPv6PrefixLength $IPv6PrefixLength `
                 -Slots $Slots
             
             # Submit job

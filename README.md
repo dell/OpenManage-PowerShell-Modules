@@ -642,6 +642,113 @@ $IdentityPool = $("default" | Get-OMEIdentityPool)
 "MX740c 4 Port"  | Get-OMETemplate | Set-OMETemplateIdentityPool -IdentityPool $IdentityPool -Verbose
 ```
 
+## Set Chassis Name
+```
+$Chassis = "C38V9ZZ" | Get-OMEDevice
+Set-OMEChassisName -Name "TESTMX7000-1" -Chassis $Chassis -Wait -Verbose
+```
+
+## Set Chassis Slot Names
+```
+$Chassis = "C38V9ZZ" | Get-OMEDevice
+Set-OMEChassisSlotName -Chassis $Chassis -Slot 1 -Name "MX840c-C39N9ZZ" -Wait -Verbose
+Set-OMEChassisSlotName -Chassis $Chassis -Slot 1 -Name "MX5108-C38T9ZZ" -SlotType "IOM" -Wait -Verbose
+```
+
+## Quick Deploy
+```
+$RootPassword = $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)
+$Chassis = "C38V9T2" | Get-OMEDevice
+```
+
+Sleds DHCP
+```
+$QuickDeployDHCP = @(
+    @{Slot=1;},
+    @{Slot=2;}
+)
+
+Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Chassis `
+    -IPv4Enabled -IPv4NetworkType "DHCP" `
+    -Slots $QuickDeployDHCP -Wait -Verbose
+
+Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Chassis `
+    -IPv4Enabled -IPv4NetworkType "DHCP" `
+    -IPv6Enabled -IPv6NetworkType "DHCP" `
+    -Slots $QuickDeployDHCP -Wait -Verbose
+```
+
+Sleds IPv4 Only
+```
+$QuickDeployIPv4Static = @(
+    @{Slot=1; IPv4Address="100.79.6.12"; VlanId=1}
+)
+Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Chassis `
+    -IPv4Enabled -IPv4NetworkType "STATIC" -IPv4SubnetMask "255.255.254.0" -IPv4Gateway "192.168.1.1" `
+    -Slots $QuickDeployBothStatic -Verbose
+```
+
+Sleds IPv6 Only
+```
+$QuickDeployIPv6Static = @(
+    @{Slot=1; IPv6Address="2001:0db8:85a3:0000:0000:8a2e:0370:7334"; VlanId=1},
+    @{Slot=2; IPv6Address="2001:0db8:85a3:0000:0000:8a2e:0370:7335"; VlanId=1}
+)
+Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Chassis `
+    -IPv6Enabled -IPv6NetworkType "STATIC" -IPv6Gateway "fe80::1" -IPv6PrefixLength 4 `
+    -Slots $QuickDeployIPv6Static -Verbose
+```
+
+Sleds IPv4 and IPv6
+```
+$QuickDeployBothStatic = @(
+    @{Slot=1; IPv4Address="100.79.6.12"; IPv6Address="2001:0db8:85a3:0000:0000:8a2e:0370:7334"; VlanId=1}
+)
+Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Chassis `
+    -IPv4Enabled -IPv4NetworkType "STATIC" -IPv4SubnetMask "255.255.254.0" -IPv4Gateway "192.168.1.1" `
+    -IPv6Enabled -IPv6NetworkType "STATIC" -IPv6Gateway "fe80::1" -IPv6PrefixLength 4 `
+    -Slots $QuickDeployBothStatic -Verbose
+```
+
+IOM IPv4
+```
+$QuickDeployIPv4Static = @(
+    @{Slot=1; IPv4Address="100.79.6.12"; VlanId=1}
+)
+Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "IOM" -Chassis $Chassis `
+    -IPv4Enabled -IPv4NetworkType "STATIC" -IPv4SubnetMask "255.255.255.0" -IPv4Gateway "192.168.1.1" `
+    -Slots $QuickDeployIPv4Static -Verbose
+```
+## Application Settings
+Set Application Settings
+```
+$Settings = @(
+    @{Name="EmailAlertsConf.1#DestinationEmailAddress"; Value="mail.example.net"},
+    @{Name="EmailAlertsConf.1#portNumber"; Value=25},
+    @{Name="EmailAlertsConf.1#useSSL"; Value=$false},
+    @{Name="ChassisLocation.1#DataCenterName"; Value="DC1"},
+    @{Name="ChassisLocation.1#RoomName"; Value=""},
+    @{Name="ChassisLocation.1#AisleName"; Value=""},
+    @{Name="TimeConfig.1#NTPEnable"; Value=$true},
+    @{Name="TimeConfig.1#TimeZone"; Value="TZ_ID_9"},
+    @{Name="TimeConfig.1#NTPServer1"; Value="0.centos.pool.ntp.org"},
+    @{Name="ChassisPower.1#RedundancyPolicy"; Value="GRID_REDUNDANCY"},
+    @{Name="ChassisPower.1#EnableHotSpare"; Value=$true},
+    @{Name="ChassisPower.1#PrimaryGrid"; Value="GRID_1"},
+    @{Name="SessionConfiguration.1#maxSessions"; Value=100},
+    @{Name="SSH.1#Enable"; Value=$true},
+    @{Name="Preference.1#DeviceName"; Value="HOST_NAME"}
+)
+
+Set-OMEApplicationSettings -Settings $Settings -Wait -Verbose
+```
+
+Get Application Settings
+```
+$CurrentSettings = Get-OMEApplicationSettings
+$CurrentSettings.SystemConfiguration.Components[0].Attributes | Format-Table
+```
+
 ## Error Handling and Control Flow
 https://devblogs.microsoft.com/scripting/handling-errors-the-powershell-way
 ```

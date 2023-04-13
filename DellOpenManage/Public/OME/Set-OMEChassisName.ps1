@@ -41,7 +41,7 @@ function Get-ChassisNamePayload($Name, $TargetPayload) {
 
 function Set-OMEChassisName {
     <#
-Copyright (c) 2018 Dell EMC Corporation
+Copyright (c) 2023 Dell EMC Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,20 +58,20 @@ limitations under the License.
 
     <#
 .SYNOPSIS
-    Set power state of server
+    Set chassis name
 .DESCRIPTION
-.PARAMETER Devices
-    Array of type Device returned from Get-OMEDevice function. Used to limit the devices updated within the baseline.
-.PARAMETER State
-    String to represent the desired power state of device. ("On", "Off", "ColdBoot", "WarmBoot", "ShutDown")
+.PARAMETER Chassis
+    Object of type Device returned from Get-OMEDevice function. Must be a Chassis device type.
+.PARAMETER Name
+    String to represent the Chassis name
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
     Time, in seconds, to wait for the job to complete
 .INPUTS
-    Device[]
+    Device
 .EXAMPLE
-    Set-OMEPowerState -State "On" -Devices $("37KP0ZZ" | Get-OMEDevice -FilterBy "ServiceTag")
+    Set-OMEChassisName -Name "TESTMX7000-1" -Chassis $("C38V9ZZ" | Get-OMEDevice) -Wait -Verbose
 #>
 
     [CmdletBinding()]
@@ -104,7 +104,7 @@ limitations under the License.
 
             $DeviceIds = @()
             $DeviceIds += $Chassis.Id
-            if ($DeviceIds.Length -gt 0) {
+            if ($Chassis.Type -eq 2000) {
                 $TargetPayload = Get-JobTargetPayload $DeviceIds
 
                 $ChassisNamePayload = Get-ChassisNamePayload -TargetPayload $TargetPayload -Name $Name
@@ -130,7 +130,7 @@ limitations under the License.
                 }
             } 
             else {
-                Write-Error "Unable to fetch powerstate for device with id $($Devices.Id))"
+                throw [System.Exception]::new("DeviceException", "Device must be of type Chassis")
             }
         } 
         Catch {
