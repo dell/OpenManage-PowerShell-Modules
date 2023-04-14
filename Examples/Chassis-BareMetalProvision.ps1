@@ -57,6 +57,7 @@ $ChassisSettings = @{
     FabricUplinkStorageFabricAPorts  = "C38S9T2:fibrechannel1/1/43:1"
     FabricUplinkStorageFabricBName   = "StorageFabricBUplink"
     FabricUplinkStorageFabricBPorts  = "CMWSV43:fibrechannel1/1/43:1"
+    IdentityPoolName                 = "TestPool01"
     IdentityPoolCount                = 128
     IdentityPoolEthernetMAC          = "02:00:00:00:00:00"
     IdentityPoolFCoEMAC              = "04:00:00:00:00:00"
@@ -129,16 +130,17 @@ New-OMEFabricUplink -Name $ChassisSettings.FabricUplinkStorageFabricAName -Fabri
     -TaggedNetworks $StorageFabricANetwork -Ports $ChassisSettings.FabricUplinkStorageFabricAPorts -Verbose
 New-OMEFabricUplink -Name $ChassisSettings.FabricUplinkStorageFabricBName -Fabric $Fabric -UplinkType $ChassisSettings.FabricUplinkStorageType `
     -TaggedNetworks $StorageFabricBNetwork -Ports $ChassisSettings.FabricUplinkStorageFabricBPorts -Verbose
+
 # Create Identity Pool
 New-OMEIdentityPool `
-    -Name "TestPool01" `
+    -Name $ChassisSettings.IdentityPoolName `
     -EthernetSettings_IdentityCount $ChassisSettings.IdentityPoolCount `
     -EthernetSettings_StartingMacAddress $ChassisSettings.IdentityPoolEthernetMAC `
     -FcoeSettings_IdentityCount $ChassisSettings.IdentityPoolCount `
     -FcoeSettings_StartingMacAddress $ChassisSettings.IdentityPoolFCoEMAC `
     -Verbose
 
-# Loop through Chassis setting chassis name, slot names and quick deploying sleds/IOM
+# Loop through Chassis setting chassis name, slot names and quick deploy for sleds/IOM
 foreach ($Chassis in $ChassisSettings.Chassis) {
     $ChassisDevice = $Chassis.ServiceTag | Get-OMEDevice
     # Set Chassis Name
@@ -158,6 +160,7 @@ foreach ($Chassis in $ChassisSettings.Chassis) {
     foreach ($SledSlot in $Chassis.SledSlots) {
         Set-OMEChassisSlotName -Chassis $ChassisDevice -Slot $SledSlot.Slot -Name $SledSlot.Name -Verbose
     }
+
     foreach ($IOMSlot in $Chassis.IOMSlots) {
         Set-OMEChassisSlotName -Chassis $ChassisDevice -Slot $IOMSlot.Slot -Name $IOMSlot.Name -SlotType "IOM" -Verbose
     }
@@ -166,12 +169,20 @@ foreach ($Chassis in $ChassisSettings.Chassis) {
 # Set Application Settings
 Set-OMEApplicationSettings -Settings $ChassisSettings.Attributes -Wait -Verbose
 
-# Create Alert Policy
-# Import Default Template
-# Configure NPAR partitions for FCoE
-# Assign Identity Pool & VLANs
-# Include FCoE VLANs
+# Create Alert Policy (TODO)
+
+# Import Default Template which includes NPAR partitions for FCoE. Configure this on a server via the Lifecycle Controller and export SCP to XML file.
 New-OMETemplateFromFile -Name $ChassisSettings.TemplateName -Content $(Get-Content -Path .\Data.xml | Out-String)
+
+# Assign VLANs to Template
+$Template = $ChassisSettings.TemplateName | Get-OMETemplate 
+$Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 1 -TaggedNetworks $Port1Networks -Mode "Replace" -Verbose
+$Template | Set-OMETemplateNetwork -NICIdentifier "NIC in Mezzanine 1A" -Port 2 -TaggedNetworks $Port2Networks -Mode "Replace" -Verbose
+
+# Assign Identity Pool  to Template
+$IdentityPool = $ChassisSettings.IdentityPoolName | Get-OMEIdentityPool
+$Template | Set-OMETemplateIdentityPool -IdentityPool $IdentityPool -Verbose
+
 # Deploy Template to Sleds
 $DefaultTemplate = $($ChassisSettings.TemplateName | Get-OMETemplate)
 $AllComputeDevices = $(1000 | Get-OMEDevice -FilterBy "Type")

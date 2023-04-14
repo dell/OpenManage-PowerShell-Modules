@@ -1,5 +1,4 @@
 ﻿using module ..\..\Classes\Device.psm1
-using module ..\..\Classes\QuickDeploySlot.psm1
 
 function Get-QuickDeployPayload($Name, [SecureString]$RootPassword, $SlotType, $DeviceId, $IPv4Enabled, $IPv4NetworkType, $IPv4SubnetMask, $IPv4Gateway, $IPv6Enabled, $IPv6NetworkType, $IPv6Gateway, $IPv6PrefixLength, $Slots) {
     $Payload = '{
@@ -249,7 +248,7 @@ Process {
             # Submit job
             $JobURL = $BaseUri + "/api/JobService/Jobs"
             $JobPayload = $JobPayload | ConvertTo-Json -Depth 6
-            Write-Verbose $JobPayload
+            #Write-Verbose $JobPayload
             $JobResp = Invoke-WebRequest -Uri $JobURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $JobPayload
             if ($JobResp.StatusCode -eq 201) {
                 Write-Verbose "Job creation successful..."

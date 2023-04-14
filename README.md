@@ -652,13 +652,14 @@ Set-OMEChassisName -Name "TESTMX7000-1" -Chassis $Chassis -Wait -Verbose
 ```
 $Chassis = "C38V9ZZ" | Get-OMEDevice
 Set-OMEChassisSlotName -Chassis $Chassis -Slot 1 -Name "MX840c-C39N9ZZ" -Wait -Verbose
+
 Set-OMEChassisSlotName -Chassis $Chassis -Slot 1 -Name "MX5108-C38T9ZZ" -SlotType "IOM" -Wait -Verbose
 ```
 
 ## Quick Deploy
 ```
 $RootPassword = $(ConvertTo-SecureString 'calvin' -AsPlainText -Force)
-$Chassis = "C38V9T2" | Get-OMEDevice
+$Chassis = "C38V9ZZ" | Get-OMEDevice
 ```
 
 Sleds DHCP
@@ -681,7 +682,7 @@ Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Cha
 Sleds IPv4 Only
 ```
 $QuickDeployIPv4Static = @(
-    @{Slot=1; IPv4Address="100.79.6.12"; VlanId=1}
+    @{Slot=1; IPv4Address="192.168.1.100"; VlanId=1}
 )
 Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Chassis `
     -IPv4Enabled -IPv4NetworkType "STATIC" -IPv4SubnetMask "255.255.254.0" -IPv4Gateway "192.168.1.1" `
@@ -702,7 +703,7 @@ Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Cha
 Sleds IPv4 and IPv6
 ```
 $QuickDeployBothStatic = @(
-    @{Slot=1; IPv4Address="100.79.6.12"; IPv6Address="2001:0db8:85a3:0000:0000:8a2e:0370:7334"; VlanId=1}
+    @{Slot=1; IPv4Address="192.168.1.100"; IPv6Address="2001:0db8:85a3:0000:0000:8a2e:0370:7334"; VlanId=1}
 )
 Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Chassis `
     -IPv4Enabled -IPv4NetworkType "STATIC" -IPv4SubnetMask "255.255.254.0" -IPv4Gateway "192.168.1.1" `
@@ -713,7 +714,7 @@ Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "SLED" -Chassis $Cha
 IOM IPv4
 ```
 $QuickDeployIPv4Static = @(
-    @{Slot=1; IPv4Address="100.79.6.12"; VlanId=1}
+    @{Slot=1; IPv4Address="192.168.1.100"; VlanId=1}
 )
 Invoke-OMEQuickDeploy -RootPassword $RootPassword -SlotType "IOM" -Chassis $Chassis `
     -IPv4Enabled -IPv4NetworkType "STATIC" -IPv4SubnetMask "255.255.255.0" -IPv4Gateway "192.168.1.1" `
