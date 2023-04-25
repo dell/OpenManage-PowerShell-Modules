@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.1]() - 2023-04-25
+### Fixed
+- Fixed bug with RunLater Scheduled Discovery in New-OMEDiscovery ([Issue #11](https://github.com/dell/OpenManage-PowerShell-Modules/issues/11))
+
 ## [3.5.0]() - 2023-04-14
 ### Added
 - Invoke-OMEQuickDeploy

@@ -101,7 +101,7 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
     }
     if ($Schedule.ToLower() -eq "runlater") {
         $DiscoveryConfigPayload.Schedule.RunNow = $false
-        $DiscoveryConfigPayload.Schedule.RunLater = $true
+        $DiscoveryConfigPayload.Schedule | Add-Member -NotePropertyName RunLater -NotePropertyValue $true
         $DiscoveryConfigPayload.Schedule.Cron = $ScheduleCron
     }
     return $DiscoveryConfigPayload
