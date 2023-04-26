@@ -67,7 +67,7 @@ Process {
             $DiscoveryInfo = $DiscoveryResp.Content | ConvertFrom-Json
             foreach ($Discovery in $DiscoveryInfo.'value') {
                 if ($Value.Count -gt 0 -and $FilterBy -eq "Id") {
-                    if ($Discovery.DiscoveryConfigGroupId -eq $Value){
+                    if ([String]$Discovery.DiscoveryConfigGroupId -eq $Value){
                         $DiscoveryData = New-DiscoveryFromJson $Discovery
                     }
                 }

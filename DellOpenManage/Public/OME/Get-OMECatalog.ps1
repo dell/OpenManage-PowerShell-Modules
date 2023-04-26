@@ -67,7 +67,7 @@ Process {
             $CatalogInfo = $CatalogResp.Content | ConvertFrom-Json
             foreach ($Catalog in $CatalogInfo.'value') {
                 if ($Value.Count -gt 0 -and $FilterBy -eq "Id") {
-                    if ($Catalog.Id -eq $Value){
+                    if ([String]$Catalog.Id -eq $Value){
                         $CatalogData += New-CatalogFromJson $Catalog
                     }
                 }

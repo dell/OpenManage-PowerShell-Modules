@@ -68,7 +68,7 @@ Process {
             $BaselineInfo = $BaselineResp.Content | ConvertFrom-Json
             foreach ($Baseline in $BaselineInfo.'value') {
                 if ($Value.Count -gt 0 -and $FilterBy -eq "Id") {
-                    if ($Baseline.Id -eq $Value){
+                    if ([String]$Baseline.Id -eq $Value){
                         $BaselineData += New-FirmwareBaselineFromJson $Baseline
                     }
                 }
@@ -88,9 +88,7 @@ Process {
         }
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String)
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 
