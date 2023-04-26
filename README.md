@@ -7,6 +7,9 @@
 - OpenManage Enterprise 3.4+
 - OpenManage Enterprise Modular 1.20.00+
 
+## PowerShell Gallery Installation
+`Install-Module -Name DellOpenManage -Scope CurrentUser`
+
 ## Scripted Installation
 1. Open PowerShell Command Window
 2. Change your PowerShell Execution Policy `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
@@ -764,6 +767,14 @@ Redirect ALL output to file
 ```
 Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -UpdateSchedule "StageForNextReboot" *> firmware.txt
 ```
+
+Get PowerShell Version
+
+`$PSVersionTable`
+
+Get PowerShell Module Path
+
+`$env:PSModulePath`
 
 ## Support
 This code is provided as-is and currently not officially supported by Dell EMC.
