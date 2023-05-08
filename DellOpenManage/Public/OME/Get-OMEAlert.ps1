@@ -249,18 +249,19 @@ function Get-Data {
   $ContentType = "application/json"
   $Data = @()
   $NextLinkUrl = $null
-  try {
+  #try {
 
     if ($PSBoundParameters.ContainsKey('OdataFilter')) {
-      $CountData = Invoke-RestMethod -UseBasicParsing -Uri $Url"?`$filter=$($OdataFilter)" -Method Get -Headers $Headers -ContentType $ContentType
-
+      $CountData = Invoke-WebRequest -UseBasicParsing -Uri $Url"?`$filter=$($OdataFilter)" -Method Get -Headers $Headers -ContentType $ContentType
+      $CountData = $CountData.Content | ConvertFrom-Json
       if ($CountData.'@odata.count' -lt 1) {
         Write-Error "No results were found for filter $($OdataFilter)."
         return @{}
       } 
     }
     else {
-      $CountData = Invoke-RestMethod -UseBasicParsing -Uri $Url -Method Get -Headers $Headers -ContentType $ContentType
+      $CountData = Invoke-WebRequest -UseBasicParsing -Uri $Url -Method Get -Headers $Headers -ContentType $ContentType
+      $CountData = $CountData.Content | ConvertFrom-Json
     }
 
     if ($null -ne $CountData.'value') {
@@ -283,7 +284,8 @@ function Get-Data {
         $i = $i + 1
       }
       
-      $NextLinkData = Invoke-RestMethod -UseBasicParsing -Uri "$($NextLinkUrl)" -Method Get -Headers $Headers -ContentType $ContentType
+      $NextLinkData = Invoke-WebRequest -UseBasicParsing -Uri "$($NextLinkUrl)" -Method Get -Headers $Headers -ContentType $ContentType
+      $NextLinkData = $NextLinkData.Content | ConvertFrom-Json
           
       if ($null -ne $NextLinkData.'value') {
         $Data += $NextLinkData.'value'
@@ -302,15 +304,18 @@ function Get-Data {
 
     return $Data
 
+    <#
   }
   catch [System.Net.Http.HttpRequestException] {
     Write-Error "There was a problem connecting to OME or the URL supplied is invalid. Did it become unavailable?"
     return @{}
   }
+  #>
 
 }
 
 ### Main commandlet start
+if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
 $BaseUri = "https://$($SessionAuth.Host)"
 $Headers = @{}
 $Headers."X-Auth-Token" = $SessionAuth.Token

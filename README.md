@@ -452,6 +452,148 @@ Run report
 Invoke-Report -ReportId 11709
 ```
 
+## Alerts
+Get 50 most recent critical alerts
+```
+Get-OMEAlert -SeverityType CRITICAL -Top 50 -Pages 1
+```
+
+Get all alert policies
+```
+Get-OMEAlertPolicy
+```
+
+Get alert policy by ID
+```
+12016 | Get-OMEAlertPolicy
+```
+
+Get alert policy by Name (OME API does not currently support filtering by Name natively)
+```
+Get-OMEAlertPolicy | Where-Object { $_.Name -eq "Group A Alert" }
+```
+
+Enable Alert Policy
+```
+17758 | Get-OMEAlertPolicy | Enable-OMEAlertPolicy
+```
+
+Disable Alert Policy
+```
+17758 | Get-OMEAlertPolicy | Disable-OMEAlertPolicy
+```
+
+Disable Multiple Alert Policies
+```
+$AlertPolicies = Get-OMEAlertPolicy | Where-Object { $_.Name -match "Group A Alert" }
+Disable-OMEAlertPolicy -AlertPolicy $AlertPolicies
+```
+
+Create alert policy
+
+Use `17758 | Get-OMEAlertPolicy | ConvertTo-Json -Depth 10` to show an existing policy as an example
+
+```
+$NewAlertPolicy = '{
+    "Name": "Test Alert Policy",
+    "Description": null,
+    "Enabled": true,
+    "DefaultPolicy": false,
+    "PolicyData": {
+        "Catalogs": [
+            {
+                "CatalogName": "iDRAC",
+                "Categories": [
+                    0
+                ],
+                "SubCategories": [
+                    0
+                ]
+            }
+        ],
+        "Severities": [
+            16
+        ],
+        "MessageIds": [],
+        "Devices": [],
+        "DeviceTypes": [],
+        "Groups": [
+            17745,
+            17743,
+            17746
+        ],
+        "AllTargets": false,
+        "Schedule": {
+            "StartTime": "2023-03-21 04:00:00.017",
+            "EndTime": "",
+            "CronString": "* * * ? * * *",
+            "Interval": false
+        },
+        "Actions": [
+            {
+                "Id": 36,
+                "Name": "Email",
+                "ParameterDetails": [
+                    {
+                        "Id": 1,
+                        "Name": "subject",
+                        "Value": "Device Name: $name,  Device IP Address: $ip,  Severity: $severity",
+                        "Type": "string",
+                        "TypeParams": [
+                            {
+                                "Name": "maxLength",
+                                "Value": "255"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 1,
+                        "Name": "to",
+                        "Value": "support@example.com",
+                        "Type": "string",
+                        "TypeParams": [
+                            {
+                                "Name": "maxLength",
+                                "Value": "255"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 1,
+                        "Name": "from",
+                        "Value": "ome@example.com",
+                        "Type": "string",
+                        "TypeParams": [
+                            {
+                                "Name": "maxLength",
+                                "Value": "255"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 1,
+                        "Name": "message",
+                        "Value": "Event occurred for Device Name: $name, Device IP Address: $ip, Identifier: $identifier, UTC Time: $time, Severity: $severity, Message ID: $messageId, $message",
+                        "Type": "string",
+                        "TypeParams": [
+                            {
+                                "Name": "maxLength",
+                                "Value": "255"
+                            }
+                        ]
+                    }
+                ],
+                "TemplateId": 50
+            }
+        ],
+        "UndiscoveredTargets": []
+    },
+    "State": true
+}'
+
+New-OMEAlertPolicy -AlertPolicy $NewAlertPolicy
+```
+
 ## Directory Services 
 ### Active Directory
 
