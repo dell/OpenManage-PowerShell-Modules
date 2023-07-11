@@ -441,6 +441,15 @@ Get job by state
 ```
 "Enabled" | Get-OMEJob -FilterBy "State" | Format-Table
 ```
+Export job details to CSV by Id
+```
+10085 | Get-OMEJob -FilterBy "Id" -Detail | Select-Object  @{Name='JobId'; Expression='Id'}, JobName, JobTypeId, JobType, JobDescription, LastRun -ExpandProperty JobDetail
+    | Export-Csv -Path "C:\Temp\OMEJobDetail.csv" -NoTypeInformation
+```
+Get jobs filter by multiple properties
+```
+2070 | Get-OMEJob -FilterBy "LastRunStatus" | Where-Object JobTypeId -EQ 101
+```
 Run job
 ```
 28991 | Invoke-OMEJobRun -Wait -Verbose

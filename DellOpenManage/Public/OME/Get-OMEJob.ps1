@@ -4,19 +4,21 @@
     $HistoryDetails = @()
     if ($ExecResp.StatusCode -eq 200) {
         $ExecRespInfo = $ExecResp.Content | ConvertFrom-Json
-        $HistoryId = $ExecRespInfo.value[0].Id
-        $ExecHistoryUrl = "$($JobExecUrl)($($HistoryId))/ExecutionHistoryDetails"
-        $HistoryResp = Invoke-WebRequest -UseBasicParsing -Uri $ExecHistoryUrl -Method Get -Headers $Headers -ContentType $Type
-        if ($HistoryResp.StatusCode -eq 200) {
-            $HistoryData = $HistoryResp.Content | ConvertFrom-Json
-            foreach ($HistoryDetail in $HistoryData.value) {
-                $HistoryDetails += $HistoryDetail
+        foreach ($ExecRespValue in $ExecRespInfo.value) {
+            $HistoryId = $ExecRespValue.Id
+            $ExecHistoryUrl = "$($JobExecUrl)($($HistoryId))/ExecutionHistoryDetails"
+            $HistoryResp = Invoke-WebRequest -UseBasicParsing -Uri $ExecHistoryUrl -Method Get -Headers $Headers -ContentType $Type
+            if ($HistoryResp.StatusCode -eq 200) {
+                $HistoryData = $HistoryResp.Content | ConvertFrom-Json
+                foreach ($HistoryDetail in $HistoryData.value) {
+                    $HistoryDetails += $HistoryDetail
+                }
             }
-            return $HistoryDetails
+            else {
+                Write-Warning "Unable to get job execution history details"
+            }
         }
-        else {
-            Write-Warning "Unable to get job execution history details"
-        }
+        return $HistoryDetails
     }
     else {
         Write-Warning "Unable to get job execution history info"

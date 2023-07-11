@@ -23,6 +23,8 @@ function New-JobFromJson {
         UserGenerated = $Job.UserGenerated
         LastRunStatusId = $Job.LastRunStatus.Id
         LastRunStatus = $Job.LastRunStatus.Name
+        JobTypeId = $Job.JobType.Id
+        JobType = $Job.JobType.Name
         Targets = $Job.Targets
     }
     if ($JobDetails) {
