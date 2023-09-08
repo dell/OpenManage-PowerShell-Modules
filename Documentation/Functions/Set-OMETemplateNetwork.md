@@ -139,7 +139,7 @@ Aliases:
 
 Required: False
 Position: 7
-Default value: None
+Default value: Append
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

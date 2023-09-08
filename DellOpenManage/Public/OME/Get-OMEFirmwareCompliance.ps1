@@ -3,6 +3,36 @@ using module ..\..\Classes\Device.psm1
 using module ..\..\Classes\FirmwareBaseline.psm1
 using module ..\..\Classes\ComponentCompliance.psm1
 
+function Get-FirmwareComplianceObject($UpdateActionSet, $Component, $ComplianceDevice) {
+    # Check for UpdateAction to allow for downgrade of firmware
+    if ($UpdateActionSet.ToUpper().Contains($Component.UpdateAction)) {
+        # Create object for display to user
+        $ReportObject = [ComponentCompliance]@{
+            DeviceId = $ComplianceDevice.DeviceId
+            ServiceTag = $ComplianceDevice.ServiceTag
+            DeviceModel = $ComplianceDevice.DeviceModel
+            DeviceName = $ComplianceDevice.DeviceName
+            Id = $Component.Id
+            Version = $Component.Version
+            CurrentVersion = $Component.CurrentVersion
+            Path = $Component.Path
+            Name = $Component.Name
+            Criticality = $Component.Criticality
+            UniqueIdentifier = $Component.UniqueIdentifier
+            TargetIdentifier = $Component.TargetIdentifier
+            UpdateAction = $Component.UpdateAction
+            SourceName = $Component.SourceName
+            PrerequisiteInfo = $Component.PrerequisiteInfo
+            ImpactAssessment = $Component.ImpactAssessment
+            Uri = $Component.Uri
+            RebootRequired = $Component.RebootRequired
+            ComplianceStatus = $Component.ComplianceStatus
+            ComponentType = $Component.ComponentType
+        }
+        return $ReportObject
+    }
+}
+
 function Get-OMEFirmwareCompliance {
 <#
 Copyright (c) 2018 Dell EMC Corporation
@@ -31,7 +61,7 @@ limitations under the License.
 .PARAMETER DeviceFilter
     Array of type Device returned from Get-OMEDevice function. Used to limit the devices updated within the baseline.
 .PARAMETER ComponentFilter
-    String to represent component name. Used to limit the components updated within the baseline. Supports regex via Powershell -match
+    Array of Strings that represent component name. Used to limit the components updated within the baseline. Supports regex via Powershell -match
 .PARAMETER UpdateAction
     Determines what type of updates will be performed. (Default="Upgrade", "Downgrade", "All")
 .PARAMETER Output
@@ -49,6 +79,10 @@ limitations under the License.
     "AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -ComponentFilter "iDRAC" | Format-Table
     
     Filter report by component in baseline
+.EXAMPLE
+    "AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -ComponentFilter -ComponentFilter "iDRAC", "BIOS"  | Format-Table
+    
+    Filter report by multiple components in baseline
 #>
 
 [CmdletBinding()]
@@ -60,7 +94,7 @@ param(
     [Device[]]$DeviceFilter,
 
     [Parameter(Mandatory=$false)]
-    [String]$ComponentFilter,
+    [String[]]$ComponentFilter,
 
     [Parameter(Mandatory=$false)]
     [ValidateSet("Upgrade", "Downgrade", "All")]
@@ -88,6 +122,7 @@ Process {
         } else {
             $BaselineId = $Id
         }
+
         $ComplURL = $BaseUri + "/api/UpdateService/Baselines($($BaselineId))/DeviceComplianceReports"
         $Response = Invoke-WebRequest -Uri $ComplURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method GET
         $DeviceComplianceReport = @()
@@ -135,50 +170,49 @@ Process {
                     # Check if the device is in the provided Devices list. Only return results for devices in the list, if a list was provided
                     if (($DeviceFilter.Count -gt 0 -and $DeviceFilter.Id -contains $ComplianceDevice.DeviceId) -or $DeviceFilter.Count -eq 0) {
                         $sourcesString = $null
+                        $DeviceComplianceReportPerDevice = @()
                         $CompList = $ComplianceDevice.'ComponentComplianceReports'
                         if ($CompList.Length -gt 0) {
                             # Loop through components
                             foreach ($Component in $CompList) {
-                                if (($ComponentFilter -ne "" -and $Component -match $ComponentFilter) -or $ComponentFilter -eq "") {
-                                    # Check for UpdateAction to allow for downgrade of firmware
-                                    if ($UpdateActionSet.ToUpper().Contains($Component.UpdateAction)) {
-                                        # Create string to be used in payload
-                                        $sourceName = $Component.'SourceName'
-                                        if ($sourcesString.Length -eq 0) {
-                                            $sourcesString += $sourceName
-                                        }
-                                        else {
-                                            $sourcesString += ';' + $sourceName
-                                        }
-                                        # Create object for display to user
-                                        $DeviceComplianceReport += [ComponentCompliance]@{
-                                            DeviceId = $ComplianceDevice.DeviceId
-                                            ServiceTag = $ComplianceDevice.ServiceTag
-                                            DeviceModel = $ComplianceDevice.DeviceModel
-                                            DeviceName = $ComplianceDevice.DeviceName
-                                            Id = $Component.Id
-                                            Version = $Component.Version
-                                            CurrentVersion = $Component.CurrentVersion
-                                            Path = $Component.Path
-                                            Name = $Component.Name
-                                            Criticality = $Component.Criticality
-                                            UniqueIdentifier = $Component.UniqueIdentifier
-                                            TargetIdentifier = $Component.TargetIdentifier
-                                            UpdateAction = $Component.UpdateAction
-                                            SourceName = $Component.SourceName
-                                            PrerequisiteInfo = $Component.PrerequisiteInfo
-                                            ImpactAssessment = $Component.ImpactAssessment
-                                            Uri = $Component.Uri
-                                            RebootRequired = $Component.RebootRequired
-                                            ComplianceStatus = $Component.ComplianceStatus
-                                            ComponentType = $Component.ComponentType
+                                $DeviceComplianceComponentReportObject = $null
+                                # No Component filter set
+                                if ($ComponentFilter.Length -eq 0) {
+                                    $DeviceComplianceComponentReportObject = Get-FirmwareComplianceObject -UpdateActionSet $UpdateActionSet -Component $Component -ComplianceDevice $ComplianceDevice
+                                    if ($null -ne $DeviceComplianceComponentReportObject) {
+                                        $DeviceComplianceReportPerDevice += $DeviceComplianceComponentReportObject
+                                        $DeviceComplianceReport += $DeviceComplianceComponentReportObject
+                                    }
+                                } else {
+                                    foreach ($Filter in $ComponentFilter) {
+                                        if (($Filter -ne "" -and $Component.Name -match $Filter)) {
+                                            $DeviceComplianceComponentReportObject = Get-FirmwareComplianceObject -UpdateActionSet $UpdateActionSet -Component $Component -ComplianceDevice $ComplianceDevice
+                                            if ($null -ne $DeviceComplianceComponentReportObject) {
+                                                $DeviceComplianceReportPerDevice += $DeviceComplianceComponentReportObject
+                                                $DeviceComplianceReport += $DeviceComplianceComponentReportObject
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+
+                        # Now what we have the filtered list of updatable components, let's build the sourceString
+                        foreach ($DeviceComplianceComponentReport in $DeviceComplianceReportPerDevice) {
+                            # Create string to be used in payload
+                            if ($null -ne $DeviceComplianceComponentReport) {
+                                $sourceName = $DeviceComplianceComponentReport.'SourceName'
+                                if ($sourcesString.Length -eq 0) {
+                                    $sourcesString += $sourceName
+                                }
+                                else {
+                                    $sourcesString += ';' + $sourceName
+                                }
+                            }
+                        }
+                        
                         # Create object to be used in payload
-                        if ( $null -ne $sourcesString) {
+                        if ($null -ne $sourcesString) {
                             $DeviceComplianceReportTargetList += @{
                                 Data = $sourcesString
                                 Id = $ComplianceDevice.'DeviceId'
@@ -202,9 +236,7 @@ Process {
         }
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String)
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

@@ -51,6 +51,7 @@ function Get-OMETemplateNetwork {
             $Headers."X-Auth-Token" = $SessionAuth.Token
     
             $TemplateVlanUrl = $BaseUri + "/api/TemplateService/Templates($($Template.Id))/Views(4)/AttributeViewDetails"
+            Write-Verbose $TemplateVlanUrl
             $TemplateVlanResponse = Invoke-WebRequest -UseBasicParsing -Uri $TemplateVlanUrl -Headers $Headers -Method Get -ContentType $ContentType
             if ($TemplateVlanResponse.StatusCode -eq 200) {
                 $TemplateVlanInfo = $TemplateVlanResponse.Content | ConvertFrom-Json

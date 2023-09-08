@@ -14,7 +14,7 @@ Get device firmware compliance report from OpenManage Enterprise
 
 ```
 Get-OMEFirmwareCompliance [[-Baseline] <FirmwareBaseline[]>] [[-DeviceFilter] <Device[]>]
- [[-ComponentFilter] <String>] [[-UpdateAction] <String[]>] [[-Output] <String>] [<CommonParameters>]
+ [[-ComponentFilter] <String[]>] [[-UpdateAction] <String[]>] [[-Output] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -43,6 +43,13 @@ Filter report by device in baseline
 ```
 
 Filter report by component in baseline
+
+### EXAMPLE 4
+```
+"AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -ComponentFilter -ComponentFilter "iDRAC", "BIOS"  | Format-Table
+```
+
+Filter report by multiple components in baseline
 
 ## PARAMETERS
 
@@ -78,12 +85,12 @@ Accept wildcard characters: False
 ```
 
 ### -ComponentFilter
-String to represent component name.
+Array of Strings that represent component name.
 Used to limit the components updated within the baseline.
 Supports regex via Powershell -match
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

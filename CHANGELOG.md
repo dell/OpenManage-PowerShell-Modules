@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.2]() - 2023-09-08
+### Fixed
+- Issue with Set-OMETemplateNetwork when not specifing the -Mode parameter
+- Issue with Update-OMEFirmware when -DeviceFilter is specified but no device is found. The null return value will select all devices in baseline. ([Issue #15](https://github.com/dell/OpenManage-PowerShell-Modules/issues/15))
+
+### Changed
+- Get-OMEFirmwareCompliance and Update-OMEFirmware to allow multiple values for -ComponentFilter ([Issue #12](https://github.com/dell/OpenManage-PowerShell-Modules/issues/12))
+
 ## [3.6.1]() - 2023-07-11
 ### Fixed
 - Issue with Get-OMEJob not listing all execution histories when using the -Detail parameter

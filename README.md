@@ -260,6 +260,12 @@ Get device firmware compliance report. BIOS only.
     Select-Object -Property ServiceTag,DeviceModel,DeviceName,CurrentVersion,Version,UpdateAction,ComplianceStatus,Name |
     Sort-Object CurrentVersion | Format-Table
 ```
+Get device firmware compliance report. Multiple component filter
+```
+"AllLatest" | Get-OMEFirmwareBaseline | Get-OMEFirmwareCompliance -ComponentFilter "BIOS", "iDRAC" |
+    Select-Object -Property ServiceTag,DeviceModel,DeviceName,CurrentVersion,Version,UpdateAction,ComplianceStatus,Name |
+    Sort-Object CurrentVersion | Format-Table
+```
 Create new firmware baseline
 ```
 $catalog = $("Auto-Update-Online" | Get-OMECatalog)

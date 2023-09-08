@@ -137,7 +137,7 @@ limitations under the License.
 .PARAMETER DeviceFilter
     Array of type Device returned from Get-OMEDevice function. Used to limit the devices updated within the baseline.
 .PARAMETER ComponentFilter
-    String to represent component name. Used to limit the components updated within the baseline. Supports regex via Powershell -match
+    Array of Strings that represent component name. Used to limit the components updated within the baseline. Supports regex via Powershell -match
 .PARAMETER ResetiDRAC
     This option will restart the iDRAC. Occurs immediately, regardless if StageForNextReboot is set
 .PARAMETER ClearJobQueue
@@ -180,6 +180,10 @@ limitations under the License.
     Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue
     
     Update firmware on specific components in baseline on next reboot and clear job queue before update
+.EXAMPLE
+    Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "BIOS", "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue
+    
+    Update firmware on multiple specific components in baseline on next reboot and clear job queue before update
 #>
 
 [CmdletBinding()]
@@ -191,7 +195,7 @@ param(
     [Device[]]$DeviceFilter,
 
     [Parameter(Mandatory=$false)]
-    [String]$ComponentFilter,
+    [String[]]$ComponentFilter,
 
     [Parameter(Mandatory)]
     [FirmwareBaseline]$Baseline,
@@ -241,10 +245,16 @@ Process {
             "Graceful" = 2;
             "GracefulForced" = 3;
         }
-
         $BaselineId = $Baseline.Id
         $CatalogId = $Baseline.CatalogId
         $RepositoryId = $Baseline.RepositoryId
+
+        # If -DeviceFilter is $null all devices in baseline will be updated. This is a fix to ensure if a user specifies -DeviceFilter 
+        # but it contains no devices the update will not be executed.
+        if ($PSBoundParameters.ContainsKey('DeviceFilter') -and $null -eq $DeviceFilter) {
+            throw [System.Exception]::new("Exception", "-DeviceFilter is specified but contains no devices")
+        }
+
         if ($UpdateSchedule -eq "Preview") { # Only show report, do not perform any updates
             return Get-OMEFirmwareCompliance -Baseline $Baseline -DeviceFilter $DeviceFilter -ComponentFilter $ComponentFilter -UpdateAction $UpdateAction -Output "Report"
         } else { # Apply updates
@@ -282,9 +292,7 @@ Process {
         }
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String)
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

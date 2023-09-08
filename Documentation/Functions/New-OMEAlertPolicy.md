@@ -26,6 +26,8 @@ New-OMEAlertPolicy [-AlertPolicy] <String> [<CommonParameters>]
 New-OMEAlertPolicy -AlertPolicy $NewAlertPolicy
 ```
 
+See README for more examples
+
 ## PARAMETERS
 
 ### -AlertPolicy

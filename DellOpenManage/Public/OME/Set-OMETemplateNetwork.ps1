@@ -163,7 +163,7 @@ param(
 
     [Parameter(Mandatory=$false)]
 	[ValidateSet("Append", "Replace", "Remove")]
-    [String] $Mode
+    [String] $Mode = "Append"
 )
 
 Begin {}
@@ -187,9 +187,6 @@ Process {
         } else {
             $UnTaggedNetworkId = $UnTaggedNetwork.Id
         }
-        if ($TaggedNetworkIds.Length -gt 0 -or $null -ne $UnTaggedNetwork) {
-            if ($null -eq $Mode) { throw [System.ArgumentNullException] "Mode parameter required when specifing -TaggedNetworks or -UnTaggedNetwork" }
-        }
         # Get network port and vlan info from existing template
         $VlanPortMap = Get-OMETemplateNetwork -Template $Template
         Write-Verbose "Current template network config"
@@ -198,6 +195,7 @@ Process {
             -TaggedNetworkIds $TaggedNetworkIds -UnTaggedNetworkId $UnTaggedNetworkId -VlanPortMap $VlanPortMap -PropagateVlan $PropagateVlan -Mode $Mode
         $UpdateNetworkConfigURL = $BaseUri + "/api/TemplateService/Actions/TemplateService.UpdateNetworkConfig"
         $UpdateNetworkConfigPayload = $UpdateNetworkConfigPayload | ConvertTo-Json -Depth 6
+        Write-Verbose "New template network config"
         Write-Verbose $UpdateNetworkConfigPayload
         $UpdateNetworkConfigResp = Invoke-WebRequest -Uri $UpdateNetworkConfigURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $UpdateNetworkConfigPayload
         if ($UpdateNetworkConfigResp.StatusCode -in 200, 201) {

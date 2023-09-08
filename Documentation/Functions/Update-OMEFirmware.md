@@ -13,7 +13,7 @@ Update firmware on devices in OpenManage Enterprise
 ## SYNTAX
 
 ```
-Update-OMEFirmware [[-Name] <String>] [[-DeviceFilter] <Device[]>] [[-ComponentFilter] <String>]
+Update-OMEFirmware [[-Name] <String>] [[-DeviceFilter] <Device[]>] [[-ComponentFilter] <String[]>]
  [-Baseline] <FirmwareBaseline> [[-UpdateSchedule] <String>] [[-RebootType] <String>]
  [[-UpdateScheduleCron] <String>] [[-UpdateAction] <String[]>] [-ResetiDRAC] [-ClearJobQueue] [-Wait]
  [[-WaitTime] <Int32>] [<CommonParameters>]
@@ -67,6 +67,13 @@ Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -Component
 
 Update firmware on specific components in baseline on next reboot and clear job queue before update
 
+### EXAMPLE 7
+```
+Update-OMEFirmware -Baseline $("AllLatest" | Get-OMEFirmwareBaseline) -ComponentFilter "BIOS", "iDRAC" -UpdateSchedule "StageForNextReboot" -ClearJobQueue
+```
+
+Update firmware on multiple specific components in baseline on next reboot and clear job queue before update
+
 ## PARAMETERS
 
 ### -Name
@@ -101,12 +108,12 @@ Accept wildcard characters: False
 ```
 
 ### -ComponentFilter
-String to represent component name.
+Array of Strings that represent component name.
 Used to limit the components updated within the baseline.
 Supports regex via Powershell -match
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

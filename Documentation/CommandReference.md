@@ -315,6 +315,8 @@
 - JobDescription (string JobDescription {get;set;})
 - JobDetail (JobDetail[] JobDetail {get;set;})
 - JobName (string JobName {get;set;})
+- JobType (string JobType {get;set;})
+- JobTypeId (int JobTypeId {get;set;})
 - LastRun (System.Nullable[datetime] LastRun {get;set;})
 - LastRunStatus (string LastRunStatus {get;set;})
 - LastRunStatusId (int LastRunStatusId {get;set;})
