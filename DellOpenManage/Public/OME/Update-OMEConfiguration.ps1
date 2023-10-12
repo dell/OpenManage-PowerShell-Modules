@@ -4,7 +4,7 @@ using module ..\..\Classes\ConfigurationBaseline.psm1
 
 
 
-function Get-ConfigurationPayload($Name, $TemplateId, $TargetPayload) {
+function Get-ConfigurationPayload($Name, $TemplateId, $TargetPayload, $RebootType) {
     $Payload = '{
         "JobName": "Make Devices Compliant",
         "JobDescription": "Make the selected devices compliant with template",
@@ -78,6 +78,7 @@ function Get-ConfigurationPayload($Name, $TemplateId, $TargetPayload) {
         "jobName" = [string]$Name
         "schemaId" = [string]$TemplateId
         "templateId" = [string]$TemplateId
+        "shutdownType" = [string]$RebootType
     }
 
     for ($i = 0; $i -le $Payload.'Params'.Length; $i++) {
@@ -119,6 +120,8 @@ limitations under the License.
     Array of type ConfigurationBaseline returned from Get-OMEConfigurationBaseline function
 .PARAMETER DeviceFilter
     Array of type Device returned from Get-OMEDevice function. Used to limit the devices updated within the baseline.
+.PARAMETER UpdateSchedule
+    Determines when the updates will be performed. (Default="RebootNow", "StageForNextReboot")
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -133,6 +136,10 @@ limitations under the License.
     Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -Wait -Verbose
     
     Update configuration compliance on filtered devices in baseline ***This will force a reboot if necessary***
+.EXAMPLE
+    Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "StageForNextReboot" -Wait -Verbose
+    
+    Update configuration compliance on filtered devices in baseline staging changes for next reboot
 #>
 
 [CmdletBinding()]
@@ -145,6 +152,10 @@ param(
 
     [Parameter(Mandatory)]
     [ConfigurationBaseline]$Baseline,
+
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("RebootNow", "StageForNextReboot")]
+    [String]$UpdateSchedule = "RebootNow",
 
     [Parameter(Mandatory=$false)]
     [Switch]$Wait,
@@ -165,6 +176,11 @@ Process {
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
+        $RebootTypeMap = @{
+            "RebootNow" = 0;
+            "ScheduleLater" = 1;
+            "StageForNextReboot" = 2;
+        }
         $TemplateId = $Baseline.TemplateId
         if ($Baseline.Targets.Length -gt 0) {
             $ComplianceReportList = Get-OMEConfigurationCompliance -Baseline $Baseline -DeviceFilter $DeviceFilter
@@ -179,7 +195,7 @@ Process {
             }
             if ($DeviceList.Length -gt 0) {
                 $TargetPayload = Get-JobTargetPayload $DeviceList
-                $UpdatePayload = Get-ConfigurationPayload -Name $Name -TemplateId $TemplateId -TargetPayload $TargetPayload
+                $UpdatePayload = Get-ConfigurationPayload -Name $Name -TemplateId $TemplateId -TargetPayload $TargetPayload -RebootType $RebootTypeMap[$UpdateSchedule]
                 # Update configuration
                 $UpdateJobURL = $BaseUri + "/api/JobService/Jobs"
                 $UpdatePayload = $UpdatePayload | ConvertTo-Json -Depth 6
