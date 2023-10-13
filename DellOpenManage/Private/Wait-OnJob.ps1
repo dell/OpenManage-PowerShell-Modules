@@ -72,8 +72,8 @@ Process {
 
     $FailedJobStatuses = @(2070, 2090, 2100, 2101, 2102, 2103)
 
-    $MAX_RETRIES = $WaitTime / 10
     $SLEEP_INTERVAL = 30
+    $MAX_RETRIES = [Math]::Floor($WaitTime / $SLEEP_INTERVAL)
 
     $Ctr = 0
     if ($JobId -gt 0) {
