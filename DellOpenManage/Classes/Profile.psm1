@@ -1,0 +1,26 @@
+Class Profile {
+    [Int]$Id
+    [String]$ProfileName
+    [String]$ProfileDescription
+    [Int]$TemplateId
+    [String]$TemplateName
+    [Int]$DataSchemaId
+    [Int]$TargetId
+    [String]$TargetName
+    [Int]$TargetTypeId
+    [Int]$DeviceIdInSlot
+    [Int]$ChassisId
+    [String]$ChassisName
+    [Int]$GroupId
+    [String]$GroupName
+    [PSCustomObject]$NetworkBootToIso
+    [Int]$ProfileState
+    [Int]$DeploymentTaskId
+    [Int]$LastRunStatus
+    [Int]$ProfileModified
+    [String]$CreatedBy
+    [String]$EditedBy
+    [DateTime]$CreatedDate
+    [DateTime]$LastEditDate
+    [nullable[DateTime]]$LastDeployDate
+}
