@@ -92,8 +92,8 @@ Process {
         if ($ProfileResponse.StatusCode -eq 200)
         {
             $ProfileCountData = $ProfileResponse.Content | ConvertFrom-Json
-            foreach ($Profile in $ProfileCountData.'value') {
-                $ProfileData += New-ProfileFromJson -Profile $Profile
+            foreach ($ServerProfile in $ProfileCountData.'value') {
+                $ProfileData += New-ProfileFromJson -ServerProfile $ServerProfile
             }
             if($ProfileCountData.'@odata.nextLink')
             {
@@ -106,8 +106,8 @@ Process {
                 if($NextLinkResponse.StatusCode -eq 200)
                 {
                     $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
-                    foreach ($Profile in $NextLinkData.'value') {
-                        $ProfileData += New-ProfileFromJson -Profile $Profile
+                    foreach ($ServerProfile in $NextLinkData.'value') {
+                        $ProfileData += New-ProfileFromJson -ServerProfile $ServerProfile
                     }
                     if($NextLinkData.'@odata.nextLink')
                     {

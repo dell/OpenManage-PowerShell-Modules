@@ -413,21 +413,68 @@ $("TestBaseline01" | Get-OMEConfigurationBaseline -FilterBy "Name") | Invoke-OME
 ```
 
 ## Profiles
-Unassign profile by device
+Get Profile by ProfileName
+```
+"ProfileName" | Get-OMEProfile
+```
+Get Profile by ProfileName where ProfileName includes single quotes. Use for Profiles deployed from Templates on the MX platform
+```
+Get-OMEProfile | Where-Object { $_.ProfileName -eq "Profile from template 'Test Template 01' 00001" }
+```
+Get Profile by TemplateName
+```
+"TemplateName" | Get-OMEProfile -FilterBy TemplateName
+```
+Create a new Profile from a Template
+```
+"Test Template 01" | Get-OMETemplate | New-OMEProfile -NamePrefix "Test Profile" -NumberOfProfilesToCreate 3 
+``` 
+Create a new Profile from a Template and mount ISO from NFS share to Virtual Media
+```
+"Test Template 01" | Get-OMETemplate | New-OMEProfile -NamePrefix "Test Profile" -NumberOfProfilesToCreate 3 -NetworkBootShareType "NFS" -NetworkBootShareIpAddress "192.168.1.100" -NetworkBootIsoPath "/mnt/data/iso/OS.iso" -Verbose
+```  
+Assign Profile to Device
+```
+$Device = "933NCZZ" | Get-OMEDevice
+"Test Profile 00001" | Get-OMEProfile | Invoke-OMEProfileAssign -TargetId $Device.Id -Verbose
+Invoke-OMEProfileUnassign -ProfileName "TSTest 00001" -Wait -Verbose
+```
+Assign Profile to Chassis Slot 1 and Apply Immediately ***This will force a reseat of the sled***
+
+*See https://www.dell.com/support/kbdoc/en-us/000214041/mx7000-deploying-a-slot-based-template-shows-the-profile-as-assigned-and-virtual-identities-as-reserved
+```
+$Chassis = "933MCZZ" | Get-OMEDevice
+$ChassisSlots = $Chassis | Get-OMEDeviceDetail -InventoryType "chassisSlotsList" | Select-Object -ExpandProperty InventoryInfo
+$SlotId = $ChassisSlots | Where-Object { $_.Number -eq "1" -and $_.DeviceType -eq 1000 } | Select-Object -ExpandProperty Id
+"Test Profile 00001" | Get-OMEProfile | Invoke-OMEProfileAssign -TargetId $SlotId -AttachAndApply -Wait -Verbose
+```
+Unassign Profile by device
 ```
 Invoke-OMEProfileUnassign -Device $("37KP0ZZ" | Get-OMEDevice) -Wait -Verbose
 ```
-Unassign profile on multiple devices
+Unassign Profile on multiple devices
 ```
 $("37KP0ZZ", "37KT0ZZ" | Get-OMEDevice) | Invoke-OMEProfileUnassign -Wait -Verbose
 ```
-Unassign profile by template
+Unassign Profile by template
 ```
 Invoke-OMEProfileUnassign -Template $("TestTemplate01" | Get-OMETemplate) -Wait -Verbose
 ```
-Unassign profile by profile name
+Unassign Profile by profile name
 ```
 Invoke-OMEProfileUnassign -ProfileName "Profile from template 'TestTemplate01' 00001" -Wait -Verbose
+```
+Remove Profile
+```
+"TestProfile01" | Get-OMEProfile | Remove-OMEProfile
+```
+Rename Profile
+```
+"Profile 00005" | Get-OMEProfile | Invoke-OMEProfileRename -Name "Test Profile 00005"
+```
+Rename Profile deployed from Template on MX platform
+```
+Get-OMEProfile | Where-Object { $_.ProfileName -eq "Profile from template 'Test Template 01' 00001" } | Invoke-OMEProfileRename -Name "Test Profile 01 - 00001"
 ```
 
 ## Jobs
@@ -818,6 +865,12 @@ $Chassis = "C38V9ZZ" | Get-OMEDevice
 Set-OMEChassisSlotName -Chassis $Chassis -Slot 1 -Name "MX840c-C39N9ZZ" -Wait -Verbose
 
 Set-OMEChassisSlotName -Chassis $Chassis -Slot 1 -Name "MX5108-C38T9ZZ" -SlotType "IOM" -Wait -Verbose
+```
+
+## Virtual Reseat
+Trigger virtual system reseat
+```
+"933NCZZ" | Get-OMEDevice | Invoke-OMEDeviceReseat -Verbose -Wait
 ```
 
 ## Quick Deploy

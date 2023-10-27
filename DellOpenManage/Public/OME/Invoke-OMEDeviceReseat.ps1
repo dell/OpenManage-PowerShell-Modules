@@ -64,17 +64,15 @@ limitations under the License.
 .DESCRIPTION
     This will submit a job to do a virtual reseat on a Compute device in an MX Chassis
 .PARAMETER Name
-    Name of the inventory refresh job
+    Name of the job
 .PARAMETER Devices
     Array of type Device returned from Get-OMEDevice function.
 .INPUTS
     Device
 .EXAMPLE
-    "PowerEdge R640" | Get-OMEDevice -FilterBy "Model" | Invoke-OMEInventoryRefresh -Verbose
-    Create separate inventory refresh job for each device in list
-.EXAMPLE
-    ,$("PowerEdge R640" | Get-OMEDevice -FilterBy "Model") | Invoke-OMEInventoryRefresh -Verbose
-    Create one inventory refresh job for all devices in list. Notice the preceeding comma before the device list.
+    "933NCZZ" | Get-OMEDevice | Invoke-OMEDeviceReseat -Verbose -Wait
+    
+    Trigger virtual system reseat
 #>
 
 [CmdletBinding()]

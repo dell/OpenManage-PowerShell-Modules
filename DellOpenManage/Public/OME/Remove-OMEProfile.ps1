@@ -22,7 +22,7 @@ limitations under the License.
     Remove Profile
 .DESCRIPTION
     Remove Profile
-.PARAMETER Profile
+.PARAMETER ServerProfile
     Object of type Profile returned from Get-OMEProfile
 .INPUTS
     None
@@ -35,7 +35,7 @@ limitations under the License.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory, ValueFromPipeline)]
-    [Profile] $Profile
+    [Profile] $ServerProfile
 )
 
 Begin {}
@@ -46,7 +46,7 @@ Process {
     Try {
         if ($SessionAuth.IgnoreCertificateWarning) { Set-CertPolicy }
         $BaseUri = "https://$($SessionAuth.Host)"
-        $RemoveUrl = $BaseUri + "/api/ProfileService/Profiles($($Profile.Id))"
+        $RemoveUrl = $BaseUri + "/api/ProfileService/Profiles($($ServerProfile.Id))"
         $Type = "application/json"
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token

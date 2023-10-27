@@ -14,7 +14,7 @@ Update configuration on devices in OpenManage Enterprise
 
 ```
 Update-OMEConfiguration [[-Name] <String>] [[-DeviceFilter] <Device[]>] [-Baseline] <ConfigurationBaseline>
- [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
+ [[-UpdateSchedule] <String>] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -36,6 +36,13 @@ Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline0
 ```
 
 Update configuration compliance on filtered devices in baseline ***This will force a reboot if necessary***
+
+### EXAMPLE 3
+```
+Update-OMEConfiguration -Name "Make Compliant Test01" -Baseline $("TestBaseline01" | Get-OMEConfigurationBaseline) -DeviceFilter $("C86CZZZ" | Get-OMEDevice -FilterBy "ServiceTag") -UpdateSchedule "StageForNextReboot" -Wait -Verbose
+```
+
+Update configuration compliance on filtered devices in baseline staging changes for next reboot
 
 ## PARAMETERS
 
@@ -85,6 +92,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -UpdateSchedule
+Determines when the updates will be performed.
+(Default="RebootNow", "StageForNextReboot")
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: RebootNow
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Wait
 Wait for job to complete
 
@@ -109,7 +132,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: 3600
 Accept pipeline input: False
 Accept wildcard characters: False

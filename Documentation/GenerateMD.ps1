@@ -29,6 +29,7 @@ using module ..\DellOpenManage\Classes\Fabric.psm1
 using module ..\DellOpenManage\Classes\Uplink.psm1
 using module ..\DellOpenManage\Classes\TemplateNetwork.psm1
 using module ..\DellOpenManage\Classes\AlertPolicy.psm1
+using module ..\DellOpenManage\Classes\Profile.psm1
 
 Import-Module platyPS
 $module = "DellOpenManage"

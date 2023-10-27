@@ -47,9 +47,13 @@ limitations under the License.
 .INPUTS
     [Template] Template
 .EXAMPLE
-    New-OMEProfile -Name "Test Profile 01"
+    "Test Template 01" | Get-OMETemplate | New-OMEProfile -NamePrefix "Test Profile" -NumberOfProfilesToCreate 3 
     
-    Create a new static Profile
+    Create a new Profile from a Template
+.EXAMPLE
+    "Test Template 01" | Get-OMETemplate | New-OMEProfile -NamePrefix "Test Profile" -NumberOfProfilesToCreate 3 -NetworkBootShareType "NFS" -NetworkBootShareIpAddress "192.168.1.100" -NetworkBootIsoPath "/mnt/data/iso/OS.iso" -Verbose
+    
+    Create a new Profile from a Template and mount ISO from NFS share to Virtual Media
 #>
 
 [CmdletBinding()]

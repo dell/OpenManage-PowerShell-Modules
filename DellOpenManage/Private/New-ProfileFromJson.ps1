@@ -1,38 +1,38 @@
 using module ..\Classes\Profile.psm1
 function New-ProfileFromJson {
     Param(
-        [PSCustomObject]$Profile
+        [PSCustomObject]$ServerProfile
     )
     $LastDeployDate = $null
-    if ($Profile.LastDeployDate -eq "") {
+    if ($ServerProfile.LastDeployDate -eq "") {
         $LastDeployDate = $null
     } else {
-        $LastDeployDate = $Profile.LastDeployDate
+        $LastDeployDate = $ServerProfile.LastDeployDate
     }
     $ProfileObj = [Profile]@{
-        Id = $Profile.Id
-        ProfileName = $Profile.ProfileName
-        ProfileDescription = $Profile.ProfileDescription
-        TemplateId = $Profile.TemplateId
-        TemplateName = $Profile.TemplateName
-        DataSchemaId = $Profile.DataSchemaId
-        TargetId = $Profile.TargetId
-        TargetName = $Profile.TargetName
-        TargetTypeId = $Profile.TargetTypeId
-        DeviceIdInSlot = $Profile.DeviceIdInSlot
-        ChassisId = $Profile.ChassisId
-        ChassisName = $Profile.ChassisName
-        GroupId = $Profile.GroupId
-        GroupName = $Profile.GroupName
-        NetworkBootToIso = $Profile.NetworkBootToIso
-        ProfileState = $Profile.ProfileState
-        DeploymentTaskId = $Profile.DeploymentTaskId
-        LastRunStatus = $Profile.LastRunStatus
-        ProfileModified = $Profile.ProfileModified
-        CreatedBy = $Profile.CreatedBy
-        EditedBy = $Profile.EditedBy
-        CreatedDate = $Profile.CreatedDate
-        LastEditDate = $Profile.LastEditDate
+        Id = $ServerProfile.Id
+        ProfileName = $ServerProfile.ProfileName
+        ProfileDescription = $ServerProfile.ProfileDescription
+        TemplateId = $ServerProfile.TemplateId
+        TemplateName = $ServerProfile.TemplateName
+        DataSchemaId = $ServerProfile.DataSchemaId
+        TargetId = $ServerProfile.TargetId
+        TargetName = $ServerProfile.TargetName
+        TargetTypeId = $ServerProfile.TargetTypeId
+        DeviceIdInSlot = $ServerProfile.DeviceIdInSlot
+        ChassisId = $ServerProfile.ChassisId
+        ChassisName = $ServerProfile.ChassisName
+        GroupId = $ServerProfile.GroupId
+        GroupName = $ServerProfile.GroupName
+        NetworkBootToIso = $ServerProfile.NetworkBootToIso
+        ProfileState = $ServerProfile.ProfileState
+        DeploymentTaskId = $ServerProfile.DeploymentTaskId
+        LastRunStatus = $ServerProfile.LastRunStatus
+        ProfileModified = $ServerProfile.ProfileModified
+        CreatedBy = $ServerProfile.CreatedBy
+        EditedBy = $ServerProfile.EditedBy
+        CreatedDate = $ServerProfile.CreatedDate
+        LastEditDate = $ServerProfile.LastEditDate
         LastDeployDate = $LastDeployDate
     }
     return $ProfileObj

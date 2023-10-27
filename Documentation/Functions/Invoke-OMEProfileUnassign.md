@@ -13,8 +13,8 @@ Unassign profile from device in OpenManage Enterprise
 ## SYNTAX
 
 ```
-Invoke-OMEProfileUnassign [[-Device] <Device>] [[-Template] <Template>] [[-ProfileName] <String>] [-Wait]
- [[-WaitTime] <Int32>] [<CommonParameters>]
+Invoke-OMEProfileUnassign [[-Device] <Device>] [[-Template] <Template>] [[-ProfileName] <String>]
+ [-ForceReclaim] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -97,6 +97,23 @@ Aliases:
 Required: False
 Position: 3
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ForceReclaim
+Force Reclaim Identities.
+This action will reclaim the identities from this device and the server will be forcefully rebooted.
+All VLANs configured on the server will be removed.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

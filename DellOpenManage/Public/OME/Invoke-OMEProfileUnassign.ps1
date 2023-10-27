@@ -31,6 +31,8 @@ limitations under the License.
     Array of type Device returned from Get-OMEDevice function
 .PARAMETER ProfileName
     Name of Profile to detach. Uses contains style operator and supports partial string matching.
+.PARAMETER ForceReclaim
+    Force Reclaim Identities. This action will reclaim the identities from this device and the server will be forcefully rebooted. All VLANs configured on the server will be removed.
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
@@ -67,6 +69,9 @@ param(
     [String]$ProfileName,
 
     [Parameter(Mandatory=$false)]
+    [Switch]$ForceReclaim,
+
+    [Parameter(Mandatory=$false)]
     [Switch]$Wait,
 
     [Parameter(Mandatory=$false)]
@@ -88,7 +93,8 @@ Process {
         $ProfileUnassignUrl = $BaseUri + "/api/ProfileService/Actions/ProfileService.UnassignProfiles"
         $ProfileUnassignPayload = '{
             "SelectAll":true,
-            "Filters":"=contains()"
+            "Filters":"=contains()",
+            "ForceReclaim":false
         }' | ConvertFrom-Json
 
         if ($Device) {
@@ -100,6 +106,11 @@ Process {
         } else {
             throw [System.Exception] "You must specify one of the following parameters: -Device -Template -ProfileName"
         }
+
+        if ($ForceReclaim) {
+            $ProfileUnassignPayload.ForceReclaim = $true
+        }
+
         $ProfileUnassignPayload = $ProfileUnassignPayload |ConvertTo-Json -Depth 6
         Write-Verbose $ProfileUnassignPayload
         Try { # Workaround to capture 400 (Bad Request) error when trying to unassign profile without target device found

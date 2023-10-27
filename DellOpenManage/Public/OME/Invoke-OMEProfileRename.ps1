@@ -22,7 +22,7 @@ limitations under the License.
     Rename profile
 .DESCRIPTION
     Rename existing profile
-.PARAMETER Profile
+.PARAMETER ServerProfile
     Object of type Profile returned from Get-OMEProfile
 .INPUTS
     [Profile] Profile
@@ -39,7 +39,7 @@ limitations under the License.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory, ValueFromPipeline)]
-    [Profile]$Profile,
+    [Profile]$ServerProfile,
 
     [Parameter(Mandatory)]
     [String]$Name
@@ -62,7 +62,7 @@ Process {
             "Name": "Edit_Profile_Name"
         }' | ConvertFrom-Json
 
-        $Payload.ProfileId = $Profile.Id
+        $Payload.ProfileId = $ServerProfile.Id
         $Payload.Name = $Name
 
         $ProfileRenameURL = $BaseUri + "/api/ProfileService/Actions/ProfileService.Rename"

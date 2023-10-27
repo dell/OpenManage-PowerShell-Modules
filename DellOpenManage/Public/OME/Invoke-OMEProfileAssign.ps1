@@ -19,48 +19,51 @@ limitations under the License.
 
 <#
 .SYNOPSIS
-    Unassign profile from device in OpenManage Enterprise
+    Assign profile to device in OpenManage Enterprise
 .DESCRIPTION
-    This action will unassign the profile(s) from all selected targets, disassociating the profile(s) from target(s).
-    The server will be forcefully rebooted in order to remove any deployed identities from applicable devices.
-    As of OME 3.4 only one template can be associated to a device. However, you can deploy a template to multiple devices.
-.PARAMETER Template
-    Object of type Template returned from Get-OMETemplate function
-.PARAMETER Device
-    Array of type Device returned from Get-OMEDevice function
-.PARAMETER ProfileName
-    Name of Profile to detach. Uses contains style operator and supports partial string matching.
+    This action will assign the profile to a chassis slot or directly to a device. 
+.PARAMETER ServerProfile
+    Object of type Profile returned from Get-OMEProfile function
+.PARAMETER TargetId
+    Integer representing the SlotId for Slot based deployment or DeviceId for device based deployment.
+.PARAMETER AttachAndApply
+    Immediately Apply To Compute Sleds. Only applies to Slot based assignments. ***This will force a reseat of the sled***
+.PARAMETER NetworkBootShareType
+    Share type ("NFS", "CIFS")
+.PARAMETER NetworkBootShareIpAddress
+    IP Address of the share server
+.PARAMETER NetworkBootIsoPath
+    Full path to the ISO
+.PARAMETER NetworkBootIsoTimeout
+    Lifecycle Controller timeout setting (Default=1) Hour
+.PARAMETER NetworkBootShareName
+    Share name (CIFS Only)
+.PARAMETER NetworkBootShareUser
+    Share user (CIFS Only)
+.PARAMETER NetworkBootShareWorkGroup
+    Share workgroup (CIFS Only)
+.PARAMETER NetworkBootSharePassword
+    Share password (CIFS Only)
 .PARAMETER Wait
     Wait for job to complete
 .PARAMETER WaitTime
     Time, in seconds, to wait for the job to complete
 .INPUTS
-    Device
+    [Profile] $ServerProfile
 .EXAMPLE
-    Invoke-OMEProfileUnassign -Device $("37KP0ZZ" | Get-OMEDevice) -Wait -Verbose
-
-    Unassign profile by device
-.EXAMPLE
-    $("37KP0ZZ", "37KT0ZZ" | Get-OMEDevice) | Invoke-OMEProfileUnassign -Wait -Verbose
-
-    Unassign profile on multiple device
-.EXAMPLE
-    Invoke-OMEProfileUnassign -Template $("TestTemplate01" | Get-OMETemplate) -Wait -Verbose
-
-    Unassign profile by template
-.EXAMPLE
-    Invoke-OMEProfileUnassign -ProfileName "Profile from template 'TestTemplate01' 00001" -Wait -Verbose
-    
-    Unassign profile by profile name
+    See README for examples
 #>
 
 [CmdletBinding()]
 param(
     [Parameter(Mandatory, ValueFromPipeline)]
-    [Profile] $Profile,
+    [Profile] $ServerProfile,
 
     [Parameter(Mandatory)]
     [Int] $TargetId,
+
+    [Parameter(Mandatory=$false)]
+    [Switch]$AttachAndApply,
 
     [Parameter(Mandatory=$false)]
     [ValidateSet("CIFS", "NFS")]
@@ -110,6 +113,7 @@ Process {
         $ProfileAssignPayload = '{
             "Id": 10079,
             "TargetId": 10087,
+            "AttachAndApply": false,
             "NetworkBootToIso": {
                 "BootToNetwork": false,
                 "ShareType": "CIFS",
@@ -135,8 +139,12 @@ Process {
             }
         }' | ConvertFrom-Json
 
-        $ProfileAssignPayload.Id = $Profile.Id
+        $ProfileAssignPayload.Id = $ServerProfile.Id
         $ProfileAssignPayload.TargetId = $TargetId
+
+        if ($AttachAndApply) {
+            $ProfileAssignPayload.AttachAndApply = $true
+        }
         
         if ($TargetId -eq 0) { throw [System.ArgumentNullException] "TargetId" }
         if ($NetworkBootShareType -ne "") {
