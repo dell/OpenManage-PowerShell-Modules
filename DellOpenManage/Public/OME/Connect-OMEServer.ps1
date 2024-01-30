@@ -91,7 +91,7 @@ param(
         $AppInfoUrl = "https://$($OMEHost)/api/ApplicationService/Info"
         $AppInfoResponse = Invoke-WebRequest -Uri $AppInfoUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type 
         $AppVersion = [System.Version]"1.0.0"
-        if ($AppInfoResponse.StatusCode -eq 200, 201) {
+        if ($AppInfoResponse.StatusCode -in 200, 201) {
             $AppInfoResponseData = $AppInfoResponse.Content | ConvertFrom-Json
             Write-Verbose $($AppInfoResponseData)
             $AppVersion = [System.Version]$AppInfoResponseData.Version
