@@ -163,7 +163,7 @@ Process {
 
         $GroupResponse = Invoke-WebRequest -Uri $GroupURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $GroupPayload
         Write-Verbose "Updating group..."
-        if ($GroupResponse.StatusCode -in (200,201)) {
+        if ($GroupResponse.StatusCode -in 200, 201) {
             Write-Verbose "Group update successful!"
             return $GroupResponse.Content | ConvertFrom-Json
         }

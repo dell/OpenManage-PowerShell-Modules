@@ -58,7 +58,7 @@ Process {
         Write-Verbose $BannerPayload
         $BannerResponse = Invoke-WebRequest -Uri $BannerURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $BannerPayload
         Write-Verbose "Updating banner text..."
-        if ($BannerResponse.StatusCode -in (200,201)) {
+        if ($BannerResponse.StatusCode -in 200, 201) {
             Write-Verbose "Banner update successfull!"
             return $true
         }

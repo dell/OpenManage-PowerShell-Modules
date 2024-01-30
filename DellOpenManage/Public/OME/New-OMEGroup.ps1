@@ -82,7 +82,7 @@ Process {
 
         $GroupResponse = Invoke-WebRequest -Uri $GroupURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $GroupPayload
         Write-Verbose "Creating Group..."
-        if ($GroupResponse.StatusCode -in (200,201)) {
+        if ($GroupResponse.StatusCode -in 200, 201) {
             return $GroupResponse.Content | ConvertFrom-Json
         }
         else {

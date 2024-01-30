@@ -66,7 +66,7 @@ Process {
         # Get Identity Pool Usage Sets
         $IdentityPoolUsageSetUrl = $BaseUri + "/api/IdentityPoolService/IdentityPools($($Id))/UsageIdentitySets"
         $IdentityPoolUsageSetResp = Invoke-WebRequest -Uri $IdentityPoolUsageSetUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($IdentityPoolUsageSetResp.StatusCode -in (200,201)) {
+        if ($IdentityPoolUsageSetResp.StatusCode -in 200, 201) {
             $IdentityPoolUsageSetRespData = $IdentityPoolUsageSetResp.Content | ConvertFrom-Json
             $IdentityPoolUsageSetRespData = $IdentityPoolUsageSetRespData.'value'
 
@@ -78,7 +78,7 @@ Process {
 
                 $IdentityPoolUsageDetailUrl = $BaseUri + "/api/IdentityPoolService/IdentityPools($($Id))/UsageIdentitySets($($IdentitySetId))/Details"
                 $IdentityPoolUsageDetailResp = Invoke-WebRequest -Uri $IdentityPoolUsageDetailUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                if ($IdentityPoolUsageDetailResp.StatusCode -in (200,201)) {
+                if ($IdentityPoolUsageDetailResp.StatusCode -in 200, 201) {
                     $IdentityPoolUsageDetailData = $IdentityPoolUsageDetailResp.Content | ConvertFrom-Json
                     # Loop through Details appending to object array
                     foreach ($DeviceEntry in $IdentityPoolUsageDetailData.'value') {
@@ -100,7 +100,7 @@ Process {
                     # Loop through pages until end
                     while ($NextLinkUrl) {
                         $IdentityPoolUsageDetailNextLinkResp = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                        if ($IdentityPoolUsageDetailNextLinkResp.StatusCode -in (200,201)) {
+                        if ($IdentityPoolUsageDetailNextLinkResp.StatusCode -in 200, 201) {
                             $IdentityPoolUsageDetailNextLinkData = $IdentityPoolUsageDetailNextLinkResp.Content | ConvertFrom-Json
                             # Loop through Details appending to object array
                             foreach ($DeviceEntry in $IdentityPoolUsageDetailNextLinkData.'value') {

@@ -115,7 +115,7 @@ Process {
         Write-Verbose $ProfileUnassignPayload
         Try { # Workaround to capture 400 (Bad Request) error when trying to unassign profile without target device found
             $ProfileUnassignResponse = Invoke-WebRequest -Uri $ProfileUnassignUrl -UseBasicParsing -Method Post -Body $ProfileUnassignPayload -ContentType $Type -Headers $Headers
-            if ($ProfileUnassignResponse.StatusCode -in (200,201)) {
+            if ($ProfileUnassignResponse.StatusCode -in 200, 201) {
                 $ProfileUnassignContent = $ProfileUnassignResponse.Content | ConvertFrom-Json
                 $JobId = $ProfileUnassignContent
                 if ($JobId -ne 0) {

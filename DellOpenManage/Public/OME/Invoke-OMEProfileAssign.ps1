@@ -173,7 +173,7 @@ Process {
         $ProfileAssignPayload = $ProfileAssignPayload |ConvertTo-Json -Depth 6
         Write-Verbose $ProfileAssignPayload
         $ProfileAssignResponse = Invoke-WebRequest -Uri $ProfileAssignUrl -UseBasicParsing -Method Post -Body $ProfileAssignPayload -ContentType $Type -Headers $Headers
-        if ($ProfileAssignResponse.StatusCode -in (200,201)) {
+        if ($ProfileAssignResponse.StatusCode -in 200, 201) {
             $ProfileAssignContent = $ProfileAssignResponse.Content | ConvertFrom-Json
             $JobId = $ProfileAssignContent
             if ($JobId -ne 0) {

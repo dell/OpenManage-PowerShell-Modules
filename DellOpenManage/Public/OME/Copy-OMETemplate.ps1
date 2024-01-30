@@ -11,7 +11,7 @@ function Get-TemplateVlan($BaseUri, $ContentType, $Headers, $Template) {
     $NETWORK_HIERARCHY_VIEW = 4  # For Network hierarchy View in a Template
     $TemplateVlanUrl = $BaseUri + "/api/TemplateService/Templates($($Template.Id))/Views($($NETWORK_HIERARCHY_VIEW))/AttributeViewDetails"
     $TemplateVlanResponse = Invoke-WebRequest -Uri $TemplateVlanUrl -UseBasicParsing -Method Get -ContentType $ContentType -Headers $Headers
-    if ($TemplateVlanResponse.StatusCode -in (200,201)) {
+    if ($TemplateVlanResponse.StatusCode -in 200, 201) {
         $TemplateVlans = $TemplateVlanResponse.Content | ConvertFrom-Json
         $NICGroups = @()
         $NICBondingList = @()
@@ -188,7 +188,7 @@ Process {
         $NewTemplateId = $null
         Write-Verbose "Clone Template..."
         $TemplateResponse = Invoke-WebRequest -Uri $TemplateUrl -UseBasicParsing -Method Post -Body $TemplatePayload -ContentType $ContentType -Headers $Headers
-        if ($TemplateResponse.StatusCode -in (200,201)) {
+        if ($TemplateResponse.StatusCode -in 200, 201) {
             $NewTemplateId = [int]$TemplateResponse.Content
             Write-Verbose "Clone Template Success - Id $($NewTemplateId)"
         }
@@ -203,7 +203,7 @@ Process {
             Write-Verbose $CloneTemplateVlanPayload
             $TemplateUpdateNetworkUrl = $BaseUri + "/api/TemplateService/Actions/TemplateService.UpdateNetworkConfig"
             $TemplateVlanResponse = Invoke-WebRequest -Uri $TemplateUpdateNetworkUrl -UseBasicParsing -Method Post -Body $CloneTemplateVlanPayload -ContentType $ContentType -Headers $Headers
-            if ($TemplateVlanResponse.StatusCode -in (200,201)) {
+            if ($TemplateVlanResponse.StatusCode -in 200, 201) {
                 Write-Verbose "Clone Template Success - VLANs"
             }
         }

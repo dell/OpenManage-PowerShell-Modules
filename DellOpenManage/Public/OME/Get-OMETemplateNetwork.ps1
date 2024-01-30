@@ -53,7 +53,7 @@ function Get-OMETemplateNetwork {
             $TemplateVlanUrl = $BaseUri + "/api/TemplateService/Templates($($Template.Id))/Views(4)/AttributeViewDetails"
             Write-Verbose $TemplateVlanUrl
             $TemplateVlanResponse = Invoke-WebRequest -UseBasicParsing -Uri $TemplateVlanUrl -Headers $Headers -Method Get -ContentType $ContentType
-            if ($TemplateVlanResponse.StatusCode -in (200,201)) {
+            if ($TemplateVlanResponse.StatusCode -in 200, 201) {
                 $TemplateVlanInfo = $TemplateVlanResponse.Content | ConvertFrom-Json
                 $AttributeGroups = $TemplateVlanInfo.AttributeGroups
                 $PortVlanInfo = @()

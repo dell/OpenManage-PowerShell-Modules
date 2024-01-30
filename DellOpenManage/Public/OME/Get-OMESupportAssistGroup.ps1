@@ -62,7 +62,7 @@ Process {
 
         $GroupData = @()
         $GrpResp = Invoke-WebRequest -Uri $GroupUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $ContentType
-        if ($GrpResp.StatusCode -in (200,201)) {
+        if ($GrpResp.StatusCode -in 200, 201) {
             $GroupData = $GrpResp.Content | ConvertFrom-Json
             return $(New-SupportAssistGroupFromJson -Group $GroupData)
         }

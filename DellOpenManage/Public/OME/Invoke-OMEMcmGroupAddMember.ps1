@@ -47,7 +47,7 @@ function Invoke-OMEMcmGroupAddMember {
         $TargetArray = @()
         $URL = $BaseUri + "/api/ManagementDomainService/DiscoveredDomains"
         $Response = Invoke-WebRequest -Uri $URL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method GET
-        if ($Response.StatusCode -in (200,201)) {
+        if ($Response.StatusCode -in 200, 201) {
             $DomainResp = $Response.Content | ConvertFrom-Json
             if ($DomainResp."value".Length -gt 0) {
                 $DiscoveredDomains = $DomainResp."value"
@@ -95,7 +95,7 @@ function Invoke-OMEMcmGroupAddMember {
             Write-Verbose "Adding members to the group..."
             Write-Verbose "Invoking URL $($ManagementDomainURL)"
             $Response = Invoke-WebRequest -Uri $ManagementDomainURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
-            if ($Response.StatusCode -in (200,201)) {
+            if ($Response.StatusCode -in 200, 201) {
                 $ManagementData = $Response | ConvertFrom-Json
                 $JobId = $ManagementData.'JobId'
                 Write-Verbose "Added members to the created group...Job ID is $($JobId)"

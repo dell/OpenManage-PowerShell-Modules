@@ -56,7 +56,7 @@ Process {
 
         $DefinitionCountUrl = $BaseUri + "/api/AlertService/AlertMessageDefinitions"
         $DeviceResponse = Invoke-WebRequest -Uri $DefinitionCountUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($DeviceResponse.StatusCode -in (200,201))
+        if ($DeviceResponse.StatusCode -in 200, 201)
         {
             $DefinitionCountData = $DeviceResponse.Content | ConvertFrom-Json
             foreach ($Definition in $DefinitionCountData.'value') {
@@ -69,7 +69,7 @@ Process {
             while($NextLinkUrl)
             {
                 $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                if($NextLinkResponse.StatusCode -in (200,201))
+                if($NextLinkResponse.StatusCode -in 200, 201)
                 {
                     $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                     foreach ($Definition in $NextLinkData.'value') {

@@ -74,7 +74,7 @@ function Invoke-OMEMcmGroupAssignBackupLead {
             Write-Verbose "Invoking URL $($URL)"
             Write-Verbose "Payload $($Body)"
             $Response = Invoke-WebRequest -Uri $URL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $Body 
-            if ($Response.StatusCode -in (200,201)) {
+            if ($Response.StatusCode -in 200, 201) {
                 $BackupLeadData = $Response | ConvertFrom-Json
                 $JobId = $BackupLeadData.'JobId'
                 Write-Verbose "Successfully assigned backup lead"

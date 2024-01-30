@@ -63,7 +63,7 @@ Process {
 
         $BaselineData = @()
         $BaselineResp = Invoke-WebRequest -Uri $BaselineUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($BaselineResp.StatusCode -in (200,201)) {
+        if ($BaselineResp.StatusCode -in 200, 201) {
             $BaselineInfo = $BaselineResp.Content | ConvertFrom-Json
             foreach ($Baseline in $BaselineInfo.'value') {
                 if ($Value.Count -gt 0 -and $FilterBy -eq "Id") {

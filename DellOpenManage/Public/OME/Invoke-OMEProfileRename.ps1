@@ -69,7 +69,7 @@ Process {
         $ProfileRenamePayload = $Payload | ConvertTo-Json -Depth 6
         Write-Verbose $ProfileRenamePayload
         $JobResponse = Invoke-WebRequest -Uri $ProfileRenameURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $ProfileRenamePayload
-        if ($JobResponse.StatusCode -in (200,201)) {
+        if ($JobResponse.StatusCode -in 200, 201) {
             return "Completed"
             Write-Verbose "Job run successful..."
         }

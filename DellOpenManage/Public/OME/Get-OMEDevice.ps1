@@ -114,7 +114,7 @@ Process {
             $GroupUrl = "https://$($SessionAuth.Host)/api/GroupService/Groups"
             $GroupUrl += "(" + [String]($Group.Id) + ")/Devices"
             $GroupResp = Invoke-WebRequest -Uri $GroupUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-            if ($GroupResp.StatusCode -in (200,201)) {
+            if ($GroupResp.StatusCode -in 200, 201) {
                 $GroupInfo = $GroupResp.Content | ConvertFrom-Json
                 $GroupData = $GroupInfo.'value'
                 $DeviceCount = $GroupInfo.'@odata.count'
@@ -127,7 +127,7 @@ Process {
                         $delta = $DeviceCount-$currDeviceCount 
                         $RemainingDeviceUrl = $GroupUrl+"?`$skip=$($currDeviceCount)&`$top=$($delta)"
                         $RemainingDeviceResp = Invoke-WebRequest -Uri $RemainingDeviceUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                        if($RemainingDeviceResp.StatusCode -in (200,201)){
+                        if($RemainingDeviceResp.StatusCode -in 200, 201){
                             $RemainingDeviceInfo = $RemainingDeviceResp.Content | ConvertFrom-Json
                             foreach ($Device in $RemainingDeviceInfo.'value') {
                                 $DeviceData += New-DeviceFromJson -Device $Device
@@ -157,7 +157,7 @@ Process {
             $DeviceCountUrl = $DeviceCountUrl + "?" + $Filter
             Write-Verbose $DeviceCountUrl
             $DeviceResponse = Invoke-WebRequest -Uri $DeviceCountUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-            if ($DeviceResponse.StatusCode -in (200,201))
+            if ($DeviceResponse.StatusCode -in 200, 201)
             {
                 $DeviceCountData = $DeviceResponse.Content | ConvertFrom-Json
                 foreach ($Device in $DeviceCountData.'value') {
@@ -171,7 +171,7 @@ Process {
                 {
                     Write-Verbose $NextLinkUrl
                     $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                    if($NextLinkResponse.StatusCode -in (200,201))
+                    if($NextLinkResponse.StatusCode -in 200, 201)
                     {
                         $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                         foreach ($Device in $NextLinkData.'value') {

@@ -80,7 +80,7 @@ param(
     $UserDetails = @{"UserName"=$OMEUserName;"Password"=$OMEPassword;"SessionType"="API"} | ConvertTo-Json
 
     $SessResponse = Invoke-WebRequest -Uri $SessionUrl -UseBasicParsing -Method Post -Body $UserDetails -ContentType $Type 
-    if ($SessResponse.StatusCode -in (200,201) -or $SessResponse.StatusCode -eq 201) {
+    if ($SessResponse.StatusCode -in 200, 201) {
         $SessResponseData = $SessResponse.Content | ConvertFrom-Json
         
         $Token = [String]$SessResponse.Headers["X-Auth-Token"]
@@ -91,7 +91,7 @@ param(
         $AppInfoUrl = "https://$($OMEHost)/api/ApplicationService/Info"
         $AppInfoResponse = Invoke-WebRequest -Uri $AppInfoUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type 
         $AppVersion = [System.Version]"1.0.0"
-        if ($AppInfoResponse.StatusCode -eq 200 -or $AppInfoResponse.StatusCode -eq 201) {
+        if ($AppInfoResponse.StatusCode -eq 200, 201) {
             $AppInfoResponseData = $AppInfoResponse.Content | ConvertFrom-Json
             Write-Verbose $($AppInfoResponseData)
             $AppVersion = [System.Version]$AppInfoResponseData.Version
