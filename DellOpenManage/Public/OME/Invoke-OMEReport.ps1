@@ -8,14 +8,14 @@
     $OutputArray = @()
     $ColumnNames = @()
     $DeetsResp = Invoke-WebRequest -Uri $ReportDeets -UseBasicParsing -Headers $Headers -Method Get -ContentType $Type
-    if ($DeetsResp.StatusCode -eq 200){
+    if ($DeetsResp.StatusCode -in (200,201)){
         $DeetsInfo = $DeetsResp.Content | ConvertFrom-Json
         $ColumnNames = $DeetsInfo.ResultRowColumns | ForEach-Object{$_.Name}
         Write-Verbose "Extracting results for report ($($ReportId))"
         $ResultUrl = $BaseUri + "/api/ReportService/ReportDefs($($ReportId))/ReportResults/ResultRows"
         
         $RepResult = Invoke-WebRequest -Uri $ResultUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($RepResult.StatusCode -eq 200) {
+        if ($RepResult.StatusCode -in (200,201)) {
             $RepInfo = $RepResult.Content | ConvertFrom-Json
             $totalRepResults = [int]($RepInfo.'@odata.count')
             if ($totalRepResults -gt 0) {
@@ -25,7 +25,7 @@
                 }
                 while ($NextLinkUrl){
                     $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                    if ($NextLinkResponse.StatusCode -eq 200) {
+                    if ($NextLinkResponse.StatusCode -in (200,201)) {
                         $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                         $ReportResultList += $NextLinkData.'value'
                         if ($NextLinkData.'@odata.nextLink'){
@@ -118,7 +118,7 @@ Process {
         Write-Verbose $RepPayload
         
         $ReportResp = Invoke-WebRequest -Uri $ExecRepUrl -UseBasicParsing -Method Post -Headers $Headers -ContentType $Type -Body $RepPayload
-        if ($ReportResp.StatusCode -eq 200) {
+        if ($ReportResp.StatusCode -in (200,201)) {
             $JobId = $ReportResp.Content
             $JobStatus = $($JobId | Wait-OnJob)
             if ($JobStatus -eq 'Completed') {

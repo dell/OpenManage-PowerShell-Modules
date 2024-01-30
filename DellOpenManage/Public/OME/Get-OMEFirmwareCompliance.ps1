@@ -137,7 +137,7 @@ Process {
             $UpdateActionSet += $UpdateAction
         }
 
-        if ($Response.StatusCode -eq 200) {
+        if ($Response.StatusCode -in (200,201)) {
             $ComplData = $Response | ConvertFrom-Json
             $ComplianceDeviceList = $ComplData.'value'
 
@@ -147,7 +147,7 @@ Process {
             while($NextLinkUrl)
             {
                 $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method GET -Headers $Headers -ContentType $Type
-                if($NextLinkResponse.StatusCode -eq 200) {
+                if($NextLinkResponse.StatusCode -in (200,201)) {
                     $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                     $ComplianceDeviceList = $ComplianceDeviceList + $NextLinkData.'value'
                     if($NextLinkData.'@odata.nextLink')

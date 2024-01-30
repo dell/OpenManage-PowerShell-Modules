@@ -76,7 +76,7 @@ Process {
         $Ctr++
         Start-Sleep -Seconds $SLEEP_INTERVAL
         $BaselineResponse = Invoke-WebRequest -Uri $BaselineUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($BaselineResponse.StatusCode -eq 200) {
+        if ($BaselineResponse.StatusCode -in (200,201)) {
             $BaselineInfo = $BaselineResponse.Content | ConvertFrom-Json
             foreach ($Baseline in $BaselineInfo.'value') {
                 if ($Baseline.Name -eq $BaselineName) {

@@ -80,7 +80,7 @@ param(
     $UserDetails = @{"UserName"=$OMEUserName;"Password"=$OMEPassword;"SessionType"="API"} | ConvertTo-Json
 
     $SessResponse = Invoke-WebRequest -Uri $SessionUrl -UseBasicParsing -Method Post -Body $UserDetails -ContentType $Type 
-    if ($SessResponse.StatusCode -eq 200 -or $SessResponse.StatusCode -eq 201) {
+    if ($SessResponse.StatusCode -in (200,201) -or $SessResponse.StatusCode -eq 201) {
         $SessResponseData = $SessResponse.Content | ConvertFrom-Json
         
         $Token = [String]$SessResponse.Headers["X-Auth-Token"]

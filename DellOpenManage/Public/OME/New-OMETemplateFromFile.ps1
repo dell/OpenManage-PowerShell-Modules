@@ -98,7 +98,7 @@ Process {
         $TemplateId = $null
         $TemplateResponse = Invoke-WebRequest -Uri $TemplateUrl -UseBasicParsing -Method Post -Body $TemplatePayload -ContentType $Type -Headers $Headers
         Write-Verbose "Creating Template..."
-        if ($TemplateResponse.StatusCode -eq 200) {
+        if ($TemplateResponse.StatusCode -in (200,201)) {
             $TemplateId = $TemplateResponse.Content | ConvertFrom-Json
             if ($Wait) {
                 $TemplateStatus = $($TemplateId | Wait-OnTemplate -WaitTime $WaitTime)

@@ -80,7 +80,7 @@ limitations under the License.
             $JobPayload = $JobPayload | ConvertTo-Json -Depth 6
             Write-Verbose $JobPayload
             $JobResp = Invoke-WebRequest -Uri $JobURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $JobPayload
-            if ($JobResp.StatusCode -eq 200) {
+            if ($JobResp.StatusCode -in (200,201)) {
                 Write-Verbose "Application settings job submitted successful..."
                 $JobInfo = $JobResp.Content | ConvertFrom-Json
                 $JobId = $JobInfo.JobId

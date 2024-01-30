@@ -2,13 +2,13 @@
     $JobExecUrl = $BaseUri  + "/api/JobService/Jobs($JobId)/ExecutionHistories"
     $ExecResp = Invoke-WebRequest -UseBasicParsing -Uri $JobExecUrl -Method Get -Headers $Headers -ContentType $Type
     $HistoryDetails = @()
-    if ($ExecResp.StatusCode -eq 200) {
+    if ($ExecResp.StatusCode -in (200,201)) {
         $ExecRespInfo = $ExecResp.Content | ConvertFrom-Json
         foreach ($ExecRespValue in $ExecRespInfo.value) {
             $HistoryId = $ExecRespValue.Id
             $ExecHistoryUrl = "$($JobExecUrl)($($HistoryId))/ExecutionHistoryDetails"
             $HistoryResp = Invoke-WebRequest -UseBasicParsing -Uri $ExecHistoryUrl -Method Get -Headers $Headers -ContentType $Type
-            if ($HistoryResp.StatusCode -eq 200) {
+            if ($HistoryResp.StatusCode -in (200,201)) {
                 $HistoryData = $HistoryResp.Content | ConvertFrom-Json
                 foreach ($HistoryDetail in $HistoryData.value) {
                     $HistoryDetails += $HistoryDetail
@@ -123,7 +123,7 @@ Process {
 
         $JobData = @()
         $JobResponse = Invoke-WebRequest -UseBasicParsing -Uri $JobUrl -Headers $Headers -Method Get -ContentType $Type
-        if ($JobResponse.StatusCode -eq 200) {
+        if ($JobResponse.StatusCode -in (200,201)) {
             $JobInfo = $JobResponse.Content | ConvertFrom-Json
             if ($JobInfo.value) { # Multiple jobs returned
                 foreach ($JobValue in $JobInfo.value) {
@@ -139,7 +139,7 @@ Process {
                 }
                 while($NextLinkUrl) {
                     $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                    if($NextLinkResponse.StatusCode -eq 200)
+                    if($NextLinkResponse.StatusCode -in (200,201))
                     {
                         $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                         foreach ($NextLinkJob in $NextLinkData.'value') {

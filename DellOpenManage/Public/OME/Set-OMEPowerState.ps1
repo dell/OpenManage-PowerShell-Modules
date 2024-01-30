@@ -12,7 +12,7 @@ function Get-DevicePowerState($BaseUri, $Headers, $Type, $DeviceId) {
     $DeviceUrl = $BaseUri + "/api/DeviceService/Devices($($DeviceId))"
     $DevResp = Invoke-WebRequest -Uri $DeviceUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
     $PowerState = $null
-    if ($DevResp.StatusCode -eq 200){
+    if ($DevResp.StatusCode -in (200,201)){
         $DevInfo = $DevResp.Content | ConvertFrom-Json
         $PowerState = $DevInfo.PowerState
     }

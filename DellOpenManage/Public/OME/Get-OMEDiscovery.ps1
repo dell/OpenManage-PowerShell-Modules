@@ -63,7 +63,7 @@ Process {
 
         $DiscoveryData = @()
         $DiscoveryResp = Invoke-WebRequest -Uri $DiscoveryUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($DiscoveryResp.StatusCode -eq 200) {
+        if ($DiscoveryResp.StatusCode -in (200,201)) {
             $DiscoveryInfo = $DiscoveryResp.Content | ConvertFrom-Json
             foreach ($Discovery in $DiscoveryInfo.'value') {
                 if ($Value.Count -gt 0 -and $FilterBy -eq "Id") {

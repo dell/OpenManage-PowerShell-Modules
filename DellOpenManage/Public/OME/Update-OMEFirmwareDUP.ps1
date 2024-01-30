@@ -81,7 +81,7 @@ function Get-ApplicableComponent($BaseUri, $Headers, $ContentType, $DupReportPay
     $DupReportUrl = $BaseUri + "/api/UpdateService/Actions/UpdateService.GetSingleDupReport"
     try {
         $DupResponse = Invoke-WebRequest -Uri $DupReportUrl -UseBasicParsing -Headers $Headers -ContentType $ContentType -Body $DupReportPayload -Method Post -ErrorAction SilentlyContinue       
-        if ($DupResponse.StatusCode -eq 200) {
+        if ($DupResponse.StatusCode -in (200,201)) {
             $DupResponseInfo = $DupResponse.Content | ConvertFrom-Json
             if ($DupResponse.Length -gt 0) {
                 if ($DupResponseInfo.Length -gt 0) {
@@ -148,7 +148,7 @@ function Push-DupToOME($BaseUri, $Headers, $DupFile) {
     Write-Verbose "Uploading $($DupFile) to $($BaseUri). This action may take some time to complete."
     
     $UploadResponse = Invoke-WebRequest -Uri $UploadActionUri -UseBasicParsing -Method Post -InFile $DupFile -ContentType "application/octet-stream" -Headers $Headers
-    if ($UploadResponse.StatusCode -eq 200) {
+    if ($UploadResponse.StatusCode -in (200,201)) {
         ## Successfully uploaded the DUP file . Get the file token
         ## returned by OME on upload of the DUP file
         ## The file token is returned as an array of decimals that maps to ascii text values
