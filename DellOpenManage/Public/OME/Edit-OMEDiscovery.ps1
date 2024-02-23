@@ -131,7 +131,7 @@ function Get-JobId($BaseUri, $Headers, $DiscoverConfigGroupId) {
     $JobId = -1
     $JobUrl = $BaseUri + "/api/DiscoveryConfigService/Jobs"
     $JobResponse = Invoke-WebRequest -UseBasicParsing -Uri $JobUrl -Headers $Headers -Method Get
-    if ($JobResponse.StatusCode -eq 200) {
+    if ($JobResponse.StatusCode -in 200, 201) {
         $JobInfo = $JobResponse.Content | ConvertFrom-Json
         $JobValues = $JobInfo.value
         foreach ($value in $JobValues) {
@@ -282,7 +282,7 @@ Process {
         $DiscoveryId = $Discovery.Id
         $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups(" + $DiscoveryId + ")"
         $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Put -Body $Payload -Headers $Headers -ContentType $Type
-        if ($DiscoverResponse.StatusCode -eq 200) {
+        if ($DiscoverResponse.StatusCode -in 200, 201) {
             Write-Verbose "Discovering devices...."
             Start-Sleep -Seconds 10
             $DiscoverInfo = $DiscoverResponse.Content | ConvertFrom-Json

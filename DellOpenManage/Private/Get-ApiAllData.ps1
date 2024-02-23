@@ -22,7 +22,7 @@ function Get-ApiAllData {
     $Data = @()
     $ContentType = "application/json"
     $Response = Invoke-WebRequest -UseBasicParsing -Uri $Url -Headers $Headers -Method Get
-    if ($Response.StatusCode -eq 200) {
+    if ($Response.StatusCode -in (200,201)) {
         $Info = $Response.Content | ConvertFrom-Json
         if ($Info.value) { 
             foreach ($Value in $Info.value) {
@@ -33,7 +33,7 @@ function Get-ApiAllData {
             }
             while($NextLinkUrl) {
                 $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $ContentType
-                if($NextLinkResponse.StatusCode -eq 200)
+                if($NextLinkResponse.StatusCode -in (200,201))
                 {
                     $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                     foreach ($NextLink in $NextLinkData.'value') {

@@ -77,7 +77,7 @@ Process {
         $GroupUrl = $GroupUrl + "?" + $Filter
         Write-Verbose $GroupUrl
         $GrpResp = Invoke-WebRequest -Uri $GroupUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($GrpResp.StatusCode -eq 200) {
+        if ($GrpResp.StatusCode -in 200, 201) {
             $GroupInfo = $GrpResp.Content | ConvertFrom-Json
             foreach ($Group in $GroupInfo.'value') {
                 $GroupData += New-GroupFromJson $Group
@@ -90,7 +90,7 @@ Process {
             {
                 Write-Verbose $NextLinkUrl
                 $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                if($NextLinkResponse.StatusCode -eq 200)
+                if($NextLinkResponse.StatusCode -in 200, 201)
                 {
                     $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                     foreach ($Group in $NextLinkData.'value') {

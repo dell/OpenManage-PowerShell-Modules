@@ -60,7 +60,7 @@ Process {
         $URL = $BaseUri + "/api/ManagementDomainService/Domains"
         $ContentType = "application/json"
         $Response = Invoke-WebRequest -Uri $URL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method GET
-        if ($Response.StatusCode -eq 200) {
+        if ($Response.StatusCode -in 200, 201) {
             $DomainResp = $Response.Content | ConvertFrom-Json
             if ($DomainResp."value".Length -gt 0) {
                 $MemberDevices = $DomainResp."value"

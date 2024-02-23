@@ -82,7 +82,7 @@ Process {
         $Ctr++
         Start-Sleep -Seconds $SLEEP_INTERVAL
         $TemplateResponse = Invoke-WebRequest -Uri $TemplateUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($TemplateResponse.StatusCode -eq 200) {
+        if ($TemplateResponse.StatusCode -in (200,201)) {
             $TemplateInfo = $TemplateResponse.Content | ConvertFrom-Json
             $Status = [int]$TemplateInfo.value[0].Status
             Write-Verbose "Iteration $($Ctr): Status of $($TemplateId) is $($JOB_STATUS_MAP.$Status)"

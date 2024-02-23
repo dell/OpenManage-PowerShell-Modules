@@ -103,7 +103,7 @@ Process {
         $BaselinePayload = $BaselinePayload | ConvertTo-Json -Depth 6
         Write-Verbose $BaselinePayload
         $BaselineResponse = Invoke-WebRequest -Uri $BaselineURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method PUT -Body $BaselinePayload
-        if ($BaselineResponse.StatusCode -eq 200) {
+        if ($BaselineResponse.StatusCode -in 200, 201) {
             $BaselineData = $BaselineResponse.Content | ConvertFrom-Json
             Write-Verbose $BaselineData
             if ($Wait) {

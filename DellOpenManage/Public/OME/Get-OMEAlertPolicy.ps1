@@ -79,7 +79,7 @@ Process {
         }
         Write-Verbose $AlertPolicyUrl
         $AlertPolicyResponse = Invoke-WebRequest -Uri $AlertPolicyUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($AlertPolicyResponse.StatusCode -eq 200)
+        if ($AlertPolicyResponse.StatusCode -in 200, 201)
         {
             $AlertPolicyCountData = $AlertPolicyResponse.Content | ConvertFrom-Json
             foreach ($AlertPolicy in $AlertPolicyCountData.'value') {
@@ -94,7 +94,7 @@ Process {
             {
                 Write-Verbose $NextLinkUrl
                 $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                if($NextLinkResponse.StatusCode -eq 200)
+                if($NextLinkResponse.StatusCode -in 200, 201)
                 {
                     $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                     foreach ($AlertPolicy in $NextLinkData.'value') {

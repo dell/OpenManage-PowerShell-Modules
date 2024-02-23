@@ -111,7 +111,7 @@ function Get-JobId($BaseUri, $Headers, $DiscoverConfigGroupId) {
     $JobId = -1
     $JobUrl = $BaseUri + "/api/DiscoveryConfigService/Jobs"
     $JobResponse = Invoke-WebRequest -UseBasicParsing -Uri $JobUrl -Headers $Headers -Method Get
-    if ($JobResponse.StatusCode -eq 200) {
+    if ($JobResponse.StatusCode -in 200, 201) {
         $JobInfo = $JobResponse.Content | ConvertFrom-Json
         $JobValues = $JobInfo.value
         foreach ($value in $JobValues) {

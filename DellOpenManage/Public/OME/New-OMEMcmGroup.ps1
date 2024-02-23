@@ -138,7 +138,7 @@ Try {
     Write-Verbose $McmGroupPayload
     $CreateGroupURL = $BaseUri + "/api/ManagementDomainService"
     $Response = Invoke-WebRequest -Uri $CreateGroupURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method PUT -Body $McmGroupPayload 
-    if ($Response.StatusCode -eq 200) {
+    if ($Response.StatusCode -in 200, 201) {
         $GroupData = $Response | ConvertFrom-Json
         $JobId = $GroupData.JobId
         Write-Verbose "MCM group created successfully...JobId is $($JobId)"

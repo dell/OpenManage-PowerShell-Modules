@@ -63,7 +63,7 @@ Process {
 
         $CatalogData = @()
         $CatalogResp = Invoke-WebRequest -Uri $CatalogUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($CatalogResp.StatusCode -eq 200) {
+        if ($CatalogResp.StatusCode -in 200, 201) {
             $CatalogInfo = $CatalogResp.Content | ConvertFrom-Json
             foreach ($Catalog in $CatalogInfo.'value') {
                 if ($Value.Count -gt 0 -and $FilterBy -eq "Id") {

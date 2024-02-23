@@ -94,7 +94,7 @@ Process {
         }
         $TemplateData = @()
         $TemplateResp = Invoke-WebRequest -Uri $TemplateUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($TemplateResp.StatusCode -eq 200) {
+        if ($TemplateResp.StatusCode -in 200, 201) {
             $TemplateInfo = $TemplateResp.Content | ConvertFrom-Json
             if ($TemplateInfo.'value'.Length -gt 0) {
                 foreach ($TemplateJson in $TemplateInfo.'value') {

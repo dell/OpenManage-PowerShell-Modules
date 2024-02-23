@@ -39,7 +39,7 @@ function Invoke-CheckOMEFabricApplicableNode ($BaseUri, $Headers, $ContentType, 
     Write-Verbose "Get fabric applicable nodes"
     Write-Verbose $ApplicableNodesURL
     $Response = Invoke-WebRequest -Uri $ApplicableNodesURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $null
-    if ($Response.StatusCode -eq 200) {
+    if ($Response.StatusCode -in 200, 201) {
         $SwitchAPass = $false
         $SwitchBPass = $false
         $DesignCriteriaData = $Response | ConvertFrom-Json
@@ -157,7 +157,7 @@ Try {
     Write-Verbose $FabricPayload
     $CreateFabricURL = $BaseUri + "/api/NetworkService/Actions/NetworkService.CreateFabric"
     $Response = Invoke-WebRequest -Uri $CreateFabricURL -UseBasicParsing -Headers $Headers -ContentType $ContentType -Method POST -Body $FabricPayload 
-    if ($Response.StatusCode -eq 200) {
+    if ($Response.StatusCode -in 200, 201) {
         $FabricData = $Response | ConvertFrom-Json
         $JobId = $FabricData.JobId
         Write-Verbose "Create fabric job created successfully...JobId is $($JobId)"

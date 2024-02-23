@@ -45,7 +45,7 @@ limitations under the License.
 
             $JobURL = $BaseUri + "/api/ApplicationService/Actions/ApplicationService.GetConfiguration"
             $JobResp = Invoke-WebRequest -Uri $JobURL -UseBasicParsing -Headers $Headers -ContentType $Type -Method POST -Body $null
-            if ($JobResp.StatusCode -eq 200) {
+            if ($JobResp.StatusCode -in 200, 201) {
                 Write-Verbose "Application settings job submitted successful..."
                 $JobInfo = $JobResp.Content | ConvertFrom-Json
                 $JobInfo

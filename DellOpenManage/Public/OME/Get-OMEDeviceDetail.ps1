@@ -66,7 +66,7 @@ Process {
             $InventoryUrl =  $BaseUri + "/api/DeviceService/Devices($($Devices.Id))/InventoryDetails('$($InventoryType)')"
         }
         $InventoryResp = Invoke-WebRequest -Uri $InventoryUrl -UseBasicParsing -Headers $Headers -Method Get -ContentType $Type
-        if ($InventoryResp.StatusCode -eq 200) {
+        if ($InventoryResp.StatusCode -in 200, 201) {
             $InventoryInfo = $InventoryResp.Content | ConvertFrom-Json
             if ($InventoryInfo.'value') {
                 $InventoryData = $InventoryInfo.'value'

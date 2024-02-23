@@ -89,7 +89,7 @@ Process {
         $ProfileCountUrl = $ProfileCountUrl + "?" + $Filter
         Write-Verbose $ProfileCountUrl
         $ProfileResponse = Invoke-WebRequest -Uri $ProfileCountUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-        if ($ProfileResponse.StatusCode -eq 200)
+        if ($ProfileResponse.StatusCode -in 200, 201)
         {
             $ProfileCountData = $ProfileResponse.Content | ConvertFrom-Json
             foreach ($ServerProfile in $ProfileCountData.'value') {
@@ -103,7 +103,7 @@ Process {
             {
                 Write-Verbose $NextLinkUrl
                 $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                if($NextLinkResponse.StatusCode -eq 200)
+                if($NextLinkResponse.StatusCode -in 200, 201)
                 {
                     $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                     foreach ($ServerProfile in $NextLinkData.'value') {

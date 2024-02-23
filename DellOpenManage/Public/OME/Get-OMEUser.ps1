@@ -77,7 +77,7 @@ Process {
 
         $AccountData = @()
         $AccountResponse = Invoke-WebRequest -UseBasicParsing -Uri $AccountUrl -Headers $Headers -Method Get
-        if ($AccountResponse.StatusCode -eq 200) {
+        if ($AccountResponse.StatusCode -in 200, 201) {
             $AccountInfo = $AccountResponse.Content | ConvertFrom-Json
             if ($AccountInfo.value) { 
                 foreach ($AccountValue in $AccountInfo.value) {
@@ -88,7 +88,7 @@ Process {
                 }
                 while($NextLinkUrl) {
                     $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                    if($NextLinkResponse.StatusCode -eq 200)
+                    if($NextLinkResponse.StatusCode -in 200, 201)
                     {
                         $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
                         foreach ($NextLinkAccount in $NextLinkData.'value') {
