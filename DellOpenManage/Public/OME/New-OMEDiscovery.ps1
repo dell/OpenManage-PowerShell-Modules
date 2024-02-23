@@ -1,5 +1,5 @@
 ﻿
-function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $SetTrapDestination, $SetCommunityString, $UseAllProtocols, $Schedule, $ScheduleCron) {
+function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $Protocol, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $SetTrapDestination, $SetCommunityString, $UseAllProtocols, $Schedule, $ScheduleCron) {
     $DiscoveryConfigPayload = '{
             "DiscoveryConfigGroupName":"Server Discovery",
             "DiscoveryStatusEmailRecipient":"",
@@ -11,39 +11,12 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
                           "AddressType":  30
                      }
                  ],
-                "ConnectionProfile":"{
-                    \"profileName\":\"\",
-                    \"profileDescription\":\"\",
-                    \"type\":\"DISCOVERY\",
-                    \"credentials\":[{
-                        \"type\":\"WSMAN\",
-                        \"authType\":\"Basic\",
-                        \"modified\":false,
-                        \"credentials\": {
-                            \"username\":\"\",
-                            \"password\":\"\",
-                            \"caCheck\":false,
-                            \"cnCheck\":false,
-                            \"port\":443,
-                            \"retries\":3,
-                            \"timeout\": 60
-                        }
-                    },
-                    {
-                        \"type\":\"REDFISH\",
-                        \"authType\":\"Basic\",
-                        \"modified\":false,
-                        \"credentials\": {
-                            \"username\":\"\",
-                            \"password\":\"\",
-                            \"caCheck\":false,
-                            \"cnCheck\":false,
-                            \"port\":443,
-                            \"retries\":3,
-                            \"timeout\": 60
-                        }
-                    }]
-                }",
+                "ConnectionProfile":{
+                    "profileName":"",
+                    "profileDescription":"",
+                    "type":"DISCOVERY",
+                    "credentials":[]
+                },
                 "DeviceType":[1000]
                 }],
             "Schedule":{
@@ -92,11 +65,38 @@ function Get-DiscoverDevicePayload($Name, $HostList, $DeviceType, $DiscoveryUser
     }
     if ($DeviceType.ToLower() -eq 'server' -or $DeviceType.ToLower() -eq 'chassis') {
         $DiscoveryConfigPayload.DiscoveryConfigModels[0].DeviceType = @($DeviceMap[$DeviceType.ToLower()])
-        $ConnectionProfile = $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile | ConvertFrom-Json
-        $ConnectionProfile.credentials[0].credentials.'username' = $DiscoveryUserName
-        $ConnectionProfile.credentials[0].credentials.'password' = $DiscoveryPasswordText
-        $ConnectionProfile.credentials[1].credentials.'username' = $DiscoveryUserName
-        $ConnectionProfile.credentials[1].credentials.'password' = $DiscoveryPasswordText
+        $ConnectionProfile = $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile 
+        if ($Protocol -eq "iDRAC") {
+            $WSManProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "WSMAN"
+            $RedfishProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "REDFISH"
+            $WSManProtocolPayload.credentials.'username' = $DiscoveryUserName
+            $WSManProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+            $RedfishProtocolPayload.credentials.'username' = $DiscoveryUserName
+            $RedfishProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+            $ConnectionProfile.credentials += $WSManProtocolPayload
+            $ConnectionProfile.credentials += $RedfishProtocolPayload
+        } elseif ($Protocol -eq "VMWARE") {
+            $VMwareProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "VMWARE"
+            $VMwareProtocolPayload.credentials.'username' = $DiscoveryUserName
+            $VMwareProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+            $ConnectionProfile.credentials += $VMwareProtocolPayload
+        } elseif ($Protocol -eq "SNMP") {
+            $SNMPProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "SNMP"
+            $SNMPProtocolPayload.credentials.'username' = $DiscoveryUserName
+            $SNMPProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+            $ConnectionProfile.credentials += $SNMPProtocolPayload
+        } elseif ($Protocol -eq "IPMI") {
+            $IPMIProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "IPMI"
+            $IPMIProtocolPayload.credentials.'username' = $DiscoveryUserName
+            $IPMIProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+            $ConnectionProfile.credentials += $IPMIProtocolPayload
+        } elseif ($Protocol -eq "SSH") {
+            $SSHProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "SSH"
+            $SSHProtocolPayload.credentials.'username' = $DiscoveryUserName
+            $SSHProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+            $ConnectionProfile.credentials += $SSHProtocolPayload
+        }
+        
         $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile = $ConnectionProfile | ConvertTo-Json -Depth 6
     }
     if ($Schedule.ToLower() -eq "runlater") {
@@ -153,7 +153,7 @@ limitations under the License.
 .PARAMETER Name
     Name of the discovery job
 .PARAMETER DeviceType
-    Type of device ("Server", "Chassis", "Storage", "Network")
+    Type of device (Default="Server", "Chassis", "Storage", "Network")
 .PARAMETER Hosts
     Array of IP Addresses, Subnets or Hosts
     Valid Format:
@@ -169,6 +169,8 @@ limitations under the License.
     10.35.0.*
     10.36.0.0-255
     10.35.0.0/255.255.255.0
+.PARAMETER Protocol
+    Protocol to use for discovery (Default="iDRAC", "SNMP", "IPMI", "SSH", "VMWARE")
 .PARAMETER DiscoveryUserName
     Discovery user name. The iDRAC user for server discovery.
 .PARAMETER DiscoveryPassword
@@ -222,6 +224,10 @@ param(
     [parameter(Mandatory)]
     [String[]]$Hosts,
 
+    [Parameter(Mandatory=$false)]
+	[ValidateSet("iDRAC", "SNMP", "IPMI", "SSH", "VMWARE")]
+    [String] $Protocol = "iDRAC",
+
     [Parameter(Mandatory)]
     [String]$DiscoveryUserName,
 
@@ -243,12 +249,6 @@ param(
 
     [Parameter(Mandatory=$false)]
     [String]$ScheduleCron = "0 0 0 ? * sun *",
-
-    <#
-    [Parameter(Mandatory=$false)]
-	[ValidateSet("vmware", "wsman", "snmp", "ipmi", "redfish", "ssh" )]
-    [String[]] $Protocol = @("wsman", "redfish"),
-    #>
 
     [Parameter(Mandatory=$false)]
     [Switch]$UseAllProtocols,
@@ -274,7 +274,7 @@ Process {
 
         $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups"
         if ($Hosts.Count -gt 0) {
-            $Payload = Get-DiscoverDevicePayload -Name $Name -HostList $Hosts -DeviceType $DeviceType -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -SetTrapDestination $SetTrapDestination -SetCommunityString $SetCommunityString -UseAllProtocols $UseAllProtocols -Schedule $Schedule -ScheduleCron $ScheduleCron
+            $Payload = Get-DiscoverDevicePayload -Name $Name -HostList $Hosts -DeviceType $DeviceType -Protocol $Protocol -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -SetTrapDestination $SetTrapDestination -SetCommunityString $SetCommunityString -UseAllProtocols $UseAllProtocols -Schedule $Schedule -ScheduleCron $ScheduleCron
             $Payload = $Payload | ConvertTo-Json -Depth 6
             $DiscoverResponse = Invoke-WebRequest -Uri $DiscoverUrl -UseBasicParsing -Method Post -Body $Payload -Headers $Headers -ContentType $Type
             if ($DiscoverResponse.StatusCode -eq 201) {

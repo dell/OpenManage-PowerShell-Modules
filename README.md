@@ -460,9 +460,9 @@ Unassign Profile by template
 ```
 Invoke-OMEProfileUnassign -Template $("TestTemplate01" | Get-OMETemplate) -Wait -Verbose
 ```
-Unassign Profile by profile name
+Unassign Profile by profile name and force reclaim identities
 ```
-Invoke-OMEProfileUnassign -ProfileName "Profile from template 'TestTemplate01' 00001" -Wait -Verbose
+Invoke-OMEProfileUnassign -ProfileName "Profile from template 'TestTemplate01' 00001" -ForceReclaim -Wait -Verbose
 ```
 Remove Profile
 ```

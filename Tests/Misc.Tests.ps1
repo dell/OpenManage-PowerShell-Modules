@@ -75,4 +75,15 @@ Describe "Misc Tests" {
             #$Script:TestIdentityPoolName | Get-OMEIdentityPool | Get-OMEIdentityPoolUsage | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
     }
+
+    Context "Cleanup" -Tag "Cleanup" {
+        It "Should remove Network" {
+            $TestNetwork.Name | Get-OMENetwork | Remove-OMENetwork
+            $TestNetwork.Name | Get-OMENetwork | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+        }
+        <# NOT IMPLEMENTED YET
+        It "Should remove Identity Pool" {
+        }
+        #>
+    } 
 }

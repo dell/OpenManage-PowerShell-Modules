@@ -13,10 +13,10 @@ Create new device discovery job in OpenManage Enterprise
 ## SYNTAX
 
 ```
-New-OMEDiscovery [[-Name] <String>] [[-DeviceType] <String>] [-Hosts] <String[]> [-DiscoveryUserName] <String>
- [-DiscoveryPassword] <SecureString> [[-Email] <String>] [-SetTrapDestination] [-SetCommunityString]
- [[-Schedule] <String>] [[-ScheduleCron] <String>] [-UseAllProtocols] [-Wait] [[-WaitTime] <Int32>]
- [<CommonParameters>]
+New-OMEDiscovery [[-Name] <String>] [[-DeviceType] <String>] [-Hosts] <String[]> [[-Protocol] <String>]
+ [-DiscoveryUserName] <String> [-DiscoveryPassword] <SecureString> [[-Email] <String>] [-SetTrapDestination]
+ [-SetCommunityString] [[-Schedule] <String>] [[-ScheduleCron] <String>] [-UseAllProtocols] [-Wait]
+ [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -75,7 +75,7 @@ Accept wildcard characters: False
 ```
 
 ### -DeviceType
-Type of device ("Server", "Chassis", "Storage", "Network")
+Type of device (Default="Server", "Chassis", "Storage", "Network")
 
 ```yaml
 Type: String
@@ -117,6 +117,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Protocol
+Protocol to use for discovery (Default="iDRAC", "SNMP", "IPMI", "SSH", "VMWARE")
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: IDRAC
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DiscoveryUserName
 Discovery user name.
 The iDRAC user for server discovery.
@@ -127,7 +142,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -143,7 +158,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -158,7 +173,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -204,7 +219,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: RunNow
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -223,7 +238,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 9
 Default value: 0 0 0 ? * sun *
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -269,7 +284,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 10
 Default value: 3600
 Accept pipeline input: False
 Accept wildcard characters: False

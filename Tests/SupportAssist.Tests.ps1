@@ -4,7 +4,7 @@ Describe "Support Assist Tests" {
     BeforeAll {
         $Script:TestSupportAssistGroupName = "TestSAGroup_$((Get-Date).ToString('yyyyMMddHHmmss'))"
         $Script:TestSupportAssistGroupEdit = "TestSAGroup2_$((Get-Date).ToString('yyyyMMddHHmmss'))"
-        $Script:DeviceServiceTag = "GV6V673"
+        $Script:DeviceServiceTag = "9Z39MH3"
         $Script:TestSupportAssistGroup = '{
             "MyAccountId": "",
             "Name": "Support Assist Group 1",

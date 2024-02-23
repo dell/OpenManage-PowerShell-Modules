@@ -11,6 +11,8 @@ param(
 )
 
 . .\Credentials.ps1
+& .\Install-Module.ps1
+
 
 Import-Module Pester
 Remove-Module DellOpenManage
@@ -25,6 +27,8 @@ $Global:OMEUsername = $OMEUsername
 $Global:OMEPassword = $OMEPassword
 $Global:iDRACUsername = $iDRACUsername
 $Global:iDRACPassword = $iDRACPassword
+$Global:SSHUsername = $SSHUsername
+$Global:SSHPassword = $SSHPassword
 
 $PesterPreference = [PesterConfiguration]::Default
 $PesterPreference.Output.Verbosity = 'Detailed'

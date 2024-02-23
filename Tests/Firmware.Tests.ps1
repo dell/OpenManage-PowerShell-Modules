@@ -4,7 +4,7 @@ Describe "Firmware Tests" {
     BeforeAll {
         $CatalogName = "Test01"
         $BaselineName = "TestBaseline01"
-        $DeviceServiceTag = "C86D0Q2"
+        $DeviceServiceTag = "9Z39MH3"
     }
     Context "Firmware" {
         It "Should export at least one function" {
@@ -14,7 +14,7 @@ Describe "Firmware Tests" {
         It "Should create and return a new Catalog object" {
             # Need to implement Delete-Catalog to cleanup for subsequent runs
             #New-OMECatalog -Name $CatalogName -Wait
-            New-OMECatalog -Name $CatalogName -RepositoryType "NFS" -Source "100.79.7.16" -SourcePath "/mnt/data/drm/OSELabAll" -CatalogFile "OSELabAll_1.00_Catalog.xml" -Wait
+            New-OMECatalog -Name $CatalogName -RepositoryType "NFS" -Source "100.77.18.27" -SourcePath "/home/nfs/drm/R650" -CatalogFile "R650_Catalog.xml" -Wait
             $CatalogName | Get-OMECatalog | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         }
 

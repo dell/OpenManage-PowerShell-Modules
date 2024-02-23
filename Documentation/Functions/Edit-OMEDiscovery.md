@@ -13,7 +13,7 @@ Edit device discovery job in OpenManage Enterprise
 ## SYNTAX
 
 ```
-Edit-OMEDiscovery [-Discovery] <Discovery> [[-Name] <String>] [[-Hosts] <String[]>]
+Edit-OMEDiscovery [-Discovery] <Discovery> [[-Name] <String>] [[-Hosts] <String[]>] [[-Protocol] <String>]
  [-DiscoveryUserName] <String> [-DiscoveryPassword] <SecureString> [[-Email] <String>] [[-Schedule] <String>]
  [[-ScheduleCron] <String>] [[-Mode] <String>] [-Wait] [[-WaitTime] <Int32>] [<CommonParameters>]
 ```
@@ -121,6 +121,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Protocol
+Protocol to use for discovery (Default="iDRAC", "SNMP", "IPMI", "SSH", "VMWARE")
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: IDRAC
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DiscoveryUserName
 Discovery user name.
 The iDRAC user for server discovery.
@@ -131,7 +146,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -147,7 +162,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -162,7 +177,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -178,7 +193,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: RunNow
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -197,7 +212,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 9
 Default value: 0 0 0 ? * sun *
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -212,7 +227,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 10
 Default value: Replace
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -242,7 +257,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 10
+Position: 11
 Default value: 3600
 Accept pipeline input: False
 Accept wildcard characters: False

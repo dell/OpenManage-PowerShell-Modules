@@ -2,12 +2,16 @@ $credentials = New-Object -TypeName System.Management.Automation.PSCredential -A
 Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Template Tests" {
     BeforeAll {
-        $Script:DeviceServiceTag1 = "C86D0Q2"
-        $Script:DeviceServiceTag2 = "C86F0Q2"
-        $Script:DeviceServiceTag3 = "47BXBM2"
+        $Script:DeviceServiceTag1 = "9Z39MH3"
+        $Script:DeviceServiceTag2 = "9Z38MH3"
+        $Script:DeviceServiceTag3 = "6VQS5X3"
         $Script:ConfigurationBaselineName = "TestConfigurationBaseline_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+        $Script:DeploymentTemplateNameFromDevice = "TestDeploymentTemplate_FromDevice_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+        $Script:DeploymentTemplateNameFromFile = "TestDeploymentTemplate_FromFile_$((Get-Date).ToString('yyyyMMddHHmmss'))"
         $Script:DeploymentTemplateNameFromString = "TestDeploymentTemplate_FromString_$((Get-Date).ToString('yyyyMMddHHmmss'))"
         $Script:DeploymentTemplateNameFromStringClone = "$($Script:DeploymentTemplateNameFromString) - Clone"
+        $Script:ConfigurationTemplateNameFromDevice = "TestComplianceTemplate_FromDevice_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+        $Script:ConfigurationTemplateNameFromFile = "TestComplianceTemplate_FromFile_$((Get-Date).ToString('yyyyMMddHHmmss'))"
         $Script:ConfigurationTemplateNameFromString = "TestConfigurationTemplate_FromString_$((Get-Date).ToString('yyyyMMddHHmmss'))"
     }
     Context "General" {
@@ -17,13 +21,13 @@ Describe "Template Tests" {
     }
     Context "Deployment" -Tag "Deployment" {
         It ("Should create a deployment template from source device and return JobId"){
-            $TemplateName = "TestDeploymentTemplate_FromDevice_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+            $TemplateName = $Script:DeploymentTemplateNameFromDevice
             New-OMETemplateFromDevice -Name $TemplateName -Device $($Script:DeviceServiceTag1 | Get-OMEDevice -FilterBy "ServiceTag") -Component "All" | Should -BeGreaterThan 0
         }
 
         It ("Should create a new deployment template from XML string located in a file") {
             $xml = Get-Content -Path .\Tests\Data\Test01.xml | Out-String
-            $TemplateNameFromFile = "TestDeploymentTemplate_FromFile_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+            $TemplateNameFromFile = $Script:DeploymentTemplateNameFromFile
             New-OMETemplateFromFile -Name $TemplateNameFromFile -Content $xml -Wait
             $TemplateNameFromFile | Get-OMETemplate -FilterBy "Name" | Select-Object -ExpandProperty Name | Should -Be $TemplateNameFromFile
             $TemplateNameFromFile | Get-OMETemplate -FilterBy "Name" | Select-Object -ExpandProperty ViewTypeId | Should -Be 2
@@ -63,6 +67,10 @@ Describe "Template Tests" {
         }
 
         It "Should remove deploy templates" {
+            Get-OMETemplate | Where-Object -Property "Name" -EQ $Script:DeploymentTemplateNameFromDevice | Remove-OMETemplate
+            $Script:DeploymentTemplateNameFromDevice | Get-OMETemplate | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+            Get-OMETemplate | Where-Object -Property "Name" -EQ $Script:DeploymentTemplateNameFromFile | Remove-OMETemplate
+            $Script:DeploymentTemplateNameFromFile | Get-OMETemplate | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
             Get-OMETemplate | Where-Object -Property "Name" -EQ $Script:DeploymentTemplateNameFromString | Remove-OMETemplate
             Get-OMETemplate | Where-Object -Property "Name" -EQ $Script:DeploymentTemplateNameFromStringClone | Remove-OMETemplate
             $Script:DeploymentTemplateNameFromString | Get-OMETemplate | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
@@ -70,13 +78,13 @@ Describe "Template Tests" {
     }
     Context "Configuration" -Tag "Configuration" {
         It ("Should create a compliance template from source device and return JobId"){
-            $TemplateName = "TestComplianceTemplate_FromDevice_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+            $TemplateName = $Script:ConfigurationTemplateNameFromDevice
             New-OMETemplateFromDevice -Name $TemplateName -TemplateType "Configuration" -Device $($Script:DeviceServiceTag2 | Get-OMEDevice -FilterBy "ServiceTag") -Component "All" | Should -BeGreaterThan 0
         }
 
         It ("Should create a new compliance template from XML string located in a file") {
             $xml = Get-Content -Path .\Tests\Data\Test01.xml | Out-String
-            $TemplateNameFromFile = "TestComplianceTemplate_FromFile_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+            $TemplateNameFromFile = $Script:ConfigurationTemplateNameFromFile
             New-OMETemplateFromFile -Name $TemplateNameFromFile -TemplateType "Configuration" -Content $xml -Wait
             $TemplateNameFromFile | Get-OMETemplate -FilterBy "Name" | Select-Object -ExpandProperty Name | Should -Be $TemplateNameFromFile
             $TemplateNameFromFile | Get-OMETemplate -FilterBy "Name" | Select-Object -ExpandProperty ViewTypeId | Should -Be 1
@@ -118,6 +126,16 @@ Describe "Template Tests" {
         It "Should check configuration compliance for baseline" -Tag "CheckConfigurationCompliance" {
             $baseline = $Script:ConfigurationBaselineName | Get-OMEConfigurationBaseline
             $baseline  | Invoke-OMEConfigurationBaselineRefresh | Should -BeGreaterThan 0
+        }
+        It "Should remove configuration template from device" {
+            $template = $($Script:ConfigurationTemplateNameFromDevice | Get-OMETemplate)
+            $template | Remove-OMETemplate
+            $Script:ConfigurationTemplateNameFromDevice | Get-OMETemplate | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
+        }
+        It "Should remove configuration template from file" {
+            $template = $($Script:ConfigurationTemplateNameFromFile | Get-OMETemplate)
+            $template | Remove-OMETemplate
+            $Script:ConfigurationTemplateNameFromFile | Get-OMETemplate | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 0
         }
         It "Should remove configuration template" {
             $template = $($Script:ConfigurationTemplateNameFromString | Get-OMETemplate)

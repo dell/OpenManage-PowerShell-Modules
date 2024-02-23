@@ -2,8 +2,8 @@ $credentials = New-Object -TypeName System.Management.Automation.PSCredential -A
 Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Device Tests" {
     BeforeEach {
-        $TestDeviceServiceTags = @("C86D0Q2")
-        $TestDeviceModel = "PowerEdge R740"
+        $TestDeviceServiceTags = @("9Z39MH3")
+        $TestDeviceModel = "PowerEdge R650"
     }
     Context "Device Checks" {
         It "Should return ALL Devices" {
@@ -31,7 +31,7 @@ Describe "Device Tests" {
         }
 
         It "Should submit job to power on device" {
-            $TestDeviceServiceTags | Get-OMEDevice | Set-OMEPowerState -State "On" | Should -Be "Completed"
+            $TestDeviceServiceTags | Get-OMEDevice | Set-OMEPowerState -State "On" -Wait | Should -Be "Completed"
         }
     }
 }

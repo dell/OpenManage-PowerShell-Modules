@@ -2,7 +2,7 @@ $credentials = New-Object -TypeName System.Management.Automation.PSCredential -A
 Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Group Tests" {
     BeforeEach {
-        $TestDeviceModel = "PowerEdge R640"
+        $TestDeviceModel = "PowerEdge R650"
         $TestGroup = "Dell iDRAC Servers"
         $TestNewGroup = "TestGroup01"
         $TestNewGroupEdit = "TestGroup02"

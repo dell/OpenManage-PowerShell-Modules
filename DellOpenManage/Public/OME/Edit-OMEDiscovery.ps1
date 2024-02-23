@@ -1,6 +1,6 @@
 ﻿using module ..\..\Classes\Discovery.psm1
 
-function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $Schedule, $ScheduleCron) {
+function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Protocol, $Mode, $DiscoveryUserName, [SecureString] $DiscoveryPassword, $Email, $Schedule, $ScheduleCron) {
     $DiscoveryConfigPayload = '{
             "DiscoveryConfigGroupId":11,
             "DiscoveryConfigGroupName":"Server Discovery",
@@ -13,39 +13,12 @@ function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $Discover
                           "AddressType":  30
                      }
                  ],
-                 "ConnectionProfile":"{
-                    \"profileName\":\"\",
-                    \"profileDescription\":\"\",
-                    \"type\":\"DISCOVERY\",
-                    \"credentials\":[{
-                        \"type\":\"WSMAN\",
-                        \"authType\":\"Basic\",
-                        \"modified\":false,
-                        \"credentials\": {
-                            \"username\":\"\",
-                            \"password\":\"\",
-                            \"caCheck\":false,
-                            \"cnCheck\":false,
-                            \"port\":443,
-                            \"retries\":3,
-                            \"timeout\": 60
-                        }
-                    },
-                    {
-                        \"type\":\"REDFISH\",
-                        \"authType\":\"Basic\",
-                        \"modified\":false,
-                        \"credentials\": {
-                            \"username\":\"\",
-                            \"password\":\"\",
-                            \"caCheck\":false,
-                            \"cnCheck\":false,
-                            \"port\":443,
-                            \"retries\":3,
-                            \"timeout\": 60
-                        }
-                    }]
-                }",
+                 "ConnectionProfile":{
+                    "profileName":"",
+                    "profileDescription":"",
+                    "type":"DISCOVERY",
+                    "credentials":[]
+                },
                 "DeviceType":[1000]
             }],
             "Schedule":{
@@ -72,11 +45,37 @@ function Update-DiscoverDevicePayload($HostList, $DiscoveryJob, $Mode, $Discover
     $DiscoveryConfigPayload.CommunityString = $DiscoveryJob.CommunityString
 
     # Update credentials
-    $ConnectionProfile = $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile | ConvertFrom-Json
-    $ConnectionProfile.credentials[0].credentials.'username' = $DiscoveryUserName
-    $ConnectionProfile.credentials[0].credentials.'password' = $DiscoveryPasswordText
-    $ConnectionProfile.credentials[1].credentials.'username' = $DiscoveryUserName
-    $ConnectionProfile.credentials[1].credentials.'password' = $DiscoveryPasswordText
+    $ConnectionProfile = $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile
+    if ($Protocol -eq "iDRAC") {
+        $WSManProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "WSMAN"
+        $RedfishProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "REDFISH"
+        $WSManProtocolPayload.credentials.'username' = $DiscoveryUserName
+        $WSManProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+        $RedfishProtocolPayload.credentials.'username' = $DiscoveryUserName
+        $RedfishProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+        $ConnectionProfile.credentials += $WSManProtocolPayload
+        $ConnectionProfile.credentials += $RedfishProtocolPayload
+    } elseif ($Protocol -eq "VMWARE") {
+        $VMwareProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "VMWARE"
+        $VMwareProtocolPayload.credentials.'username' = $DiscoveryUserName
+        $VMwareProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+        $ConnectionProfile.credentials += $VMwareProtocolPayload
+    } elseif ($Protocol -eq "SNMP") {
+        $SNMPProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "SNMP"
+        $SNMPProtocolPayload.credentials.'username' = $DiscoveryUserName
+        $SNMPProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+        $ConnectionProfile.credentials += $SNMPProtocolPayload
+    } elseif ($Protocol -eq "IPMI") {
+        $IPMIProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "IPMI"
+        $IPMIProtocolPayload.credentials.'username' = $DiscoveryUserName
+        $IPMIProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+        $ConnectionProfile.credentials += $IPMIProtocolPayload
+    } elseif ($Protocol -eq "SSH") {
+        $SSHProtocolPayload = Get-DiscoveryProtocolPayload -Protocol "SSH"
+        $SSHProtocolPayload.credentials.'username' = $DiscoveryUserName
+        $SSHProtocolPayload.credentials.'password' = $DiscoveryPasswordText
+        $ConnectionProfile.credentials += $SSHProtocolPayload
+    }
     $DiscoveryConfigPayload.DiscoveryConfigModels[0].ConnectionProfile = $ConnectionProfile | ConvertTo-Json -Depth 6
 
     # Update target hosts
@@ -186,6 +185,8 @@ limitations under the License.
     10.35.0.*
     10.36.0.0-255
     10.35.0.0/255.255.255.0
+.PARAMETER Protocol
+    Protocol to use for discovery (Default="iDRAC", "SNMP", "IPMI", "SSH", "VMWARE")
 .PARAMETER DiscoveryUserName
     Discovery user name. The iDRAC user for server discovery.
 .PARAMETER DiscoveryPassword
@@ -238,6 +239,10 @@ param(
     [parameter(Mandatory=$false)]
     [String[]]$Hosts,
 
+    [Parameter(Mandatory=$false)]
+	[ValidateSet("iDRAC", "SNMP", "IPMI", "SSH", "VMWARE")]
+    [String] $Protocol = "iDRAC",
+
     [Parameter(Mandatory)]
     [String]$DiscoveryUserName,
 
@@ -277,7 +282,7 @@ Process {
         $Headers = @{}
         $Headers."X-Auth-Token" = $SessionAuth.Token
 
-        $Payload = Update-DiscoverDevicePayload -Name $Name -HostList $Hosts -Mode $Mode -DiscoveryJob $Discovery -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -Schedule $Schedule -ScheduleCron $ScheduleCron
+        $Payload = Update-DiscoverDevicePayload -Name $Name -HostList $Hosts -Protocol $Protocol -Mode $Mode -DiscoveryJob $Discovery -DiscoveryUserName $DiscoveryUserName -DiscoveryPassword $DiscoveryPassword -Email $Email -Schedule $Schedule -ScheduleCron $ScheduleCron
         $Payload = $Payload | ConvertTo-Json -Depth 6
         $DiscoveryId = $Discovery.Id
         $DiscoverUrl = $BaseUri + "/api/DiscoveryConfigService/DiscoveryConfigGroups(" + $DiscoveryId + ")"
@@ -301,9 +306,7 @@ Process {
 
     }
     Catch {
-        Write-Error ($_.ErrorDetails)
-        Write-Error ($_.Exception | Format-List -Force | Out-String)
-        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String)
+        Resolve-Error $_
     }
 }
 

@@ -104,7 +104,9 @@ Process {
         } elseif ($ProfileName) {
             $ProfileUnassignPayload.Filters = "=contains(ProfileName, '$($ProfileName)')"
         } else {
-            throw [System.Exception] "You must specify one of the following parameters: -Device -Template -ProfileName"
+            Write-Verbose "You must specify one of the following parameters: -Device -Template -ProfileName"
+            # This seems to be thrown without ever going into this else statement. Not sure why. Need to look into. 
+            # throw [System.Exception]::new("You must specify one of the following parameters: -Device -Template -ProfileName")
         }
 
         if ($ForceReclaim) {

@@ -2,15 +2,27 @@ $credentials = New-Object -TypeName System.Management.Automation.PSCredential -A
 Connect-OMEServer -Name $Global:OMEServer -Credentials $credentials -IgnoreCertificateWarning
 Describe "Device Tests" {
     BeforeAll {
-        $Script:TestDeviceHosts = @("100.77.14.129", "100.77.14.34", "100.77.14.172")
-        $Script:TestDeviceHostsNew = @("100.77.14.13")
+        $Script:TestDeviceHosts = @("100.77.14.41", "100.77.14.42", "100.77.14.55")
+        $Script:TestDeviceHostsNew = @("100.77.14.62")
+        $Script:TestDeviceHostsSSH = @("100.77.18.47")
         $Script:TestDiscoveryJobName = "TestDiscovery_$((Get-Date).ToString('yyyyMMddHHmmss'))"
+        $Script:TestDiscoveryJobNameSSH = "$($Script:TestDiscoveryJobName)_SSH"
         $Script:TestiDRACUsername = $Global:iDRACUsername
         $Script:TestiDRACPassword = $Global:iDRACPassword
+        $Script:TestSSHUsername = $Global:SSHUsername
+        $Script:TestSSHPassword = $Global:SSHPassword
     }
     Context "Discovery Job Checks" {
         It "NewDiscoveryJob > Should return a discovery job id" {
             New-OMEDiscovery -Name $Script:TestDiscoveryJobName -Hosts $Script:TestDeviceHosts -DiscoveryUserName $Script:TestiDRACUsername -DiscoveryPassword $(ConvertTo-SecureString $Script:TestiDRACPassword -AsPlainText -Force) -Wait | Should -BeGreaterThan 0
+        }
+
+        It "NewDiscoveryJobSSH > Should return a discovery job id" -Tag "SSH" {
+            New-OMEDiscovery -Name $Script:TestDiscoveryJobNameSSH -Hosts $Script:TestDeviceHostsSSH `
+                -Protocol "SSH" `
+                -DiscoveryUserName $Script:TestSSHUsername `
+                -DiscoveryPassword $(ConvertTo-SecureString $Script:TestSSHPassword -AsPlainText -Force) `
+                -Wait | Should -BeGreaterThan 0
         }
 
         It "GetDiscoveryJob > Should return 1 discovery job" {
