@@ -117,26 +117,37 @@ Process {
             if ($GroupResp.StatusCode -in 200, 201) {
                 $GroupInfo = $GroupResp.Content | ConvertFrom-Json
                 $GroupData = $GroupInfo.'value'
-                $DeviceCount = $GroupInfo.'@odata.count'
-                if ($DeviceCount -gt 0) {
-                    foreach ($Device in $GroupData) {
-                        $DeviceData += New-DeviceFromJson -Device $Device
-                    }
-                    $currDeviceCount = $GroupData.Count
-                    if($DeviceCount -gt $currDeviceCount){
-                        $delta = $DeviceCount-$currDeviceCount 
-                        $RemainingDeviceUrl = $GroupUrl+"?`$skip=$($currDeviceCount)&`$top=$($delta)"
-                        $RemainingDeviceResp = Invoke-WebRequest -Uri $RemainingDeviceUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
-                        if($RemainingDeviceResp.StatusCode -in 200, 201){
-                            $RemainingDeviceInfo = $RemainingDeviceResp.Content | ConvertFrom-Json
-                            foreach ($Device in $RemainingDeviceInfo.'value') {
-                                $DeviceData += New-DeviceFromJson -Device $Device
-                            }
+                foreach ($Device in $GroupData) {
+                    $DeviceData += New-DeviceFromJson -Device $Device
+                }
+                if($GroupInfo.'@odata.nextLink')
+                {
+                    $NextLinkUrl = $BaseUri + $GroupInfo.'@odata.nextLink' + "&" + $Filter
+                }
+                while($NextLinkUrl)
+                {
+                    Write-Verbose $NextLinkUrl
+                    $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
+                    if($NextLinkResponse.StatusCode -in 200, 201)
+                    {
+                        $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
+                        foreach ($Device in $NextLinkData.'value') {
+                            $DeviceData += New-DeviceFromJson -Device $Device
+                        }
+                        if($NextLinkData.'@odata.nextLink')
+                        {
+                            $NextLinkUrl = $BaseUri + $NextLinkData.'@odata.nextLink' + "&" + $Filter
+                        }
+                        else
+                        {
+                            $NextLinkUrl = $null
                         }
                     }
-                }
-                else {
-                    Write-Verbose "No devices found in group ($($Group.Name))"
+                    else
+                    {
+                        Write-Warning "Unable to get nextlink response for $($NextLinkUrl)"
+                        $NextLinkUrl = $null
+                    }
                 }
             }
             else {
