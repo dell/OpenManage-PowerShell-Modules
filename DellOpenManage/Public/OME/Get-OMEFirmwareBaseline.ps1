@@ -81,6 +81,43 @@ Process {
                     $BaselineData += New-FirmwareBaselineFromJson $Baseline
                 }
             }
+
+            if ($BaselineInfo.'@odata.nextLink') {
+                    $NextLinkUrl = $BaseUri + $BaselineInfo.'@odata.nextLink'
+                }
+                while ($NextLinkUrl) {
+                    Write-Verbose $NextLinkUrl
+                    $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
+                    if ($NextLinkResponse.StatusCode -in 200, 201) {
+                        $NextLinkData = $NextLinkResponse.Content | ConvertFrom-Json
+                        foreach ($Baseline in $NextLinkData.'value') {
+                            if ($Value.Count -gt 0 -and $FilterBy -eq "Id") {
+                                if ([String]$Baseline.Id -eq $Value) {
+                                    $BaselineData += New-FirmwareBaselineFromJson $Baseline
+                                }
+                            }
+                            elseif ($Value.Count -gt 0 -and $FilterBy -eq "Name") {
+                                if ($Baseline.Name -eq $Value) {
+                                    $BaselineData += New-FirmwareBaselineFromJson $Baseline
+                                }
+                            }
+                            else {
+                                $BaselineData += New-FirmwareBaselineFromJson $Baseline
+                            }
+                        }
+                        if ($NextLinkData.'@odata.nextLink') {
+                            $NextLinkUrl = $BaseUri + $NextLinkData.'@odata.nextLink'
+                        }
+                        else {
+                            $NextLinkUrl = $null
+                        }
+                    }
+                    else {
+                        Write-Warning "Unable to get nextlink response for $($NextLinkUrl)"
+                        $NextLinkUrl = $null
+                    }
+                }
+
             return $BaselineData
         }
         else {
