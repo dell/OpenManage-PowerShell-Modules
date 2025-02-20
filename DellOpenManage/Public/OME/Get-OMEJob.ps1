@@ -26,6 +26,27 @@
 
 }
 
+function Get-UrlWithFilter
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)]
+        [String]$Url,
+        [Parameter(Mandatory=$true)]
+        [String]$Filter
+    )
+    $NewFilter = ""
+    if ($null -ne $Filter -and $Filter.Length -gt 0) {
+        if ($Url.IndexOf('?') -gt -1) {
+            $NewFilter = "&$($Filter)"
+        } else {
+            $NewFilter = "?$($Filter)"
+        }
+    }
+    "$($Url)$($NewFilter)"
+}
+
+
 function Get-OMEJob {
 <#
 Copyright (c) 2018 Dell EMC Corporation
@@ -41,6 +62,10 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+​​​​​Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+SPDX-License-Identifier: BSD-3-Clause-Clear
 #>
 
 <#
@@ -111,18 +136,21 @@ Process {
         }
         $FilterExpr  = $FilterMap[$FilterBy]
 
-        $JobUrl = $BaseUri  + "/api/JobService/Jobs"
+        $JobUrl = "$($BaseUri)/api/JobService/Jobs"
+        $JobUrlFilter = ""
         if ($Value) {
             if ($FilterBy -ne 'State') {
-                $JobUrl += "?`$filter=$($FilterExpr) eq $($Value)"
+                #$JobUrl += "?`$filter=$($FilterExpr) eq $($Value)"
+                $JobUrlFilter += "`$filter=$($FilterExpr) eq $($Value)"
             }
             else {
-                $JobUrl += "?`$filter=$($FilterExpr) eq '$($Value)'"
+                #$JobUrl += "?`$filter=$($FilterExpr) eq '$($Value)'"
+                $JobUrlFilter += "`$filter=$($FilterExpr) eq '$($Value)'"
             }
         }
 
         $JobData = @()
-        $JobResponse = Invoke-WebRequest -UseBasicParsing -Uri $JobUrl -Headers $Headers -Method Get -ContentType $Type
+        $JobResponse = Invoke-WebRequest -UseBasicParsing -Uri (Get-UrlWithFilter -Url $JobUrl -Filter $JobUrlFilter) -Headers $Headers -Method Get -ContentType $Type
         if ($JobResponse.StatusCode -in 200, 201) {
             $JobInfo = $JobResponse.Content | ConvertFrom-Json
             if ($JobInfo.value) { # Multiple jobs returned
@@ -135,7 +163,8 @@ Process {
                     }
                 }
                 if ($JobInfo.'@odata.nextLink') {
-                    $NextLinkUrl = $BaseUri + $JobInfo.'@odata.nextLink'
+                    $NextLinkUrl = Get-UrlWithFilter -Url "$($BaseUri)$($JobInfo.'@odata.nextLink')" -Filter $JobUrlFilter
+                    
                 }
                 while($NextLinkUrl) {
                     $NextLinkResponse = Invoke-WebRequest -Uri $NextLinkUrl -UseBasicParsing -Method Get -Headers $Headers -ContentType $Type
@@ -146,7 +175,7 @@ Process {
                             $JobData += New-JobFromJson -Job $NextLinkJob
                         }
                         if ($NextLinkData.'@odata.nextLink') {
-                            $NextLinkUrl = $BaseUri + $NextLinkData.'@odata.nextLink'
+                            $NextLinkUrl = Get-UrlWithFilter -Url "$($BaseUri)$($NextLinkData.'@odata.nextLink')" -Filter $JobUrlFilter
                         }
                         else {
                             $NextLinkUrl = $null
