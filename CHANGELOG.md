@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.8.1]() - 2024-02-23
 ### Fixed
-- Fixed paging when filtering OME-GetDevice by Group
+- Fixed paging when filtering Get-OMEDevice by Group
+- Fixed paging in Get-OMEJob
+- Fixed paging in Get-OMEFirmwareBaseline 
+
+### Added
+- Get-OMEDiscovery
 
 ## [3.8.0]() - 2024-02-23
 ### Fixed
