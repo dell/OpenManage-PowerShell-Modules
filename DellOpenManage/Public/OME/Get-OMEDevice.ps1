@@ -122,7 +122,7 @@ Process {
                 }
                 if($GroupInfo.'@odata.nextLink')
                 {
-                    $NextLinkUrl = $BaseUri + $GroupInfo.'@odata.nextLink' + "&" + $Filter
+                    $NextLinkUrl = $BaseUri + $GroupInfo.'@odata.nextLink'
                 }
                 while($NextLinkUrl)
                 {
@@ -136,7 +136,7 @@ Process {
                         }
                         if($NextLinkData.'@odata.nextLink')
                         {
-                            $NextLinkUrl = $BaseUri + $NextLinkData.'@odata.nextLink' + "&" + $Filter
+                            $NextLinkUrl = $BaseUri + $NextLinkData.'@odata.nextLink'
                         }
                         else
                         {

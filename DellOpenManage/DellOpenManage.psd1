@@ -12,7 +12,7 @@
 RootModule = 'DellOpenManage.psm1'
 
 # Version number of this module.
-ModuleVersion = '3.8.0'
+ModuleVersion = '3.9.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -27,7 +27,7 @@ Author = 'Trevor Squillario <Trevor.Squillario@Dell.com>'
 CompanyName = 'Dell EMC'
 
 # Copyright statement for this module
-Copyright = '(c) 2023 Dell EMC. All rights reserved.'
+Copyright = '(c) 2025 Dell EMC. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'Dell OpenManage Enterprise PowerShell Module'

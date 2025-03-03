@@ -6,4 +6,4 @@ param(
     [String]$Version
 )
 
-Update-ModuleManifest -Path ".\DellOpenManage\DellOpenManage.psd1" -ModuleVersion $Version -Copyright "(c) 2023 Dell EMC. All rights reserved."
+Update-ModuleManifest -Path ".\DellOpenManage\DellOpenManage.psd1" -ModuleVersion $Version -Copyright "(c) 2025 Dell EMC. All rights reserved."
